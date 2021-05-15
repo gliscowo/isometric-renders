@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "isometric-renders",
+  "version": "${version}",
+  "name": "Isometric Renders",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/isometric-renders/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.glisco.isometricrenders.client.IsometricRendersClient"
+    ],
+    "main": [
+      "com.glisco.isometricrenders.IsometricRenders"
+    ]
+  },
+  "mixins": [
+    "isometric-renders.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.16.5"
+  }
+}

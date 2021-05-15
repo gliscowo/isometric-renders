@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.glisco.isometricrenders.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "BlockEntityAccessor",
+    "BlockStateArgumentAccessor",
+    "CameraInvoker",
+    "ChatScreenMixin",
+    "EntitySummonArgumentTypeAccessor",
+    "HandledScreenMixin",
+    "MinecraftClientAccessor",
+    "NativeImageAccessor",
+    "ParticleManagerAccessor",
+    "ParticleManagerMixin",
+    "SliderWidgetInvoker"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
