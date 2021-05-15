@@ -14,7 +14,8 @@
     "NativeImageAccessor",
     "ParticleManagerAccessor",
     "ParticleManagerMixin",
-    "SliderWidgetInvoker"
+    "SliderWidgetInvoker",
+    "TextureManagerMixin"
   ],
   "client": [
   ],

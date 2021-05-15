@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.ImageExportThread;
+import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
@@ -14,6 +14,7 @@ import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.text.Text;
@@ -41,8 +42,11 @@ public class IsometricRenderScreen extends Screen {
     protected static int exportResolution = 2048;
     protected static boolean studioMode = false;
 
-    protected boolean tickRender = false;
+    public boolean tickRender = false;
+
+    protected boolean tickParticles = true;
     protected boolean captureScheduled = false;
+    protected boolean drawBackground = false;
 
     protected IsometricRenderHelper.RenderCallback renderCallback = (matrices, vertexConsumerProvider, tickDelta) -> {};
     protected Runnable tickCallback = () -> {};
@@ -121,36 +125,40 @@ public class IsometricRenderScreen extends Screen {
             heightField.setText(String.valueOf(130 - renderHeight));
         });
 
-        CheckboxWidget playAnimationsCheckbox = new CallbackCheckboxWidget(10, 220, Text.of("Play Animations"), tickRender, aBoolean -> {
+        CheckboxWidget playAnimationsCheckbox = new CallbackCheckboxWidget(10, 220, Text.of("Animations"), tickRender, aBoolean -> {
             tickRender = aBoolean;
         });
+        CheckboxWidget playParticlesCheckbox = new CallbackCheckboxWidget(10, 245, Text.of("Particles (requires animations)"), tickParticles, aBoolean -> {
+            tickParticles = aBoolean;
+        });
 
-
-        TextFieldWidget resolutionField = new TextFieldWidget(client.textRenderer, 10, 280, 50, 20, Text.of("2048"));
+        ButtonWidget exportButton = new ButtonWidget(10, 385, 65, 20, Text.of("Export"), button -> {
+            captureScheduled = true;
+        });
+        TextFieldWidget resolutionField = new TextFieldWidget(client.textRenderer, 10, 305, 50, 20, Text.of("2048"));
         resolutionField.setEditableColor(0x00FF00);
         resolutionField.setText(String.valueOf(exportResolution));
         resolutionField.setTextPredicate(s -> s.matches("[0-9]{0,5}"));
         resolutionField.setChangedListener(s -> {
             if (s.length() < 1) return;
             int resolution = Integer.parseInt(s);
-            if ((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16) {
+            if ((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || resolution > 16384) {
                 resolutionField.setEditableColor(0xFF0000);
+                exportButton.active = false;
             } else {
                 resolutionField.setEditableColor(0x00FF00);
                 exportResolution = resolution;
+                exportButton.active = true;
             }
         });
-        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(10, 310, Text.of("Use High-Resolution Renderer"), hiResRender, aBoolean -> {
+        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(10, 335, Text.of("Use Variable-Resolution Renderer"), hiResRender, aBoolean -> {
             hiResRender = aBoolean;
         });
-        CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(10, 335, Text.of("Allow Multiple Export Jobs"), allowMultiple, aBoolean -> {
+        CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(10, 360, Text.of("Allow Multiple Export Jobs"), allowMultiple, aBoolean -> {
             allowMultiple = aBoolean;
         });
-        ButtonWidget exportButton = new ButtonWidget(10, 365, 75, 20, Text.of("Export (F12)"), button -> {
-            captureScheduled = true;
-        });
-        ButtonWidget clearQueueButton = new ButtonWidget(90, 365, 75, 20, Text.of("Clear Queue"), button -> {
-            ImageExportThread.clearQueue();
+        ButtonWidget clearQueueButton = new ButtonWidget(90, 385, 75, 20, Text.of("Clear Queue"), button -> {
+            ImageExporter.clearQueue();
         });
 
         buttons.clear();
@@ -171,6 +179,7 @@ public class IsometricRenderScreen extends Screen {
         addButton(playAnimationsCheckbox);
         addButton(doHiResCheckbox);
         addButton(allowMultipleRendersCheckbox);
+        addButton(playParticlesCheckbox);
 
         addButton(resolutionField);
         addButton(exportButton);
@@ -191,7 +200,7 @@ public class IsometricRenderScreen extends Screen {
 
     @Override
     public void tick() {
-        IsometricRenderHelper.allowParticles = true;
+        if (tickParticles) IsometricRenderHelper.allowParticles = true;
         if (tickRender) tickCallback.run();
         IsometricRenderHelper.allowParticles = false;
     }
@@ -206,11 +215,18 @@ public class IsometricRenderScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 
-        if ((captureScheduled && !hiResRender) || studioMode) {
+        if (((captureScheduled && !hiResRender) || studioMode) && !drawBackground) {
             fill(matrices, 0, 0, this.width, this.height, backgroundColor | 255 << 24);
         } else {
-            renderBackground(matrices);
-            drawFramingHint(matrices);
+
+            if (drawBackground) {
+                fill(matrices, 0, 0, this.width, this.height, backgroundColor | 255 << 24);
+            } else {
+                renderBackground(matrices);
+                drawFramingHint(matrices);
+            }
+
+            drawGuiBackground(matrices);
             super.render(matrices, mouseX, mouseY, delta);
 
             client.textRenderer.draw(matrices, "Transform Options", 12, 20, 0xAAAAAA);
@@ -219,15 +235,24 @@ public class IsometricRenderScreen extends Screen {
             client.textRenderer.draw(matrices, "Background Color", 66, 195, 0xFFFFFF);
             fill(matrices, 160, 195, 168, 203, backgroundColor | 255 << 24);
 
-            client.textRenderer.draw(matrices, "Export Options", 12, 262, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "Renderer Resolution", 66, 285, 0xFFFFFF);
+            client.textRenderer.draw(matrices, "Export Options", 12, 287, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "Renderer Resolution", 66, 310, 0xFFFFFF);
 
-            int currentJobs = ImageExportThread.getJobCount();
+            client.textRenderer.draw(matrices, "F10: Studio Mode  F12: Export", 12, height - 20, 0xAAAAAA);
 
-            client.textRenderer.draw(matrices, "Export Jobs: " + currentJobs, 12, 408, 0xFFFFFF);
+            int endX = (int) (this.width - (this.width - this.height) * 0.5);
+            client.textRenderer.draw(matrices, "Warning: Unless you have at least 6GB ", endX + 10, height - 60, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "of memory available for Minecraft, ", endX + 10, height - 50, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "resolutions over 8192x8192", endX + 10, height - 40, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "are not recommended if you want", endX + 10, height - 30, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "your computer to survive", endX + 10, height - 20, 0xAAAAAA);
+
+            int currentJobs = ImageExporter.getJobCount();
+
+            client.textRenderer.draw(matrices, ImageExporter.getProgressBarText(), 12, 423, 0xFFFFFF);
 
             if (currentJobs > 0) {
-                drawExportProgressBar(matrices, 12, 420, (int) ((this.width - this.height) * 0.5) - 18, 150, 5);
+                drawExportProgressBar(matrices, 12, 435, (int) ((this.width - this.height) * 0.5) - 18, 150, 5);
             }
         }
 
@@ -284,7 +309,7 @@ public class IsometricRenderScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_F12) {
-            if (ImageExportThread.getJobCount() < 1 || allowMultiple) {
+            if (ImageExporter.acceptsJobs() && (ImageExporter.getJobCount() < 1 || allowMultiple)) {
                 captureScheduled = true;
             }
         } else if (keyCode == GLFW.GLFW_KEY_F10) {
@@ -304,32 +329,37 @@ public class IsometricRenderScreen extends Screen {
 
         fillGradient(matrices, beginX + 5, 0, endX - 5, 5, 0x90000000, 0x90000000);
         fillGradient(matrices, beginX + 5, height - 5, endX - 5, height, 0x90000000, 0x90000000);
-        fillGradient(matrices, 0, 0, beginX + 5, height, 0x90000000, 0x90000000);
-        fillGradient(matrices, endX - 5, 0, width, height, 0x90000000, 0x90000000);
+        fillGradient(matrices, beginX, 0, beginX + 5, height, 0x90000000, 0x90000000);
+        fillGradient(matrices, endX - 5, 0, endX, height, 0x90000000, 0x90000000);
+    }
+
+    protected void drawGuiBackground(MatrixStack matrices) {
+        int beginX = (int) ((this.width - this.height) * 0.5);
+        int endX = (int) (this.width - (this.width - this.height) * 0.5);
+
+        fillGradient(matrices, 0, 0, beginX, height, 0x90000000, 0x90000000);
+        fillGradient(matrices, endX, 0, width, height, 0x90000000, 0x90000000);
     }
 
     public static void drawExportProgressBar(MatrixStack matrices, int x, int y, int drawWidth, int barWidth, double speed) {
 
-        if (ImageExportThread.exportingEnabled()) {
-            final int color = ImageExportThread.currentlyExporting() ? 0xFF00FF00 : 0xFFFF8800;
-            int end = x + drawWidth + barWidth;
 
-            int offset = (int) (System.currentTimeMillis() / speed % (drawWidth + barWidth));
+        final int color = ImageExporter.currentlyExporting() ? 0xFF00FF00 : 0xFFFF8800;
+        int end = x + drawWidth + barWidth;
 
-            int endWithOffset = x + offset;
-            if (endWithOffset > end) endWithOffset = end;
+        int offset = (int) (System.currentTimeMillis() / speed % (drawWidth + barWidth));
 
-            fill(matrices, Math.max(x + offset - barWidth, x), y, Math.min(endWithOffset, x + drawWidth), y + 2, color);
-        } else {
-            int end = x + drawWidth;
-            fill(matrices, x, y, end, y + 2, 0xFFFF0000);
-        }
+        int endWithOffset = x + offset;
+        if (endWithOffset > end) endWithOffset = end;
+
+        fill(matrices, Math.max(x + offset - barWidth, x), y, Math.min(endWithOffset, x + drawWidth), y + 2, color);
+
     }
 
     protected void capture() {
 
         if (hiResRender) {
-            IsometricRenderHelper.renderAndSave(exportResolution, (matrices, vertexConsumerProvider, tickDelta) -> {
+            NativeImage image = IsometricRenderHelper.renderIntoImage(exportResolution, (matrices, vertexConsumerProvider, tickDelta) -> {
 
                 matrices.push();
 
@@ -353,9 +383,15 @@ public class IsometricRenderScreen extends Screen {
                 matrices.pop();
 
             });
+
+            addImageToQueue(image);
         } else {
-            IsometricRenderHelper.takeKeyedScreenshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true);
+            addImageToQueue(IsometricRenderHelper.takeKeyedSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true));
         }
+    }
+
+    protected void addImageToQueue(NativeImage image) {
+        ImageExporter.addJob(image);
     }
 
     private static class SliderWidgetImpl extends SliderWidget {

@@ -1,44 +1,30 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.ImageExportThread;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
 import java.util.Iterator;
 
-public class BatchIsometricItemRenderScreen extends IsometricRenderScreen {
+public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<ItemStack> {
 
-    private final Iterator<ItemStack> toRender;
     private ItemStack next = ItemStack.EMPTY;
-    private int frameDelay = 5;
 
-    public BatchIsometricItemRenderScreen(Iterator<ItemStack> stacks) {
-        this.toRender = stacks;
+    public BatchIsometricItemRenderScreen(Iterator<ItemStack> renderObjects, boolean allowInsaneResolutions) {
+        super(renderObjects, allowInsaneResolutions);
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-
-        if (frameDelay > 0) {
-            frameDelay--;
-        } else {
-            while (next.isEmpty()) {
-                if (!toRender.hasNext()) {
-                    client.openScreen(null);
-                    ImageExportThread.enableExporting();
-                    return;
-                }
-                next = toRender.next();
+    protected void setupRender() {
+        while (next.isEmpty()) {
+            if (!renderObjects.hasNext()) {
+                onClose();
+                return;
             }
-
-            IsometricRenderHelper.setupItemStackRender(this, next);
-
-            captureScheduled = true;
-            frameDelay = 5;
+            next = renderObjects.next();
         }
 
-
-        super.render(matrices, mouseX, mouseY, delta);
-
+        captureScheduled = true;
+        IsometricRenderHelper.setupItemStackRender(this, next);
+        next = ItemStack.EMPTY;
     }
+
 }

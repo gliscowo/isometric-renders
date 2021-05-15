@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.ImageExportThread;
+import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.mixin.CameraInvoker;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.mixin.NativeImageAccessor;
@@ -141,18 +141,18 @@ public class IsometricRenderHelper {
         });
     }
 
-    public static void batchRenderItemGroupBlocks(ItemGroup group) {
+    public static void batchRenderItemGroupBlocks(ItemGroup group, boolean insaneResolutions) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        MinecraftClient.getInstance().openScreen(new BatchIsometricBlockRenderScreen(extractBlocks(stacks)));
+        MinecraftClient.getInstance().openScreen(new BatchIsometricBlockRenderScreen(extractBlocks(stacks), insaneResolutions));
     }
 
-    public static void batchRenderItemGroupItems(ItemGroup group) {
+    public static void batchRenderItemGroupItems(ItemGroup group, boolean insaneResolutions) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        MinecraftClient.getInstance().openScreen(new BatchIsometricItemRenderScreen(stacks.iterator()));
+        MinecraftClient.getInstance().openScreen(new BatchIsometricItemRenderScreen(stacks.iterator(), insaneResolutions));
     }
 
     public static void renderItemGroupAtlas(ItemGroup group, int size, int columns, float scale) {
@@ -163,7 +163,7 @@ public class IsometricRenderHelper {
 
     public static void renderItemAtlas(List<ItemStack> stacks, int size, int columns, float scale) {
 
-        renderAndSave(size, (matrices, vertexConsumerProvider, tickDelta) -> {
+        ImageExporter.addJob(renderIntoImage(size, (matrices, vertexConsumerProvider, tickDelta) -> {
 
             matrices.scale(1, -1, 1);
             matrices.translate(-0.925 + scale * 0.05, 0.925 - scale * 0.05, 0);
@@ -192,10 +192,10 @@ public class IsometricRenderHelper {
                 matrices.pop();
 
             }
-        });
+        }));
     }
 
-    public static void renderAndSave(int size, RenderCallback renderCallback) {
+    public static NativeImage renderIntoImage(int size, RenderCallback renderCallback) {
 
         Framebuffer framebuffer = new Framebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
 
@@ -238,7 +238,7 @@ public class IsometricRenderHelper {
 
         framebuffer.endWrite();
 
-        takeKeyedScreenshot(framebuffer, IsometricRenderScreen.backgroundColor, false);
+        return takeKeyedSnapshot(framebuffer, IsometricRenderScreen.backgroundColor, false);
     }
 
     public static Camera getParticleCamera() {
@@ -247,7 +247,7 @@ public class IsometricRenderHelper {
         return camera;
     }
 
-    public static void takeKeyedScreenshot(Framebuffer framebuffer, int backgroundColor, boolean crop) {
+    public static NativeImage takeKeyedSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop) {
         NativeImage img = ScreenshotUtils.takeScreenshot(0, 0, framebuffer);
         if (framebuffer != MinecraftClient.getInstance().getFramebuffer()) framebuffer.delete();
 
@@ -290,8 +290,7 @@ public class IsometricRenderHelper {
             rect = img;
         }
 
-        ImageExportThread.addJob(rect);
-
+        return rect;
     }
 
     public static File getScreenshotFilename(File directory) {

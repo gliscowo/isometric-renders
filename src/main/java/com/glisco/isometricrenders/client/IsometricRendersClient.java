@@ -20,15 +20,15 @@ public class IsometricRendersClient implements ClientModInitializer {
     public void onInitializeClient() {
 
         IsoRenderCommand.register(ClientCommandManager.DISPATCHER);
-        ImageExportThread.init();
+        ImageExporter.init();
 
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
             final MinecraftClient client = MinecraftClient.getInstance();
 
-            if (ImageExportThread.getJobCount() < 1 || client.currentScreen != null) return;
+            if (ImageExporter.getJobCount() < 1 || client.currentScreen != null) return;
 
             DrawableHelper.fill(matrixStack, 20, 20, 140, 60, 0x90000000);
-            client.textRenderer.draw(matrixStack, "Export Jobs: " + ImageExportThread.getJobCount(), 30, 30, 0xFFFFFF);
+            client.textRenderer.draw(matrixStack, ImageExporter.getProgressBarText(), 30, 30, 0xFFFFFF);
 
             IsometricRenderScreen.drawExportProgressBar(matrixStack, 30, 45, 100, 50, 10);
         });

@@ -71,12 +71,18 @@ public class IsoRenderCommand {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), context.getArgument("nbt", CompoundTag.class));
         })))).then(literal("batch").then(argument("item_group", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("blocks").executes(context -> {
-            IsometricRenderHelper.batchRenderItemGroupBlocks(context.getArgument("item_group", ItemGroup.class));
+            IsometricRenderHelper.batchRenderItemGroupBlocks(context.getArgument("item_group", ItemGroup.class), false);
             return 0;
-        })).then(literal("items").executes(context -> {
-            IsometricRenderHelper.batchRenderItemGroupItems(context.getArgument("item_group", ItemGroup.class));
+        }).then(literal("insane").executes(context -> {
+            IsometricRenderHelper.batchRenderItemGroupBlocks(context.getArgument("item_group", ItemGroup.class), true);
             return 0;
-        })))).then(literal("atlas").then(argument("item_group", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).executes(context -> {
+        }))).then(literal("items").executes(context -> {
+            IsometricRenderHelper.batchRenderItemGroupItems(context.getArgument("item_group", ItemGroup.class), false);
+            return 0;
+        }).then(literal("insane").executes(context -> {
+            IsometricRenderHelper.batchRenderItemGroupItems(context.getArgument("item_group", ItemGroup.class), true);
+            return 0;
+        }))))).then(literal("atlas").then(argument("item_group", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).executes(context -> {
             IsometricRenderHelper.renderItemGroupAtlas(context.getArgument("item_group", ItemGroup.class), 1024, 12, 1);
             return 0;
         }).then(argument("size", IntegerArgumentType.integer()).then(argument("columns", IntegerArgumentType.integer()).then(argument("scale", FloatArgumentType.floatArg()).executes(context -> {
