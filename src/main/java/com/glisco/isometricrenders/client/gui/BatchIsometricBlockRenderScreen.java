@@ -18,6 +18,6 @@ public class BatchIsometricBlockRenderScreen extends BatchIsometricRenderScreen<
         }
 
         captureScheduled = true;
-        IsometricRenderHelper.setupBlockStateRender(this, renderObjects.next());
+        IsometricRenderPresets.setupBlockStateRender(this, renderObjects.next());
     }
 }

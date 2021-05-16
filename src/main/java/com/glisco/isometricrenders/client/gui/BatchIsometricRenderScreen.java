@@ -5,9 +5,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 
 import java.util.Iterator;
+
+import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
+import static com.glisco.isometricrenders.client.RuntimeConfig.exportResolution;
+import static com.glisco.isometricrenders.client.RuntimeConfig.useExternalRenderer;
 
 public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScreen {
 
@@ -19,18 +22,20 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     public BatchIsometricRenderScreen(Iterator<T> renderObjects, boolean allowInsaneResolutions) {
         this.renderObjects = renderObjects;
         this.drawBackground = true;
-        if (ImageExporter.Threaded.busy()) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§cThe export system is not available, try again in a few seconds. If this doesn't fix itself, restart your client"), false);
-            invalid = true;
-        }
 
-        if (IsometricRenderScreen.hiResRender && IsometricRenderScreen.exportResolution > 2048 && !allowInsaneResolutions) {
-            MinecraftClient.getInstance().player.sendMessage(Text.of("§cResolutions over 2048x2048 are not supported for batch-rendering. If you want to risk it, append §binsane §cto your command"), false);
+        if (ImageExporter.Threaded.busy()) {
+            MinecraftClient.getInstance().player.sendMessage(prefix("§cThe threaded export system is not available, try again in a few seconds. If this doesn't fix itself, restart your client"), false);
             invalid = true;
         }
 
         ImageExporter.Threaded.init();
-        delay = (int) Math.pow(IsometricRenderScreen.exportResolution / 1024f, 2);
+
+        if (useExternalRenderer && exportResolution > 2048 && !allowInsaneResolutions) {
+            MinecraftClient.getInstance().player.sendMessage(prefix("§cResolutions over 2048x2048 are not supported for batch-rendering. If you want to risk it, append §binsane §cto your command"), false);
+            invalid = true;
+        }
+
+        delay = (int) Math.pow(exportResolution / 1024f, 2);
     }
 
     @Override
@@ -48,7 +53,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     }
 
     @Override
-    protected void addImageToQueue(NativeImage image) {
+    protected void addImageToExportQueue(NativeImage image) {
         ImageExporter.Threaded.submit(image);
     }
 

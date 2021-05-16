@@ -23,7 +23,7 @@ public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<I
         }
 
         captureScheduled = true;
-        IsometricRenderHelper.setupItemStackRender(this, next);
+        IsometricRenderPresets.setupItemStackRender(this, next);
         next = ItemStack.EMPTY;
     }
 

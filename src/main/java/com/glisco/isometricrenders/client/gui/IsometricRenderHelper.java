@@ -1,31 +1,26 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.ImageExporter;
+import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.CameraInvoker;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.mixin.NativeImageAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.ScreenshotUtils;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
@@ -42,104 +37,6 @@ public class IsometricRenderHelper {
     public static boolean allowParticles = true;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
-
-    public static void setupBlockStateRender(IsometricRenderScreen screen, @NotNull BlockState state) {
-        final MinecraftClient client = MinecraftClient.getInstance();
-        screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
-            matrices.push();
-            matrices.translate(-0.5, 0, -0.5);
-
-            client.getBlockRenderManager().renderBlockAsEntity(state, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
-
-            double xOffset = client.player.getX() % 1d;
-            double zOffset = client.player.getZ() % 1d;
-
-            if (xOffset < 0) xOffset += 1;
-            if (zOffset < 0) zOffset += 1;
-
-            matrices.translate(xOffset, 1.65 + client.player.getY() % 1d, zOffset);
-
-            client.particleManager.renderParticles(matrices, (VertexConsumerProvider.Immediate) vertexConsumerProvider, client.gameRenderer.getLightmapTextureManager(), getParticleCamera(), tickDelta);
-
-            matrices.pop();
-        });
-
-        screen.setTickCallback(() -> {
-            if (client.world.random.nextDouble() < 0.150) {
-                state.getBlock().randomDisplayTick(state, client.world, client.player.getBlockPos(), client.world.random);
-            }
-        });
-    }
-
-    public static void setupBlockEntityRender(IsometricRenderScreen screen, @NotNull BlockEntity entity) {
-
-        final MinecraftClient client = MinecraftClient.getInstance();
-        screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
-
-            matrices.push();
-            matrices.translate(-0.5, 0, -0.5);
-
-            client.getBlockRenderManager().renderBlockAsEntity(entity.getCachedState(), matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
-
-            if (BlockEntityRenderDispatcher.INSTANCE.get(entity) != null) {
-                BlockEntityRenderDispatcher.INSTANCE.get(entity).render(entity, tickDelta, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
-            }
-
-            double xOffset = client.player.getX() % 1d;
-            double zOffset = client.player.getZ() % 1d;
-
-            if (xOffset < 0) xOffset += 1;
-            if (zOffset < 0) zOffset += 1;
-
-            matrices.translate(xOffset, 1.65 + client.player.getY() % 1d, zOffset);
-
-            client.particleManager.renderParticles(matrices, (VertexConsumerProvider.Immediate) vertexConsumerProvider, client.gameRenderer.getLightmapTextureManager(), getParticleCamera(), tickDelta);
-
-            matrices.pop();
-        });
-
-        screen.setTickCallback(() -> {
-
-            if (entity instanceof Tickable) {
-                ((Tickable) entity).tick();
-            }
-            if (client.world.random.nextDouble() < 0.150) {
-                entity.getCachedState().getBlock().randomDisplayTick(entity.getCachedState(), client.world, client.player.getBlockPos(), client.world.random);
-            }
-        });
-
-    }
-
-    public static void setupItemStackRender(IsometricRenderScreen screen, @NotNull ItemStack stack) {
-        screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
-            matrices.push();
-            matrices.scale(4, 4, 4);
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider);
-            matrices.pop();
-        });
-    }
-
-    public static void setupEntityRender(IsometricRenderScreen screen, @NotNull Entity entity) {
-
-        final MinecraftClient client = MinecraftClient.getInstance();
-        screen.setRenderCallback((matrixStack, vertexConsumerProvider, delta) -> {
-            matrixStack.push();
-            matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180));
-            entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
-            client.getEntityRenderDispatcher().render(entity, 0, 0, 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
-
-            matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-180));
-            matrixStack.translate(0, 2, 0);
-            client.particleManager.renderParticles(matrixStack, (VertexConsumerProvider.Immediate) vertexConsumerProvider, client.gameRenderer.getLightmapTextureManager(), getParticleCamera(), delta);
-            matrixStack.pop();
-        });
-        screen.setTickCallback(() -> {
-            client.world.tickEntity(entity);
-        });
-        screen.setClosedCallback(() -> {
-            entity.updatePosition(0, 0, 0);
-        });
-    }
 
     public static void batchRenderItemGroupBlocks(ItemGroup group, boolean insaneResolutions) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
@@ -162,23 +59,23 @@ public class IsometricRenderHelper {
     }
 
     public static void renderItemAtlas(List<ItemStack> stacks, int size, int columns, float scale) {
+        ItemAtlasRenderScreen screen = new ItemAtlasRenderScreen();
 
-        ImageExporter.addJob(renderIntoImage(size, (matrices, vertexConsumerProvider, tickDelta) -> {
+        screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
 
-            matrices.scale(1, -1, 1);
-            matrices.translate(-0.925 + scale * 0.05, 0.925 - scale * 0.05, 0);
-            matrices.scale(0.125f * scale, 0.125f * scale, 1);
+            matrices.translate(-0.88 + 0.05, 0.925 - 0.05, 0);
+            matrices.scale(0.125f, 0.125f, 1);
 
-            int rows = (int) Math.ceil(stacks.size() / (double) columns);
+            int rows = (int) Math.ceil(stacks.size() / (double) RuntimeConfig.atlasColumns);
 
             for (int i = 0; i < rows; i++) {
 
                 matrices.push();
                 matrices.translate(0, -1.2 * i, 0);
 
-                for (int j = 0; j < columns; j++) {
+                for (int j = 0; j < RuntimeConfig.atlasColumns; j++) {
 
-                    int index = i * columns + j;
+                    int index = i * RuntimeConfig.atlasColumns + j;
                     if (index > stacks.size() - 1) continue;
 
                     ItemStack stack = stacks.get(index);
@@ -192,7 +89,9 @@ public class IsometricRenderHelper {
                 matrices.pop();
 
             }
-        }));
+        });
+
+        MinecraftClient.getInstance().openScreen(screen);
     }
 
     public static NativeImage renderIntoImage(int size, RenderCallback renderCallback) {
@@ -203,9 +102,9 @@ public class IsometricRenderHelper {
         RenderSystem.enableBlend();
         RenderSystem.clear(16640, MinecraftClient.IS_SYSTEM_MAC);
 
-        float r = (IsometricRenderScreen.backgroundColor >> 16) / 255f;
-        float g = (IsometricRenderScreen.backgroundColor >> 8 & 0xFF) / 255f;
-        float b = (IsometricRenderScreen.backgroundColor & 0xFF) / 255f;
+        float r = (RuntimeConfig.backgroundColor >> 16) / 255f;
+        float g = (RuntimeConfig.backgroundColor >> 8 & 0xFF) / 255f;
+        float b = (RuntimeConfig.backgroundColor & 0xFF) / 255f;
 
         framebuffer.setClearColor(r, g, b, 0);
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
@@ -238,13 +137,7 @@ public class IsometricRenderHelper {
 
         framebuffer.endWrite();
 
-        return takeKeyedSnapshot(framebuffer, IsometricRenderScreen.backgroundColor, false);
-    }
-
-    public static Camera getParticleCamera() {
-        Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
-        ((CameraInvoker) camera).invokeSetRotation(IsometricRenderScreen.rotation, IsometricRenderScreen.angle);
-        return camera;
+        return takeKeyedSnapshot(framebuffer, RuntimeConfig.backgroundColor, false);
     }
 
     public static NativeImage takeKeyedSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop) {
@@ -259,17 +152,18 @@ public class IsometricRenderHelper {
         long pointer = ((NativeImageAccessor) (Object) img).getPointer();
 
         final IntBuffer buffer = MemoryUtil.memIntBuffer(pointer, (img.getWidth() * img.getHeight()));
-        int[] ints = new int[buffer.remaining()];
-        buffer.get(ints);
+        int[] pixelColors = new int[buffer.remaining()];
+        buffer.get(pixelColors);
         buffer.clear();
 
-        for (int i = 0; i < ints.length; i++) {
-            if (ints[i] == abgrColor) {
-                ints[i] = 0;
+        for (int i = 0; i < pixelColors.length; i++) {
+            if (pixelColors[i] == abgrColor) {
+                pixelColors[i] = 0;
             }
         }
 
-        buffer.put(ints);
+        buffer.put(pixelColors);
+        buffer.clear();
 
         int i = img.getWidth();
         int j = img.getHeight();
@@ -305,6 +199,12 @@ public class IsometricRenderHelper {
 
             ++i;
         }
+    }
+
+    public static Camera getParticleCamera() {
+        Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
+        ((CameraInvoker) camera).invokeSetRotation(RuntimeConfig.rotation, RuntimeConfig.angle);
+        return camera;
     }
 
     public static Iterator<BlockState> extractBlocks(List<ItemStack> stacks) {

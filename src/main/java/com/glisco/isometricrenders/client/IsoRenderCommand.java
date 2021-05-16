@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.client;
 
 import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
+import com.glisco.isometricrenders.client.gui.IsometricRenderPresets;
 import com.glisco.isometricrenders.client.gui.IsometricRenderScreen;
 import com.glisco.isometricrenders.mixin.BlockEntityAccessor;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
@@ -121,9 +122,9 @@ public class IsoRenderCommand {
         }
 
         if (be != null) {
-            IsometricRenderHelper.setupBlockEntityRender(screen, be);
+            IsometricRenderPresets.setupBlockEntityRender(screen, be);
         } else {
-            IsometricRenderHelper.setupBlockStateRender(screen, state);
+            IsometricRenderPresets.setupBlockStateRender(screen, state);
         }
 
         MinecraftClient.getInstance().openScreen(screen);
@@ -164,9 +165,9 @@ public class IsoRenderCommand {
         }
 
         if (be != null) {
-            IsometricRenderHelper.setupBlockEntityRender(screen, be);
+            IsometricRenderPresets.setupBlockEntityRender(screen, be);
         } else {
-            IsometricRenderHelper.setupBlockStateRender(screen, state);
+            IsometricRenderPresets.setupBlockStateRender(screen, state);
         }
 
         client.openScreen(screen);
@@ -187,7 +188,7 @@ public class IsoRenderCommand {
             ((MobEntity) entity).setPersistent();
         }
 
-        IsometricRenderHelper.setupEntityRender(screen, entity);
+        IsometricRenderPresets.setupEntityRender(screen, entity);
 
         client.openScreen(screen);
 
@@ -199,7 +200,7 @@ public class IsoRenderCommand {
         MinecraftClient client = MinecraftClient.getInstance();
         IsometricRenderScreen screen = new IsometricRenderScreen();
 
-        IsometricRenderHelper.setupItemStackRender(screen, stack);
+        IsometricRenderPresets.setupItemStackRender(screen, stack);
 
         client.openScreen(screen);
 

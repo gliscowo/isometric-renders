@@ -3,6 +3,7 @@ package com.glisco.isometricrenders.client;
 import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 
 import java.io.File;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
 
 public class ImageExporter extends Thread {
 
@@ -31,7 +34,10 @@ public class ImageExporter extends Thread {
     }
 
     public static void addJob(NativeImage image) {
-        if (!acceptsJobs()) return;
+        if (!acceptsJobs()) {
+            sendErrorMessage();
+            return;
+        }
         jobs.add(image);
     }
 
@@ -45,6 +51,10 @@ public class ImageExporter extends Thread {
 
     public static boolean currentlyExporting() {
         return currentJob != null || Threaded.getJobCount() > 0;
+    }
+
+    private static void sendErrorMessage() {
+        MinecraftClient.getInstance().player.sendMessage(prefix("§cYour job could not be submitted because the export queue is full!"), false);
     }
 
     @Override
@@ -96,9 +106,14 @@ public class ImageExporter extends Thread {
         public static void init() {
             exporters = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             exporters.setThreadFactory(new ThreadFactoryBuilder().setNameFormat("image-export-worker-%d").build());
+            MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system initialized"), false);
         }
 
         public static void submit(NativeImage image) {
+            if (!acceptsNew()) {
+                sendErrorMessage();
+                return;
+            }
             exporters.submit(() -> {
                 exportImage(image);
             });
@@ -106,6 +121,11 @@ public class ImageExporter extends Thread {
 
         public static void finish() {
             exporters.shutdown();
+            if(getJobCount() > 0){
+                MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system shutting down with " + getJobCount() + " tasks remaining"), false);
+            } else {
+                MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system shutting down"), false);
+            }
         }
 
         public static boolean busy() {
