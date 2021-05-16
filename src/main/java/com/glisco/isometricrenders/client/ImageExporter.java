@@ -109,7 +109,7 @@ public class ImageExporter extends Thread {
         }
 
         public static boolean busy() {
-            return !exporters.isShutdown();
+            return exporters != null && !exporters.isShutdown();
         }
 
         public static boolean acceptsNew() {
