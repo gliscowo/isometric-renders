@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.ImageExporter;
+import com.glisco.isometricrenders.client.RuntimeConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.texture.NativeImage;
@@ -19,7 +20,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     protected int delayTicks;
     protected boolean invalid = false;
 
-    public BatchIsometricRenderScreen(Iterator<T> renderObjects, boolean allowInsaneResolutions) {
+    public BatchIsometricRenderScreen(Iterator<T> renderObjects) {
         this.renderObjects = renderObjects;
         this.drawBackground = true;
 
@@ -30,7 +31,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
 
         ImageExporter.Threaded.init();
 
-        if (useExternalRenderer && exportResolution > 2048 && !allowInsaneResolutions) {
+        if (useExternalRenderer && exportResolution > 2048 && !RuntimeConfig.allowInsaneResolutions) {
             MinecraftClient.getInstance().player.sendMessage(prefix("§cResolutions over 2048x2048 are not supported for batch-rendering. If you want to risk it, append §binsane §cto your command"), false);
             invalid = true;
         }

@@ -20,6 +20,7 @@ public class RuntimeConfig {
     //Export Options
     public static boolean useExternalRenderer = false;
     public static boolean allowMultipleNonThreadedJobs = false;
+    public static boolean allowInsaneResolutions = false;
     public static int exportResolution = 2048;
 
 }

@@ -2,13 +2,16 @@ package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.CameraInvoker;
+import com.glisco.isometricrenders.mixin.DefaultPosArgumentAccessor;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.mixin.NativeImageAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
@@ -16,11 +19,14 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.ScreenshotUtils;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
+import net.minecraft.command.argument.DefaultPosArgument;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
@@ -35,30 +41,37 @@ import java.util.List;
 public class IsometricRenderHelper {
 
     public static boolean allowParticles = true;
+    public static final Matrix4f LIGHT_MATRIX;
+
+    static {
+        LIGHT_MATRIX = new Matrix4f();
+        LIGHT_MATRIX.loadIdentity();
+        LIGHT_MATRIX.addToLastColumn(new Vector3f(0.15f, 0.5f, 0.15f));
+    }
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 
-    public static void batchRenderItemGroupBlocks(ItemGroup group, boolean insaneResolutions) {
+    public static void batchRenderItemGroupBlocks(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        MinecraftClient.getInstance().openScreen(new BatchIsometricBlockRenderScreen(extractBlocks(stacks), insaneResolutions));
+        MinecraftClient.getInstance().openScreen(new BatchIsometricBlockRenderScreen(extractBlocks(stacks)));
     }
 
-    public static void batchRenderItemGroupItems(ItemGroup group, boolean insaneResolutions) {
+    public static void batchRenderItemGroupItems(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        MinecraftClient.getInstance().openScreen(new BatchIsometricItemRenderScreen(stacks.iterator(), insaneResolutions));
+        MinecraftClient.getInstance().openScreen(new BatchIsometricItemRenderScreen(stacks.iterator()));
     }
 
-    public static void renderItemGroupAtlas(ItemGroup group, int size, int columns, float scale) {
+    public static void renderItemGroupAtlas(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
-        renderItemAtlas(stacks, size, columns, scale);
+        renderItemAtlas(stacks);
     }
 
-    public static void renderItemAtlas(List<ItemStack> stacks, int size, int columns, float scale) {
+    public static void renderItemAtlas(List<ItemStack> stacks) {
         ItemAtlasRenderScreen screen = new ItemAtlasRenderScreen();
 
         screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
@@ -120,7 +133,10 @@ public class IsometricRenderHelper {
         RenderSystem.loadIdentity();
 
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setupGuiFlatDiffuseLighting(Util.make(new Vector3f(0.2F, 1.0F, -0.7F), Vector3f::normalize), Util.make(new Vector3f(-0.2F, 1.0F, 0.7F), Vector3f::normalize));
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.loadIdentity();
+        matrix4f.addToLastColumn(new Vector3f(0.15f, 0.5f, 0.15f));
+        DiffuseLighting.enableForLevel(matrix4f);
 
         VertexConsumerProvider.Immediate vertexConsumers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         MatrixStack matrixStack = new MatrixStack();
@@ -201,10 +217,23 @@ public class IsometricRenderHelper {
         }
     }
 
+    public static void setupLighting() {
+        DiffuseLighting.enableForLevel(LIGHT_MATRIX);
+    }
+
     public static Camera getParticleCamera() {
         Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
         ((CameraInvoker) camera).invokeSetRotation(RuntimeConfig.rotation, RuntimeConfig.angle);
         return camera;
+    }
+
+    public static BlockPos getPosFromArgument(DefaultPosArgument argument, FabricClientCommandSource source) {
+
+        DefaultPosArgumentAccessor accessor = (DefaultPosArgumentAccessor) argument;
+        Vec3d pos = source.getPlayer().getPos();
+
+        return new BlockPos(accessor.getX().toAbsoluteCoordinate(pos.x), accessor.getY().toAbsoluteCoordinate(pos.y), accessor.getZ().toAbsoluteCoordinate(pos.z));
+
     }
 
     public static Iterator<BlockState> extractBlocks(List<ItemStack> stacks) {

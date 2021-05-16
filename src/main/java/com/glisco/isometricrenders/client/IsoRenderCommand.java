@@ -35,6 +35,7 @@ import net.minecraft.util.registry.Registry;
 import java.util.Arrays;
 import java.util.function.Function;
 
+import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
@@ -71,30 +72,60 @@ public class IsoRenderCommand {
         }).then(argument("nbt", NbtCompoundTagArgumentType.nbtCompound()).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), context.getArgument("nbt", CompoundTag.class));
-        })))).then(literal("batch").then(argument("item_group", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("blocks").executes(context -> {
-            IsometricRenderHelper.batchRenderItemGroupBlocks(context.getArgument("item_group", ItemGroup.class), false);
-            return 0;
-        }).then(literal("insane").executes(context -> {
-            IsometricRenderHelper.batchRenderItemGroupBlocks(context.getArgument("item_group", ItemGroup.class), true);
-            return 0;
-        }))).then(literal("items").executes(context -> {
-            IsometricRenderHelper.batchRenderItemGroupItems(context.getArgument("item_group", ItemGroup.class), false);
-            return 0;
-        }).then(literal("insane").executes(context -> {
-            IsometricRenderHelper.batchRenderItemGroupItems(context.getArgument("item_group", ItemGroup.class), true);
-            return 0;
-        }))))).then(literal("atlas").then(argument("item_group", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).executes(context -> {
-            IsometricRenderHelper.renderItemGroupAtlas(context.getArgument("item_group", ItemGroup.class), 1024, 12, 1);
-            return 0;
-        }).then(argument("size", IntegerArgumentType.integer()).then(argument("columns", IntegerArgumentType.integer()).then(argument("scale", FloatArgumentType.floatArg()).executes(context -> {
-            int size = IntegerArgumentType.getInteger(context, "size");
-            int columns = IntegerArgumentType.getInteger(context, "columns");
-            float scale = FloatArgumentType.getFloat(context, "scale");
+        })))).then(literal("insanity").executes(context -> {
 
-            IsometricRenderHelper.renderItemGroupAtlas(context.getArgument("item_group", ItemGroup.class), size, columns, scale);
+            RuntimeConfig.allowInsaneResolutions = !RuntimeConfig.allowInsaneResolutions;
+
+            if (RuntimeConfig.allowInsaneResolutions) {
+                context.getSource().sendFeedback(prefix("Insane resolutions §cunlocked§7. I will not be your place to cry if this blows up your computer."));
+            } else {
+                context.getSource().sendFeedback(prefix("Insane resolutions §alocked§7. You're safe again"));
+            }
 
             return 0;
-        })))))));
+        })).then(literal("area").then(argument("start", BlockPosArgumentType.blockPos()).then(argument("end", BlockPosArgumentType.blockPos()).executes(context -> {
+
+            DefaultPosArgument startArg = context.getArgument("start", DefaultPosArgument.class);
+            DefaultPosArgument endArg = context.getArgument("end", DefaultPosArgument.class);
+
+            BlockPos pos1 = IsometricRenderHelper.getPosFromArgument(startArg, context.getSource());
+            BlockPos pos2 = IsometricRenderHelper.getPosFromArgument(endArg, context.getSource());
+
+            BlockPos start = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
+            BlockPos end = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
+
+            int xDiff = end.getX() - start.getX();
+            int yDiff = end.getY() - start.getY();
+            int zDiff = end.getZ() - start.getZ();
+
+            BlockState[][][] states = new BlockState[yDiff + 1][zDiff + 1][xDiff + 1];
+
+            for (int y = 0; y <= yDiff; y++) {
+                for (int z = 0; z <= zDiff; z++) {
+                    for (int x = 0; x <= xDiff; x++) {
+                        states[y][z][x] = context.getSource().getWorld().getBlockState(start.add(x, y, z));
+                    }
+                }
+            }
+
+            IsometricRenderScreen screen = new IsometricRenderScreen();
+            IsometricRenderPresets.setupAreaRender(screen, states);
+            MinecraftClient.getInstance().openScreen(screen);
+
+            return 0;
+        })))).then(literal("creative_tab").then(argument("itemgroup", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("batch").then(literal("blocks").executes(context -> {
+            ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
+            IsometricRenderHelper.batchRenderItemGroupBlocks(group);
+            return 0;
+        })).then(literal("items").executes(context -> {
+            ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
+            IsometricRenderHelper.batchRenderItemGroupItems(group);
+            return 0;
+        }))).then(literal("atlas").executes(context -> {
+            ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
+            IsometricRenderHelper.renderItemGroupAtlas(group);
+            return 0;
+        })))));
     }
 
 

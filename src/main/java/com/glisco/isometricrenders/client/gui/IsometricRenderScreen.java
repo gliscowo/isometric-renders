@@ -30,11 +30,11 @@ public class IsometricRenderScreen extends RenderCallbackScreen {
         scaleField.setText(String.valueOf(renderScale));
         scaleField.setChangedListener(s -> {
             int tempScale = s.length() > 0 ? Integer.parseInt(s) : renderScale;
-            if (tempScale == renderScale || tempScale < 25) return;
-            scaleSlider.setValue((tempScale - 25d) / 400d);
+            if (tempScale == renderScale || tempScale < 10) return;
+            scaleSlider.setValue((tempScale - 10d) / 400d);
         });
-        scaleSlider = new SliderWidgetImpl(50, 40, 170, Text.of("Scale"), 0.3125, 0.025, (renderScale - 25) / 400d, aDouble -> {
-            renderScale = (int) Math.round(25d + aDouble * 400d);
+        scaleSlider = new SliderWidgetImpl(50, 40, 170, Text.of("Scale"), 0.35, 0.025, (renderScale - 10) / 400d, aDouble -> {
+            renderScale = (int) Math.round(10d + aDouble * 400d);
             scaleField.setText(String.valueOf(renderScale));
         });
 
@@ -162,7 +162,6 @@ public class IsometricRenderScreen extends RenderCallbackScreen {
 
     @Override
     protected void addImageToExportQueue(NativeImage image) {
-        //TODO migrate to export dispatcher
         ImageExporter.addJob(image);
     }
 }

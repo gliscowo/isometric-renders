@@ -8,8 +8,8 @@ public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<I
 
     private ItemStack next = ItemStack.EMPTY;
 
-    public BatchIsometricItemRenderScreen(Iterator<ItemStack> renderObjects, boolean allowInsaneResolutions) {
-        super(renderObjects, allowInsaneResolutions);
+    public BatchIsometricItemRenderScreen(Iterator<ItemStack> renderObjects) {
+        super(renderObjects);
     }
 
     @Override

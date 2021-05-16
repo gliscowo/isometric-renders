@@ -2,9 +2,9 @@ package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.client.RuntimeConfig;
+import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -13,9 +13,7 @@ import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -23,6 +21,8 @@ import java.util.function.Consumer;
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
 public abstract class RenderCallbackScreen extends Screen {
+
+    private ButtonWidget exportButton;
 
     protected IsometricRenderHelper.RenderCallback renderCallback = (matrices, vertexConsumerProvider, tickDelta) -> {};
     protected Runnable tickCallback = () -> {};
@@ -45,7 +45,10 @@ public abstract class RenderCallbackScreen extends Screen {
     protected void init() {
         super.init();
         viewportBeginX = (int) ((this.width - this.height) * 0.5);
-        viewportEndX = (int) (this.width - (this.width - this.height) * 0.5);
+        viewportEndX = (int) (this.width - (this.width - this.height) * 0.5) + 1;
+
+        ((ParticleManagerAccessor)client.particleManager).getParticles().clear();
+        IsometricRenderHelper.allowParticles = false;
 
         buttons.clear();
         buildGuiElements();
@@ -75,7 +78,7 @@ public abstract class RenderCallbackScreen extends Screen {
             ImageExporter.clearQueue();
         });
 
-        ButtonWidget exportButton = new ButtonWidget(viewportEndX + 10, 233, 65, 20, Text.of("Export"), button -> {
+        exportButton = new ButtonWidget(viewportEndX + 10, 233, 65, 20, Text.of("Export"), button -> {
             if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs)) {
                 captureScheduled = true;
             }
@@ -87,7 +90,7 @@ public abstract class RenderCallbackScreen extends Screen {
         resolutionField.setChangedListener(s -> {
             if (s.length() < 1) return;
             int resolution = Integer.parseInt(s);
-            if ((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || resolution > 16384) {
+            if ((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || (resolution > 16384 && !allowInsaneResolutions)) {
                 resolutionField.setEditableColor(0xFF0000);
                 exportButton.active = false;
             } else {
@@ -136,10 +139,10 @@ public abstract class RenderCallbackScreen extends Screen {
 
             client.textRenderer.draw(matrices, "F10: Studio Mode  F12: Export", viewportEndX + 12, height - 20, 0xAAAAAA);
 
-            client.textRenderer.draw(matrices, "Warning: Unless you have at least 6GB ",  10, height - 60, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "of memory available for Minecraft, ",  10, height - 50, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "resolutions over 8192x8192",  10, height - 40, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "are not recommended if you want",  10, height - 30, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "Warning: Unless you have at least 6GB ", 10, height - 60, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "of memory available for Minecraft, ", 10, height - 50, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "resolutions over 8192x8192", 10, height - 40, 0xAAAAAA);
+            client.textRenderer.draw(matrices, "are not recommended if you want", 10, height - 30, 0xAAAAAA);
             client.textRenderer.draw(matrices, "your computer to survive", 10, height - 20, 0xAAAAAA);
 
             client.textRenderer.draw(matrices, ImageExporter.getProgressBarText(), viewportEndX + 12, 350, 0xFFFFFF);
@@ -149,7 +152,7 @@ public abstract class RenderCallbackScreen extends Screen {
             }
         }
 
-        RenderSystem.setupGuiFlatDiffuseLighting(Util.make(new Vector3f(0.2F, 1.0F, -0.7F), Vector3f::normalize), Util.make(new Vector3f(-0.2F, 1.0F, 0.7F), Vector3f::normalize));
+        IsometricRenderHelper.setupLighting();
 
         int i = (this.width - 248) / 2 + 10;
         int j = (this.height - 166) / 2 + 8;
@@ -187,11 +190,10 @@ public abstract class RenderCallbackScreen extends Screen {
         IsometricRenderHelper.allowParticles = false;
     }
 
-    //TODO migrate to ExportDispatcher
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_F12) {
-            if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs)) {
+            if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs) && exportButton.active) {
                 captureScheduled = true;
             }
         } else if (keyCode == GLFW.GLFW_KEY_F10) {

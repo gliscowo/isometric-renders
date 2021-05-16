@@ -3,6 +3,7 @@ package com.glisco.isometricrenders.client.gui;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
@@ -11,6 +12,7 @@ import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tickable;
+import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.NotNull;
 
 import static com.glisco.isometricrenders.client.gui.IsometricRenderHelper.getParticleCamera;
@@ -42,6 +44,32 @@ public class IsometricRenderPresets {
             if (client.world.random.nextDouble() < 0.150) {
                 state.getBlock().randomDisplayTick(state, client.world, client.player.getBlockPos(), client.world.random);
             }
+        });
+    }
+
+    public static void setupAreaRender(IsometricRenderScreen screen, @NotNull BlockState[][][] states) {
+        final MinecraftClient client = MinecraftClient.getInstance();
+        screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
+            matrices.push();
+
+            matrices.translate(-states[0][0].length / 2f, 0, -states[0].length / 2f);
+
+            for (BlockState[][] twoDim : states) {
+                matrices.push();
+                for (BlockState[] oneDim : twoDim) {
+                    matrices.push();
+                    for (BlockState state : oneDim) {
+                        client.getBlockRenderManager().renderBlockAsEntity(state, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
+                        matrices.translate(1, 0, 0);
+                    }
+                    matrices.pop();
+                    matrices.translate(0, 0, 1);
+                }
+                matrices.pop();
+                matrices.translate(0, 1, 0);
+            }
+
+            matrices.pop();
         });
     }
 

@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 public class BatchIsometricBlockRenderScreen extends BatchIsometricRenderScreen<BlockState> {
 
-    public BatchIsometricBlockRenderScreen(Iterator<BlockState> renderObjects, boolean allowInsaneResolutions) {
-        super(renderObjects, allowInsaneResolutions);
+    public BatchIsometricBlockRenderScreen(Iterator<BlockState> renderObjects) {
+        super(renderObjects);
     }
 
     @Override

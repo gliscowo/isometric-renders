@@ -33,13 +33,13 @@ public class HandledScreenMixin<T extends ScreenHandler> extends Screen {
     public void renderInventory(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if (keyCode == GLFW.GLFW_KEY_F12) {
             if (Screen.hasControlDown()) {
-                client.openScreen(new BatchIsometricBlockRenderScreen(IsometricRenderHelper.extractBlocks(handler.slots.stream().map(Slot::getStack).collect(Collectors.toList())), false));
+                client.openScreen(new BatchIsometricBlockRenderScreen(IsometricRenderHelper.extractBlocks(handler.slots.stream().map(Slot::getStack).collect(Collectors.toList()))));
                 cir.cancel();
             } else if (Screen.hasAltDown()) {
-                client.openScreen(new BatchIsometricItemRenderScreen(handler.slots.stream().map(Slot::getStack).iterator(), false));
+                client.openScreen(new BatchIsometricItemRenderScreen(handler.slots.stream().map(Slot::getStack).iterator()));
                 cir.cancel();
             } else if (Screen.hasShiftDown()) {
-                IsometricRenderHelper.renderItemAtlas(handler.slots.stream().map(Slot::getStack).filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList()), 1024, 12, 1);
+                IsometricRenderHelper.renderItemAtlas(handler.slots.stream().map(Slot::getStack).filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList()));
                 cir.cancel();
             }
         }
