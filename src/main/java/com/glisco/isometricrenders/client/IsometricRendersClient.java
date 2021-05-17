@@ -1,7 +1,6 @@
 package com.glisco.isometricrenders.client;
 
-import com.glisco.isometricrenders.client.export.ImageExporter;
-import com.glisco.isometricrenders.client.gui.RenderCallbackScreen;
+import com.glisco.isometricrenders.client.gui.RenderScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,7 +33,7 @@ public class IsometricRendersClient implements ClientModInitializer {
             DrawableHelper.fill(matrixStack, 20, 20, 140, 60, 0x90000000);
             client.textRenderer.draw(matrixStack, ImageExporter.getProgressBarText(), 30, 30, 0xFFFFFF);
 
-            RenderCallbackScreen.drawExportProgressBar(matrixStack, 30, 45, 100, 50, 10);
+            RenderScreen.drawExportProgressBar(matrixStack, 30, 45, 100, 50, 10);
         });
     }
 

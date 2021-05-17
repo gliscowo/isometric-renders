@@ -1,8 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.RuntimeConfig;
-import com.glisco.isometricrenders.client.export.ExportMetadata;
-import com.glisco.isometricrenders.client.export.ImageExporter;
+import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -22,7 +21,7 @@ import java.util.function.Consumer;
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
 //TODO move away from callbacks and use metadata instead, with correct subclasses
-public abstract class RenderCallbackScreen<T extends ExportMetadata<?>> extends Screen {
+public abstract class RenderScreen extends Screen {
 
     private ButtonWidget exportButton;
 
@@ -38,10 +37,9 @@ public abstract class RenderCallbackScreen<T extends ExportMetadata<?>> extends 
 
     protected int viewportBeginX;
     protected int viewportEndX;
+    protected String currentFilename = "";
 
-    protected T exportMetadata;
-
-    public RenderCallbackScreen() {
+    public RenderScreen() {
         super(Text.of(""));
     }
 
@@ -238,8 +236,9 @@ public abstract class RenderCallbackScreen<T extends ExportMetadata<?>> extends 
         fill(matrices, Math.max(x + offset - barWidth, x), y, Math.min(endWithOffset, x + drawWidth), y + 2, color);
     }
 
-    public void setRenderCallback(IsometricRenderHelper.RenderCallback renderCallback) {
+    public void setup(IsometricRenderHelper.RenderCallback renderCallback, String filename) {
         this.renderCallback = renderCallback;
+        this.currentFilename = filename;
     }
 
     public void setTickCallback(Runnable tickCallback) {
@@ -248,11 +247,6 @@ public abstract class RenderCallbackScreen<T extends ExportMetadata<?>> extends 
 
     public void setClosedCallback(Runnable closedCallback) {
         this.closedCallback = closedCallback;
-    }
-
-    //TODO somehow enforce this in a sensible way
-    public void setExportMetadata(T exportMetadata) {
-        this.exportMetadata = exportMetadata;
     }
 
     protected abstract void buildGuiElements();

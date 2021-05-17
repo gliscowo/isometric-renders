@@ -1,6 +1,5 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.export.ExportMetadata;
 import net.minecraft.block.BlockState;
 
 import java.util.Iterator;
@@ -19,7 +18,6 @@ public class BatchIsometricBlockRenderScreen extends BatchIsometricRenderScreen<
         }
 
         captureScheduled = true;
-        ((ExportMetadata.BatchExportMetadata)exportMetadata).next();
         IsometricRenderPresets.setupBlockStateRender(this, renderObjects.next());
     }
 }

@@ -21,6 +21,7 @@ public class RuntimeConfig {
     public static boolean useExternalRenderer = false;
     public static boolean allowMultipleNonThreadedJobs = false;
     public static boolean allowInsaneResolutions = false;
+    public static boolean dumpIntoRoot = false;
     public static int exportResolution = 2048;
 
 }

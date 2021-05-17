@@ -1,6 +1,5 @@
-package com.glisco.isometricrenders.client.export;
+package com.glisco.isometricrenders.client;
 
-import com.glisco.isometricrenders.client.IsometricRendersClient;
 import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
@@ -10,6 +9,7 @@ import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -21,8 +21,8 @@ public class ImageExporter extends Thread {
 
     private static ImageExporter INSTANCE = null;
 
-    private static final List<Pair<NativeImage, ExportMetadata<?>>> jobs = new ArrayList<>();
-    private static Pair<NativeImage, ExportMetadata<?>> currentJob = null;
+    private static final List<Pair<NativeImage, String>> jobs = new ArrayList<>();
+    private static Pair<NativeImage, String> currentJob = null;
 
     public static void init() {
         if (INSTANCE != null) throw new IllegalStateException("Export Thread is already running!");
@@ -35,12 +35,12 @@ public class ImageExporter extends Thread {
         return getJobCount() < 10;
     }
 
-    public static void addJob(Pair<NativeImage, ExportMetadata<?>> job) {
+    public static void addJob(NativeImage image, String name) {
         if (!acceptsJobs()) {
             sendErrorMessage();
             return;
         }
-        jobs.add(job);
+        jobs.add(new Pair<>(image, name));
     }
 
     public static int getJobCount() {
@@ -87,8 +87,9 @@ public class ImageExporter extends Thread {
         return "Export Jobs: " + jobs;
     }
 
-    private static void exportImage(Pair<NativeImage, ExportMetadata<?>> job) {
-        File file = job.getRight().getExportFile(FabricLoader.getInstance().getGameDir().resolve("renders"));
+    private static void exportImage(Pair<NativeImage, String> job) {
+        final File renderDir = FabricLoader.getInstance().getGameDir().resolve("renders").toFile();
+        File file = RuntimeConfig.dumpIntoRoot ? IsometricRenderHelper.getScreenshotFilename(renderDir) : IsometricRenderHelper.getNextFile(renderDir, job.getRight());
         file.getParentFile().mkdirs();
 
         IsometricRendersClient.LOGGER.info("Started saving image: {}", file);
@@ -112,19 +113,19 @@ public class ImageExporter extends Thread {
             MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system initialized"), false);
         }
 
-        public static void submit(Pair<NativeImage, ExportMetadata<?>> job) {
+        public static void submit(NativeImage image, String name) {
             if (!acceptsNew()) {
                 sendErrorMessage();
                 return;
             }
             exporters.submit(() -> {
-                exportImage(job);
+                exportImage(new Pair<>(image, name));
             });
         }
 
         public static void finish() {
             exporters.shutdown();
-            if(getJobCount() > 0){
+            if (getJobCount() > 0) {
                 MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system shutting down with " + getJobCount() + " tasks remaining"), false);
             } else {
                 MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system shutting down"), false);

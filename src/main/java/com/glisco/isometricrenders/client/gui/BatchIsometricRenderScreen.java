@@ -1,13 +1,11 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.export.ExportMetadata;
-import com.glisco.isometricrenders.client.export.ImageExporter;
 import com.glisco.isometricrenders.client.RuntimeConfig;
+import com.glisco.isometricrenders.client.ImageExporter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Pair;
 
 import java.util.Iterator;
 
@@ -57,7 +55,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
 
     @Override
     protected void addImageToExportQueue(NativeImage image) {
-        ImageExporter.Threaded.submit(new Pair<NativeImage, ExportMetadata<?>>(image, exportMetadata));
+        ImageExporter.Threaded.submit(image, currentFilename);
     }
 
     @Override

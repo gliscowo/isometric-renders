@@ -1,7 +1,6 @@
 package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.RuntimeConfig;
-import com.glisco.isometricrenders.client.export.ExportMetadata;
 import com.glisco.isometricrenders.mixin.CameraInvoker;
 import com.glisco.isometricrenders.mixin.DefaultPosArgumentAccessor;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
@@ -57,8 +56,6 @@ public class IsometricRenderHelper {
         group.appendStacks(stacks);
 
         BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks));
-        screen.setExportMetadata(new ExportMetadata.BlockBatch(extractBlocks(stacks)));
-
         MinecraftClient.getInstance().openScreen(screen);
     }
 
@@ -67,8 +64,6 @@ public class IsometricRenderHelper {
         group.appendStacks(stacks);
 
         BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator());
-        screen.setExportMetadata(new ExportMetadata.ItemBatch(stacks.iterator()));
-
         MinecraftClient.getInstance().openScreen(screen);
     }
 
@@ -81,8 +76,7 @@ public class IsometricRenderHelper {
     public static void renderItemAtlas(String name, List<ItemStack> stacks) {
         ItemAtlasRenderScreen screen = new ItemAtlasRenderScreen();
 
-        screen.setExportMetadata(new ExportMetadata.Atlas(name, stacks));
-        screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
+        screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
 
             matrices.translate(-0.88 + 0.05, 0.925 - 0.05, 0);
             matrices.scale(0.125f, 0.125f, 1);
@@ -110,7 +104,7 @@ public class IsometricRenderHelper {
                 matrices.pop();
 
             }
-        });
+        }, "atlases/" + name);
 
         MinecraftClient.getInstance().openScreen(screen);
     }
@@ -233,6 +227,17 @@ public class IsometricRenderHelper {
         Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
         ((CameraInvoker) camera).invokeSetRotation(RuntimeConfig.rotation, RuntimeConfig.angle);
         return camera;
+    }
+
+    public static File getNextFile(File baseDir, String filename) {
+        int i = 0;
+        while (true) {
+            File file = new File(baseDir, filename + (i == 0 ? "" : "_" + i) + ".png");
+            if (!file.exists()) {
+                return file;
+            }
+            ++i;
+        }
     }
 
     public static BlockPos getPosFromArgument(DefaultPosArgument argument, FabricClientCommandSource source) {

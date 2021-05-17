@@ -7,8 +7,6 @@ import com.glisco.isometricrenders.mixin.BlockEntityAccessor;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
@@ -80,6 +78,17 @@ public class IsoRenderCommand {
                 context.getSource().sendFeedback(prefix("Insane resolutions §cunlocked§7. I will not be your place to cry if this blows up your computer."));
             } else {
                 context.getSource().sendFeedback(prefix("Insane resolutions §alocked§7. You're safe again"));
+            }
+
+            return 0;
+        })).then(literal("dump_into_root").executes((context) -> {
+
+            RuntimeConfig.dumpIntoRoot = !RuntimeConfig.dumpIntoRoot;
+
+            if (RuntimeConfig.dumpIntoRoot) {
+                context.getSource().sendFeedback(prefix("Renders will be dumped into §a.minecraft/renders"));
+            } else {
+                context.getSource().sendFeedback(prefix("Renders will be deposited in their respective subfolders"));
             }
 
             return 0;
