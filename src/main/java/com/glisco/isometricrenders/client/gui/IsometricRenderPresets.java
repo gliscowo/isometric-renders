@@ -1,9 +1,9 @@
 package com.glisco.isometricrenders.client.gui;
 
+import com.glisco.isometricrenders.client.export.ExportMetadata;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
@@ -12,7 +12,6 @@ import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tickable;
-import net.minecraft.util.math.Matrix4f;
 import org.jetbrains.annotations.NotNull;
 
 import static com.glisco.isometricrenders.client.gui.IsometricRenderHelper.getParticleCamera;
@@ -21,6 +20,8 @@ public class IsometricRenderPresets {
 
     public static void setupBlockStateRender(IsometricRenderScreen screen, @NotNull BlockState state) {
         final MinecraftClient client = MinecraftClient.getInstance();
+
+        screen.setExportMetadata(new ExportMetadata.Block(state));
         screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
             matrices.translate(-0.5, 0, -0.5);
@@ -49,6 +50,8 @@ public class IsometricRenderPresets {
 
     public static void setupAreaRender(IsometricRenderScreen screen, @NotNull BlockState[][][] states) {
         final MinecraftClient client = MinecraftClient.getInstance();
+
+        screen.setExportMetadata(new ExportMetadata.Area("area_render", states));
         screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
 
@@ -76,6 +79,8 @@ public class IsometricRenderPresets {
     public static void setupBlockEntityRender(IsometricRenderScreen screen, @NotNull BlockEntity entity) {
 
         final MinecraftClient client = MinecraftClient.getInstance();
+
+        screen.setExportMetadata(new ExportMetadata.Block(entity.getCachedState()));
         screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
 
             matrices.push();
@@ -113,6 +118,8 @@ public class IsometricRenderPresets {
     }
 
     public static void setupItemStackRender(IsometricRenderScreen screen, @NotNull ItemStack stack) {
+
+        screen.setExportMetadata(new ExportMetadata.Item(stack));
         screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
             matrices.scale(4, 4, 4);
@@ -124,6 +131,8 @@ public class IsometricRenderPresets {
     public static void setupEntityRender(IsometricRenderScreen screen, @NotNull Entity entity) {
 
         final MinecraftClient client = MinecraftClient.getInstance();
+
+        screen.setExportMetadata(new ExportMetadata.EntityData(entity));
         screen.setRenderCallback((matrixStack, vertexConsumerProvider, delta) -> {
             matrixStack.push();
             matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180));

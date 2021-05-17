@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.ImageExporter;
+import com.glisco.isometricrenders.client.export.ExportMetadata;
+import com.glisco.isometricrenders.client.export.ImageExporter;
 import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -12,6 +13,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.Quaternion;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
@@ -162,6 +164,6 @@ public class IsometricRenderScreen extends RenderCallbackScreen {
 
     @Override
     protected void addImageToExportQueue(NativeImage image) {
-        ImageExporter.addJob(image);
+        ImageExporter.addJob(new Pair<NativeImage, ExportMetadata<?>>(image, exportMetadata));
     }
 }

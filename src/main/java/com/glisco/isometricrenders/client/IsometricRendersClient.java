@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.client;
 
-import com.glisco.isometricrenders.client.gui.IsometricRenderScreen;
+import com.glisco.isometricrenders.client.export.ImageExporter;
 import com.glisco.isometricrenders.client.gui.RenderCallbackScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

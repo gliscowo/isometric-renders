@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.client.gui;
 
+import com.glisco.isometricrenders.client.export.ExportMetadata;
 import net.minecraft.item.ItemStack;
 
 import java.util.Iterator;
@@ -19,6 +20,7 @@ public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<I
                 onClose();
                 return;
             }
+            ((ExportMetadata.BatchExportMetadata)exportMetadata).next();
             next = renderObjects.next();
         }
 

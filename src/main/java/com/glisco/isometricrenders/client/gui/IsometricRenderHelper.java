@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.RuntimeConfig;
+import com.glisco.isometricrenders.client.export.ExportMetadata;
 import com.glisco.isometricrenders.mixin.CameraInvoker;
 import com.glisco.isometricrenders.mixin.DefaultPosArgumentAccessor;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
@@ -55,25 +56,32 @@ public class IsometricRenderHelper {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        MinecraftClient.getInstance().openScreen(new BatchIsometricBlockRenderScreen(extractBlocks(stacks)));
+        BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks));
+        screen.setExportMetadata(new ExportMetadata.BlockBatch(extractBlocks(stacks)));
+
+        MinecraftClient.getInstance().openScreen(screen);
     }
 
     public static void batchRenderItemGroupItems(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        MinecraftClient.getInstance().openScreen(new BatchIsometricItemRenderScreen(stacks.iterator()));
+        BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator());
+        screen.setExportMetadata(new ExportMetadata.ItemBatch(stacks.iterator()));
+
+        MinecraftClient.getInstance().openScreen(screen);
     }
 
     public static void renderItemGroupAtlas(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
-        renderItemAtlas(stacks);
+        renderItemAtlas(group.getName(), stacks);
     }
 
-    public static void renderItemAtlas(List<ItemStack> stacks) {
+    public static void renderItemAtlas(String name, List<ItemStack> stacks) {
         ItemAtlasRenderScreen screen = new ItemAtlasRenderScreen();
 
+        screen.setExportMetadata(new ExportMetadata.Atlas(name, stacks));
         screen.setRenderCallback((matrices, vertexConsumerProvider, tickDelta) -> {
 
             matrices.translate(-0.88 + 0.05, 0.925 - 0.05, 0);

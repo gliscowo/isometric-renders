@@ -1,7 +1,8 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.client.RuntimeConfig;
+import com.glisco.isometricrenders.client.export.ExportMetadata;
+import com.glisco.isometricrenders.client.export.ImageExporter;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -20,7 +21,8 @@ import java.util.function.Consumer;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
-public abstract class RenderCallbackScreen extends Screen {
+//TODO move away from callbacks and use metadata instead, with correct subclasses
+public abstract class RenderCallbackScreen<T extends ExportMetadata<?>> extends Screen {
 
     private ButtonWidget exportButton;
 
@@ -37,6 +39,8 @@ public abstract class RenderCallbackScreen extends Screen {
     protected int viewportBeginX;
     protected int viewportEndX;
 
+    protected T exportMetadata;
+
     public RenderCallbackScreen() {
         super(Text.of(""));
     }
@@ -47,7 +51,7 @@ public abstract class RenderCallbackScreen extends Screen {
         viewportBeginX = (int) ((this.width - this.height) * 0.5);
         viewportEndX = (int) (this.width - (this.width - this.height) * 0.5) + 1;
 
-        ((ParticleManagerAccessor)client.particleManager).getParticles().clear();
+        ((ParticleManagerAccessor) client.particleManager).getParticles().clear();
         IsometricRenderHelper.allowParticles = false;
 
         buttons.clear();
@@ -246,6 +250,11 @@ public abstract class RenderCallbackScreen extends Screen {
         this.closedCallback = closedCallback;
     }
 
+    //TODO somehow enforce this in a sensible way
+    public void setExportMetadata(T exportMetadata) {
+        this.exportMetadata = exportMetadata;
+    }
+
     protected abstract void buildGuiElements();
 
     protected abstract void drawGuiText(MatrixStack matrices);
@@ -255,7 +264,6 @@ public abstract class RenderCallbackScreen extends Screen {
     protected abstract IsometricRenderHelper.RenderCallback getExternalExportCallback();
 
     protected abstract void addImageToExportQueue(NativeImage image);
-
 
     protected static class SliderWidgetImpl extends SliderWidget {
 
