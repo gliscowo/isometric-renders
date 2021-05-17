@@ -115,8 +115,8 @@ public class ItemAtlasRenderScreen extends RenderCallbackScreen {
 
             matrices.push();
 
-            matrices.translate((115 - atlasShift) / 270d, 0.25 + ((atlasHeight - 115) / 270d), 0);
-            matrices.scale(atlasScale * 90 * 0.004f, atlasScale * 90 * 0.004f, -1f);
+            matrices.translate((115 - atlasShift) / 270d, 0.20 + ((atlasHeight - 115) / 270d), 0);
+            matrices.scale(atlasScale * 85 * 0.004f, atlasScale * 85 * 0.004f, -1f);
 
             matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(180));
 
