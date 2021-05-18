@@ -9,7 +9,6 @@ import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -89,7 +88,13 @@ public class ImageExporter extends Thread {
 
     private static void exportImage(Pair<NativeImage, String> job) {
         final File renderDir = FabricLoader.getInstance().getGameDir().resolve("renders").toFile();
-        File file = RuntimeConfig.dumpIntoRoot ? IsometricRenderHelper.getScreenshotFilename(renderDir) : IsometricRenderHelper.getNextFile(renderDir, job.getRight());
+        File file;
+        if (RuntimeConfig.dumpIntoRoot) {
+            file = IsometricRenderHelper.getNextFile(renderDir, IsometricRenderHelper.getLastFile(job.getRight()));
+        } else {
+            file = IsometricRenderHelper.getNextFile(renderDir, job.getRight());
+        }
+
         file.getParentFile().mkdirs();
 
         IsometricRendersClient.LOGGER.info("Started saving image: {}", file);

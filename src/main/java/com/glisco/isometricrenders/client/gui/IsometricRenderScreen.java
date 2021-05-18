@@ -25,6 +25,8 @@ public class IsometricRenderScreen extends RenderScreen {
 
     @Override
     protected void buildGuiElements() {
+        final int sliderWidth = viewportBeginX - 55;
+
         TextFieldWidget scaleField = new TextFieldWidget(client.textRenderer, 10, 40, 35, 20, Text.of(String.valueOf(renderScale)));
         scaleField.setTextPredicate(s -> s.matches("[0-9]{0,3}+"));
         scaleField.setText(String.valueOf(renderScale));
@@ -33,7 +35,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempScale == renderScale || tempScale < 10) return;
             scaleSlider.setValue((tempScale - 10d) / 400d);
         });
-        scaleSlider = new SliderWidgetImpl(50, 40, 170, Text.of("Scale"), 0.35, 0.025, (renderScale - 10) / 400d, aDouble -> {
+        scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, Text.of("Scale"), 0.35, 0.025, (renderScale - 10) / 400d, aDouble -> {
             renderScale = (int) Math.round(10d + aDouble * 400d);
             scaleField.setText(String.valueOf(renderScale));
         });
@@ -47,7 +49,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempRot == rotation) return;
             rotSlider.setValue(tempRot / 360d);
         });
-        rotSlider = new SliderWidgetImpl(50, 70, 170, Text.of("Rotation"), 0.875, 0.125, rotation / 360d, aDouble -> {
+        rotSlider = new SliderWidgetImpl(50, 70, sliderWidth, Text.of("Rotation"), 0.875, 0.125, rotation / 360d, aDouble -> {
             rotation = (int) Math.round(aDouble * 360);
             rotationField.setText(String.valueOf(rotation));
         });
@@ -61,7 +63,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempAngle == angle) return;
             angleSlider.setValue(tempAngle / 60d);
         });
-        angleSlider = new SliderWidgetImpl(50, 100, 170, Text.of("Angle"), 1, 0.25, (30 + angle) / 60d, aDouble -> {
+        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Angle"), 1, 0.25, (30 + angle) / 60d, aDouble -> {
             angle = -30 + (int) Math.round(aDouble * 60);
             angleField.setText(String.valueOf(angle));
         });
@@ -74,7 +76,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempHeight == renderHeight) return;
             heightSlider.setValue(1 - ((tempHeight + 170) / 600d));
         });
-        heightSlider = new SliderWidgetImpl(50, 130, 170, Text.of("Render Height"), 0.5, 0.05, 1 - ((renderHeight + 170) / 600d), aDouble -> {
+        heightSlider = new SliderWidgetImpl(50, 130, sliderWidth, Text.of("Render Height"), 0.5, 0.05, 1 - ((renderHeight + 170) / 600d), aDouble -> {
             renderHeight = 430 - (int) Math.round(aDouble * 600);
             heightField.setText(String.valueOf(130 - renderHeight));
         });

@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.client.ImageExporter;
+import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -55,7 +55,7 @@ public abstract class RenderScreen extends Screen {
         buttons.clear();
         buildGuiElements();
 
-        TextFieldWidget colorField = new TextFieldWidget(client.textRenderer, viewportEndX + 10, 38, 50, 20, Text.of("#00ff00"));
+        TextFieldWidget colorField = new TextFieldWidget(client.textRenderer, viewportEndX + 10, 38, 50, 20, Text.of("#0000ff"));
         colorField.setTextPredicate(s -> s.matches("^#([A-Fa-f0-9]{0,6})$"));
         colorField.setText("#" + String.format("%02X", backgroundColor >> 16) + String.format("%02X", backgroundColor >> 8 & 0xFF) + String.format("%02X", backgroundColor & 0xFF));
         colorField.setChangedListener(s -> {
@@ -70,7 +70,7 @@ public abstract class RenderScreen extends Screen {
             tickParticles = aBoolean;
         });
 
-        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, Text.of("Use Variable-Resolution Renderer"), useExternalRenderer, aBoolean -> {
+        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, Text.of("Use External Renderer"), useExternalRenderer, aBoolean -> {
             useExternalRenderer = aBoolean;
         });
         CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, Text.of("Allow Multiple Export Jobs"), allowMultipleNonThreadedJobs, aBoolean -> {

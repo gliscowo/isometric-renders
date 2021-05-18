@@ -15,7 +15,7 @@ public class RuntimeConfig {
     public static float atlasScale = 2.5f;
 
     //Render Options
-    public static int backgroundColor = 0x00ff00;
+    public static int backgroundColor = 0x0000ff;
 
     //Export Options
     public static boolean useExternalRenderer = false;

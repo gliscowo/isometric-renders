@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.client.gui;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 
 import java.util.Iterator;
@@ -8,8 +9,9 @@ public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<I
 
     private ItemStack next = ItemStack.EMPTY;
 
-    public BatchIsometricItemRenderScreen(Iterator<ItemStack> renderObjects) {
-        super(renderObjects);
+    public BatchIsometricItemRenderScreen(Iterator<ItemStack> renderObjects, String name) {
+        super(renderObjects, name);
+        this.name = IsometricRenderHelper.getLastFile(IsometricRenderHelper.getNextFolder(FabricLoader.getInstance().getGameDir().resolve("renders/batches/items/").toFile(), name).toString());
     }
 
     @Override
@@ -27,4 +29,8 @@ public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<I
         next = ItemStack.EMPTY;
     }
 
+    @Override
+    public void setup(IsometricRenderHelper.RenderCallback renderCallback, String filename) {
+        super.setup(renderCallback, "batches/items/" + name + "/" + IsometricRenderHelper.getLastFile(filename));
+    }
 }

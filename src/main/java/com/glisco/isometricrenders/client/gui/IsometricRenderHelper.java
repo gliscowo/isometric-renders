@@ -31,7 +31,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,7 +58,7 @@ public class IsometricRenderHelper {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks));
+        BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks), group.getName());
         MinecraftClient.getInstance().openScreen(screen);
     }
 
@@ -63,7 +66,7 @@ public class IsometricRenderHelper {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator());
+        BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), group.getName());
         MinecraftClient.getInstance().openScreen(screen);
     }
 
@@ -238,6 +241,30 @@ public class IsometricRenderHelper {
             }
             ++i;
         }
+    }
+
+    public static Path getNextFolder(File baseDir, String name) {
+        int i = 0;
+        while (true) {
+            File file = new File(baseDir, name + (i == 0 ? "" : "_" + i) + "/");
+            if (!file.exists() || (file.isDirectory() && isDirectoryEmpty(file.toPath()))) {
+                return file.toPath();
+            }
+            ++i;
+        }
+    }
+
+    public static boolean isDirectoryEmpty(Path directory) {
+        try {
+            return !Files.list(directory).findAny().isPresent();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static String getLastFile(String file) {
+        return new File(file).getName();
     }
 
     public static BlockPos getPosFromArgument(DefaultPosArgument argument, FabricClientCommandSource source) {

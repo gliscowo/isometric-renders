@@ -23,6 +23,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
 
     @Override
     protected void buildGuiElements() {
+        final int sliderWidth = viewportBeginX - 55;
         TextFieldWidget scaleField = new TextFieldWidget(client.textRenderer, 10, 40, 35, 20, Text.of(String.valueOf(atlasScale)));
         scaleField.setTextPredicate(s -> s.matches("^[-+]?([0-9]+(\\.[0-9]+)?|\\.[0-9]+)$") || s.isEmpty());
         scaleField.setText(String.format(Locale.ENGLISH, "%.1f", atlasScale));
@@ -31,7 +32,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             if (tempScale == atlasScale) return;
             scaleSlider.setValue(tempScale / 10);
         });
-        scaleSlider = new SliderWidgetImpl(50, 40, 170, Text.of("Scale"), 0.25, 0.025, atlasScale / 10, aDouble -> {
+        scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, Text.of("Scale"), 0.25, 0.025, atlasScale / 10, aDouble -> {
             atlasScale = (float) (aDouble * 10);
             scaleField.setText(String.format(Locale.ENGLISH, "%.1f", atlasScale));
         });
@@ -44,7 +45,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             if (tempHeight == atlasHeight) return;
             heightSlider.setValue(1 - ((tempHeight + 335) / 900d));
         });
-        heightSlider = new SliderWidgetImpl(50, 70, 170, Text.of("Render Height"), 0.5, 0.05, 1 - ((renderHeight + 335) / 900d), aDouble -> {
+        heightSlider = new SliderWidgetImpl(50, 70, sliderWidth, Text.of("Render Height"), 0.5, 0.05, 1 - ((atlasHeight + 335) / 900d), aDouble -> {
             atlasHeight = 565 - (int) Math.round(aDouble * 900);
             heightField.setText(String.valueOf(115 - atlasHeight));
         });
@@ -57,7 +58,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             if (tempShift == atlasShift) return;
             shiftSlider.setValue(1 - ((tempShift + 335) / 900d));
         });
-        shiftSlider = new SliderWidgetImpl(50, 100, 170, Text.of("Render Shift"), 0.5, 0.05, 1 - ((atlasShift + 335) / 900d), aDouble -> {
+        shiftSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Render Shift"), 0.5, 0.05, 1 - ((atlasShift + 335) / 900d), aDouble -> {
             atlasShift = 565 - (int) Math.round(aDouble * 900);
             shiftField.setText(String.valueOf(115 - atlasShift));
         });
@@ -92,7 +93,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
         float scale = atlasScale * 90 * height / 515f;
 
         RenderSystem.pushMatrix();
-        RenderSystem.translatef((float) Math.round(230 - atlasShift * 1f + (height - 515f) / 10f), (float) Math.round(atlasHeight * 1f + (height - 515f) / 10f), 1500);
+        RenderSystem.translatef((float) Math.round(230 - atlasShift * 1f + (height - 515f) / 30f), (float) Math.round(atlasHeight * 1f + (height - 515f) / 10f), 1500);
         RenderSystem.scalef(1, 1, -1);
 
         MatrixStack matrixStack = new MatrixStack();

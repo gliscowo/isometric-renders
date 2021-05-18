@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.client.ImageExporter;
+import com.glisco.isometricrenders.client.RuntimeConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.texture.NativeImage;
@@ -19,10 +19,12 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     protected final int delay;
     protected int delayTicks;
     protected boolean invalid = false;
+    protected String name;
 
-    public BatchIsometricRenderScreen(Iterator<T> renderObjects) {
+    public BatchIsometricRenderScreen(Iterator<T> renderObjects, String name) {
         this.renderObjects = renderObjects;
         this.drawBackground = true;
+        this.name = name;
 
         if (ImageExporter.Threaded.busy()) {
             MinecraftClient.getInstance().player.sendMessage(prefix("§cThe threaded export system is not available, try again in a few seconds. If this doesn't fix itself, restart your client"), false);
