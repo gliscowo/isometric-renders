@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
-//TODO move away from callbacks and use metadata instead, with correct subclasses
 public abstract class RenderScreen extends Screen {
 
     private ButtonWidget exportButton;

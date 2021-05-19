@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.client.ImageExporter;
+import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
@@ -22,6 +22,7 @@ public class IsometricRenderScreen extends RenderScreen {
     private SliderWidgetImpl rotSlider;
     private SliderWidgetImpl angleSlider;
     private SliderWidgetImpl heightSlider;
+    private SliderWidgetImpl opacitySlider;
 
     @Override
     protected void buildGuiElements() {
@@ -81,6 +82,19 @@ public class IsometricRenderScreen extends RenderScreen {
             heightField.setText(String.valueOf(130 - renderHeight));
         });
 
+        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 160, 35, 20, Text.of(String.valueOf(exportOpacity)));
+        opacityField.setTextPredicate(s -> s.matches("[0-9]{0,3}"));
+        opacityField.setText(String.valueOf(exportOpacity));
+        opacityField.setChangedListener(s -> {
+            int tempOpacity = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : exportOpacity;
+            if (tempOpacity == exportOpacity) return;
+            opacitySlider.setValue(exportOpacity / 100f);
+        });
+        opacitySlider = new SliderWidgetImpl(50, 160, sliderWidth, Text.of("Export Opacity"), 1, 0.05, exportOpacity / 100f, aDouble -> {
+            exportOpacity = (int) Math.round(aDouble * 100);
+            opacityField.setText(String.valueOf(exportOpacity));
+        });
+
         buttons.clear();
 
         addButton(scaleSlider);
@@ -94,6 +108,9 @@ public class IsometricRenderScreen extends RenderScreen {
 
         addButton(heightField);
         addButton(heightSlider);
+
+        addButton(opacityField);
+        addButton(opacitySlider);
     }
 
     @Override

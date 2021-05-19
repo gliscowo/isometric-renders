@@ -137,11 +137,7 @@ public class IsometricRenderHelper {
         RenderSystem.pushMatrix();
         RenderSystem.loadIdentity();
 
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Matrix4f matrix4f = new Matrix4f();
-        matrix4f.loadIdentity();
-        matrix4f.addToLastColumn(new Vector3f(0.15f, 0.5f, 0.15f));
-        DiffuseLighting.enableForLevel(matrix4f);
+        setupLighting();
 
         VertexConsumerProvider.Immediate vertexConsumers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         MatrixStack matrixStack = new MatrixStack();
@@ -180,6 +176,15 @@ public class IsometricRenderHelper {
         for (int i = 0; i < pixelColors.length; i++) {
             if (pixelColors[i] == abgrColor) {
                 pixelColors[i] = 0;
+            }
+        }
+
+        if(RuntimeConfig.exportOpacity != 100){
+
+            int opacityMask = 0xFFFFFF | (Math.round(RuntimeConfig.exportOpacity * 2.55f) << 24);
+
+            for (int i = 0; i < pixelColors.length; i++) {
+                pixelColors[i] = pixelColors[i] & opacityMask;
             }
         }
 
