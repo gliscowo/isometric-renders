@@ -76,11 +76,14 @@ public abstract class RenderScreen extends Screen {
         CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, Text.of("Allow Multiple Export Jobs"), allowMultipleNonThreadedJobs, aBoolean -> {
             allowMultipleNonThreadedJobs = aBoolean;
         });
-        ButtonWidget clearQueueButton = new ButtonWidget(viewportEndX + 90, 233, 75, 20, Text.of("Clear Queue"), button -> {
-            ImageExporter.clearQueue();
+        CheckboxWidget dumpIntoRootCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 233, Text.of("Dump into root"), dumpIntoRoot, aBoolean -> {
+            dumpIntoRoot = aBoolean;
         });
 
-        exportButton = new ButtonWidget(viewportEndX + 10, 233, 65, 20, Text.of("Export"), button -> {
+        ButtonWidget clearQueueButton = new ButtonWidget(viewportEndX + 80, 260, 75, 20, Text.of("Clear Queue"), button -> {
+            ImageExporter.clearQueue();
+        });
+        exportButton = new ButtonWidget(viewportEndX + 10, 260, 65, 20, Text.of("Export"), button -> {
             if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs)) {
                 captureScheduled = true;
             }
@@ -92,7 +95,7 @@ public abstract class RenderScreen extends Screen {
         resolutionField.setChangedListener(s -> {
             if (s.length() < 1) return;
             int resolution = Integer.parseInt(s);
-            if ((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || (resolution > 16384 && !allowInsaneResolutions)) {
+            if (((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || resolution > 16384) && !allowInsaneResolutions) {
                 resolutionField.setEditableColor(0xFF0000);
                 exportButton.active = false;
             } else {
@@ -108,6 +111,7 @@ public abstract class RenderScreen extends Screen {
         addButton(doHiResCheckbox);
         addButton(allowMultipleRendersCheckbox);
         addButton(playParticlesCheckbox);
+        addButton(dumpIntoRootCheckbox);
 
         addButton(resolutionField);
         addButton(exportButton);
@@ -116,16 +120,30 @@ public abstract class RenderScreen extends Screen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        if (((captureScheduled && !RuntimeConfig.useExternalRenderer) || studioMode) && !drawBackground) {
+        final boolean drawOnlyBackground = ((captureScheduled && !useExternalRenderer) || studioMode) && !this.drawBackground;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(0, 0, -760);
+        if (this.drawBackground || drawOnlyBackground) {
             fill(matrices, 0, 0, this.width, this.height, RuntimeConfig.backgroundColor | 255 << 24);
         } else {
+            renderBackground(matrices);
+        }
+        GlStateManager.popMatrix();
 
-            if (drawBackground) {
-                fill(matrices, 0, 0, this.width, this.height, RuntimeConfig.backgroundColor | 255 << 24);
-            } else {
-                renderBackground(matrices);
-                drawFramingHint(matrices);
-            }
+        IsometricRenderHelper.setupLighting();
+
+        int i = (this.width - 248) / 2 + 10;
+        int j = (this.height - 166) / 2 + 8;
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(0, 0, !drawOnlyBackground ? -750 : 10);
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.translatef(i, j, 10F);
+        drawContent(matrices);
+        GlStateManager.popMatrix();
+
+        if (!drawOnlyBackground) {
+            if (!this.drawBackground) drawFramingHint(matrices);
 
             drawGuiBackground(matrices);
             super.render(matrices, mouseX, mouseY, delta);
@@ -153,19 +171,6 @@ public abstract class RenderScreen extends Screen {
                 drawExportProgressBar(matrices, viewportEndX + 12, 362, width - viewportEndX - 30, 150, 5);
             }
         }
-
-        IsometricRenderHelper.setupLighting();
-
-        int i = (this.width - 248) / 2 + 10;
-        int j = (this.height - 166) / 2 + 8;
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0, 0, 10F);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.translatef(i, j, 10F);
-
-        drawContent(matrices);
-
-        GlStateManager.popMatrix();
 
         if (captureScheduled) {
             capture();

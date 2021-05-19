@@ -54,16 +54,17 @@ public class IsoRenderCommand {
         };
     }
 
+    //TODO clean this up
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(literal("isorender").then(literal("block").then(argument("block", BlockStateArgumentType.blockState()).executes(context -> {
+        dispatcher.register(literal("isorender").then(literal("block").executes(context -> executeBlockTarget(context.getSource())).then(argument("block", BlockStateArgumentType.blockState()).executes(context -> {
             final BlockStateArgument blockStateArgument = context.getArgument("block", BlockStateArgument.class);
             final BlockState blockState = blockStateArgument.getBlockState();
             return executeBlockState(context.getSource(), blockState, ((BlockStateArgumentAccessor) blockStateArgument).getData());
-        })).then(literal("target").executes(context -> executeBlockTarget(context.getSource())))).then(literal("item").then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
+        }))).then(literal("item").executes(context -> {
+            return executeItem(context.getSource(), context.getSource().getPlayer().getMainHandStack().copy());
+        }).then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
             final ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             return executeItem(context.getSource(), stack);
-        })).then(literal("hand").executes(context -> {
-            return executeItem(context.getSource(), context.getSource().getPlayer().getMainHandStack().copy());
         }))).then(literal("entity").then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), new CompoundTag());
@@ -78,17 +79,6 @@ public class IsoRenderCommand {
                 context.getSource().sendFeedback(prefix("Insane resolutions §cunlocked§7. I will not be your place to cry if this blows up your computer."));
             } else {
                 context.getSource().sendFeedback(prefix("Insane resolutions §alocked§7. You're safe again"));
-            }
-
-            return 0;
-        })).then(literal("dump_into_root").executes((context) -> {
-
-            RuntimeConfig.dumpIntoRoot = !RuntimeConfig.dumpIntoRoot;
-
-            if (RuntimeConfig.dumpIntoRoot) {
-                context.getSource().sendFeedback(prefix("Renders will be dumped into §a.minecraft/renders"));
-            } else {
-                context.getSource().sendFeedback(prefix("Renders will be deposited in their respective subfolders"));
             }
 
             return 0;
