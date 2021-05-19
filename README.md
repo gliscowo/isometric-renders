@@ -19,4 +19,4 @@ This was designed with modded wikis or similar documentation in mind, should be 
 
 Join My Discord™ if you have questions, issues or similar
 
-![Discord](https://discordapp.com/api/guilds/825828008644313089/embed.png?style=banner2&v=2)
+[![Discord](https://discordapp.com/api/guilds/825828008644313089/embed.png?style=banner2&v=2)](https://discord.gg/xrwHKktV2d)
