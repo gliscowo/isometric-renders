@@ -39,7 +39,7 @@ public class HandledScreenMixin<T extends ScreenHandler> extends Screen {
                 client.openScreen(new BatchIsometricItemRenderScreen(handler.slots.stream().map(Slot::getStack).iterator(), "inventory"));
                 cir.cancel();
             } else if (Screen.hasShiftDown()) {
-                IsometricRenderHelper.renderItemAtlas("inventory", handler.slots.stream().map(Slot::getStack).filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList()));
+                IsometricRenderHelper.renderItemAtlas("inventory", handler.slots.stream().map(Slot::getStack).filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList()), true);
                 cir.cancel();
             }
         }

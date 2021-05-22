@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.OverlayTexture;
@@ -46,6 +47,8 @@ public class IsometricRenderHelper {
     public static boolean allowParticles = true;
     public static final Matrix4f LIGHT_MATRIX;
 
+    private static Screen SCHEDULED_SCREEN = null;
+
     static {
         LIGHT_MATRIX = new Matrix4f();
         LIGHT_MATRIX.loadIdentity();
@@ -59,7 +62,7 @@ public class IsometricRenderHelper {
         group.appendStacks(stacks);
 
         BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks), group.getName());
-        MinecraftClient.getInstance().openScreen(screen);
+        scheduleScreen(screen);
     }
 
     public static void batchRenderItemGroupItems(ItemGroup group) {
@@ -67,16 +70,16 @@ public class IsometricRenderHelper {
         group.appendStacks(stacks);
 
         BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), group.getName());
-        MinecraftClient.getInstance().openScreen(screen);
+        scheduleScreen(screen);
     }
 
     public static void renderItemGroupAtlas(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
-        renderItemAtlas(group.getName(), stacks);
+        renderItemAtlas(group.getName(), stacks, false);
     }
 
-    public static void renderItemAtlas(String name, List<ItemStack> stacks) {
+    public static void renderItemAtlas(String name, List<ItemStack> stacks, boolean forceOpen) {
         ItemAtlasRenderScreen screen = new ItemAtlasRenderScreen();
 
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
@@ -109,7 +112,11 @@ public class IsometricRenderHelper {
             }
         }, "atlases/" + name);
 
-        MinecraftClient.getInstance().openScreen(screen);
+        if (forceOpen) {
+            MinecraftClient.getInstance().openScreen(screen);
+        } else {
+            IsometricRenderHelper.scheduleScreen(screen);
+        }
     }
 
     public static NativeImage renderIntoImage(int size, RenderCallback renderCallback) {
@@ -179,7 +186,7 @@ public class IsometricRenderHelper {
             }
         }
 
-        if(RuntimeConfig.exportOpacity != 100){
+        if (RuntimeConfig.exportOpacity != 100) {
 
             int opacityMask = 0xFFFFFF | (Math.round(RuntimeConfig.exportOpacity * 2.55f) << 24);
 
@@ -278,7 +285,23 @@ public class IsometricRenderHelper {
         Vec3d pos = source.getPlayer().getPos();
 
         return new BlockPos(accessor.getX().toAbsoluteCoordinate(pos.x), accessor.getY().toAbsoluteCoordinate(pos.y), accessor.getZ().toAbsoluteCoordinate(pos.z));
+    }
 
+    public static void scheduleScreen(Screen screen) {
+        if (MinecraftClient.getInstance().currentScreen == null) {
+            MinecraftClient.getInstance().openScreen(screen);
+        } else {
+            SCHEDULED_SCREEN = screen;
+        }
+    }
+
+    public static boolean isScreenScheduled() {
+        return SCHEDULED_SCREEN != null;
+    }
+
+    public static void openScheduledScreen() {
+        MinecraftClient.getInstance().openScreen(SCHEDULED_SCREEN);
+        SCHEDULED_SCREEN = null;
     }
 
     public static Iterator<BlockState> extractBlocks(List<ItemStack> stacks) {

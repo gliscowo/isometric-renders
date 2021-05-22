@@ -109,7 +109,7 @@ public class IsoRenderCommand {
 
             IsometricRenderScreen screen = new IsometricRenderScreen();
             IsometricRenderPresets.setupAreaRender(screen, states);
-            MinecraftClient.getInstance().openScreen(screen);
+            IsometricRenderHelper.scheduleScreen(screen);
 
             return 0;
         })))).then(literal("creative_tab").then(argument("itemgroup", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("batch").then(literal("blocks").executes(context -> {
@@ -157,7 +157,7 @@ public class IsoRenderCommand {
             IsometricRenderPresets.setupBlockStateRender(screen, state);
         }
 
-        MinecraftClient.getInstance().openScreen(screen);
+        IsometricRenderHelper.scheduleScreen(screen);
 
         return 0;
     }
@@ -183,7 +183,7 @@ public class IsoRenderCommand {
 
             be = ((BlockWithEntity) state.getBlock()).createBlockEntity(client.world);
             ((BlockEntityAccessor) be).setCachedState(state);
-            be.setLocation(client.world, BlockPos.ORIGIN);
+            be.setLocation(client.world, MinecraftClient.getInstance().player.getBlockPos());
 
             CompoundTag copyTag = tag.copy();
 
@@ -192,6 +192,7 @@ public class IsoRenderCommand {
             copyTag.putInt("z", 0);
 
             be.fromTag(be.getCachedState(), copyTag);
+            be.setLocation(client.world, MinecraftClient.getInstance().player.getBlockPos());
         }
 
         if (be != null) {
@@ -200,7 +201,7 @@ public class IsoRenderCommand {
             IsometricRenderPresets.setupBlockStateRender(screen, state);
         }
 
-        client.openScreen(screen);
+        IsometricRenderHelper.scheduleScreen(screen);
         return 0;
     }
 
@@ -220,7 +221,7 @@ public class IsoRenderCommand {
 
         IsometricRenderPresets.setupEntityRender(screen, entity);
 
-        client.openScreen(screen);
+        IsometricRenderHelper.scheduleScreen(screen);
 
         return 0;
     }
@@ -232,7 +233,7 @@ public class IsoRenderCommand {
 
         IsometricRenderPresets.setupItemStackRender(screen, stack);
 
-        client.openScreen(screen);
+        IsometricRenderHelper.scheduleScreen(screen);
 
         return 0;
     }

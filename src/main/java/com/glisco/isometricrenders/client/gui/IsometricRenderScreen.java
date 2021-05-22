@@ -33,7 +33,7 @@ public class IsometricRenderScreen extends RenderScreen {
         scaleField.setText(String.valueOf(renderScale));
         scaleField.setChangedListener(s -> {
             int tempScale = s.length() > 0 ? Integer.parseInt(s) : renderScale;
-            if (tempScale == renderScale || tempScale < 10) return;
+            if (tempScale == renderScale || tempScale < 1) return;
             scaleSlider.setValue((tempScale - 1d) / 449d);
         });
         scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, Text.of("Scale"), 0.399, 0.025, (renderScale - 1) / 449d, aDouble -> {
