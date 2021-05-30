@@ -108,7 +108,7 @@ public class IsoRenderCommand {
             }
 
             IsometricRenderScreen screen = new IsometricRenderScreen();
-            IsometricRenderPresets.setupAreaRender(screen, states);
+            IsometricRenderPresets.setupAreaRender(screen, states, start);
             IsometricRenderHelper.scheduleScreen(screen);
 
             return 0;

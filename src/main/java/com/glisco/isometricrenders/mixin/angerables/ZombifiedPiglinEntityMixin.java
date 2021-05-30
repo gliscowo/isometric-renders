@@ -25,7 +25,7 @@ public abstract class ZombifiedPiglinEntityMixin extends MobEntity implements An
             cancellable = true
     )
     private void worldCheckAngerFromTag(CompoundTag tag, CallbackInfo ci) {
-        if(!this.world.isClient) {
+        if (!this.world.isClient) {
             this.angerFromTag((ServerWorld) world, tag);
         }
 

@@ -9,6 +9,7 @@
   "license": "MIT",
   "icon": "assets/isometric-renders/icon.png",
   "environment": "client",
+  "accessWidener": "isometricrenders.accesswidener",
   "entrypoints": {
     "client": [
       "com.glisco.isometricrenders.client.IsometricRendersClient"

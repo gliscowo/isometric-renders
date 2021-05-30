@@ -37,7 +37,7 @@ public class IsometricRendersClient implements ClientModInitializer {
         });
     }
 
-    public static Text prefix(String text){
+    public static Text prefix(String text) {
         return new LiteralText(PREFIX + text);
     }
 }

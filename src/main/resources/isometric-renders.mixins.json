@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "BlockEntityAccessor",
+    "BlockModelRendererInvoker",
     "BlockStateArgumentAccessor",
     "CameraInvoker",
     "DefaultPosArgumentAccessor",
