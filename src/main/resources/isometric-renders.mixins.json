@@ -4,6 +4,7 @@
   "package": "com.glisco.isometricrenders.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "BiomeAccessAccessor",
     "BlockEntityAccessor",
     "BlockModelRendererInvoker",
     "BlockStateArgumentAccessor",

@@ -16,13 +16,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockRenderView;
 
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 public class AreaBlockModelRenderer extends BlockModelRenderer {
 
-    private final HashMap<Direction, Boolean> cullingOverrides = new HashMap<>();
+    private byte cullingOverrides = 0;
 
     private static AreaBlockModelRenderer INSTANCE;
 
@@ -37,13 +36,15 @@ public class AreaBlockModelRenderer extends BlockModelRenderer {
 
     private AreaBlockModelRenderer(BlockColors colorMap) {
         super(colorMap);
-        for (Direction direction : Direction.values()) {
-            cullingOverrides.put(direction, true);
-        }
     }
 
-    public void setCullDirection(Direction direction, boolean cull) {
-        cullingOverrides.put(direction, cull);
+    public void setCullDirection(Direction direction, boolean alwaysDraw) {
+        if (!alwaysDraw) return;
+        cullingOverrides |= (1 << direction.getId());
+    }
+
+    public void clearCullingOverrides() {
+        cullingOverrides = 0;
     }
 
     @Override
@@ -58,8 +59,8 @@ public class AreaBlockModelRenderer extends BlockModelRenderer {
             random.setSeed(seed);
             List<BakedQuad> faceQuads = model.getQuads(state, direction, random);
 
-            if (!faceQuads.isEmpty() && (!cull || !cullingOverrides.get(direction) || Block.shouldDrawSide(state, world, pos, direction))) {
-                invoker.isometric_renderQuadsSmooth(world, state, cullingOverrides.get(direction) ? pos : pos.add(0, 500, 0), buffer, vertexConsumer, faceQuads, fs, flags, ambientOcclusionCalculator, overlay);
+            if (!faceQuads.isEmpty() && (!cull || shouldAlwaysDraw(direction) || Block.shouldDrawSide(state, world, pos, direction))) {
+                invoker.isometric_renderQuadsSmooth(world, state, !shouldAlwaysDraw(direction) ? pos : pos.add(0, 500, 0), buffer, vertexConsumer, faceQuads, fs, flags, ambientOcclusionCalculator, overlay);
                 anyFacesRendered = true;
             }
         }
@@ -84,13 +85,12 @@ public class AreaBlockModelRenderer extends BlockModelRenderer {
             random.setSeed(seed);
             List<BakedQuad> faceQuads = model.getQuads(state, direction, random);
 
-            if (!faceQuads.isEmpty() && (!cull || !cullingOverrides.get(direction) || Block.shouldDrawSide(state, world, pos, direction))) {
+            if (!faceQuads.isEmpty() && (!cull || shouldAlwaysDraw(direction) || Block.shouldDrawSide(state, world, pos, direction))) {
                 int light = WorldRenderer.getLightmapCoordinates(world, state, pos.offset(direction));
-                invoker.isometric_renderQuadsFlat(world, state, cullingOverrides.get(direction) ? pos : pos.add(0, 500, 0), light, overlay, false, buffer, vertexConsumer, faceQuads, flags);
+                invoker.isometric_renderQuadsFlat(world, state, !shouldAlwaysDraw(direction) ? pos : pos.add(0, 500, 0), light, overlay, false, buffer, vertexConsumer, faceQuads, flags);
                 anyFacesRendered = true;
             }
         }
-
 
         random.setSeed(seed);
         List<BakedQuad> quads = model.getQuads(state, null, random);
@@ -100,6 +100,10 @@ public class AreaBlockModelRenderer extends BlockModelRenderer {
         }
 
         return anyFacesRendered;
+    }
+
+    private boolean shouldAlwaysDraw(Direction direction) {
+        return (cullingOverrides & (1 << direction.getId())) != 0;
     }
 
 }

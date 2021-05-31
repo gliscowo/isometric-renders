@@ -9,10 +9,12 @@ import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.Entity;
@@ -28,7 +30,9 @@ import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -99,10 +103,18 @@ public class IsoRenderCommand {
 
             BlockState[][][] states = new BlockState[yDiff + 1][zDiff + 1][xDiff + 1];
 
+            final ClientWorld world = context.getSource().getWorld();
             for (int y = 0; y <= yDiff; y++) {
                 for (int z = 0; z <= zDiff; z++) {
                     for (int x = 0; x <= xDiff; x++) {
-                        states[y][z][x] = context.getSource().getWorld().getBlockState(start.add(x, y, z));
+                        final BlockPos pos = start.add(x, y, z);
+                        BlockState state = world.getBlockState(pos);
+
+                        if (!(x == 0 || x == xDiff || y == 0 || y == yDiff || z == 0 || z == zDiff)) {
+                            state = nullifyIfInvisible(state, pos, world);
+                        }
+
+                        states[y][z][x] = state;
                     }
                 }
             }
@@ -238,4 +250,12 @@ public class IsoRenderCommand {
         return 0;
     }
 
+    private static BlockState nullifyIfInvisible(BlockState state, BlockPos pos, World world) {
+        if(state.isAir()) return null;
+        for (Direction direction : Direction.values()) {
+            if (Block.shouldDrawSide(state, world, pos, direction))
+                return state;
+        }
+        return null;
+    }
 }

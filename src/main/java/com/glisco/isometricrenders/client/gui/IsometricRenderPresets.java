@@ -7,6 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.BlockModelRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.Vector3f;
@@ -58,8 +59,11 @@ public class IsometricRenderPresets {
         AreaBlockModelRenderer.prepare();
 
         final MinecraftClient client = MinecraftClient.getInstance();
+        CachedWorldView world = new CachedWorldView(client.world);
 
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
+            final AreaBlockModelRenderer areaBlockRenderer = AreaBlockModelRenderer.get();
+
             matrices.push();
 
             matrices.translate(-states[0][0].length / 2f, 0, -states[0].length / 2f);
@@ -68,6 +72,8 @@ public class IsometricRenderPresets {
             int x;
             int z;
 
+            BlockModelRenderer.enableBrightnessCache();
+
             for (BlockState[][] twoDim : states) {
                 matrices.push();
                 z = 0;
@@ -75,19 +81,23 @@ public class IsometricRenderPresets {
                     matrices.push();
                     x = 0;
                     for (BlockState state : oneDim) {
-                        final BlockPos renderPos = origin.add(x, y, z);
 
-                        matrices.push();
+                        if (state != null) {
+                            final BlockPos renderPos = origin.add(x, y, z);
 
-                        AreaBlockModelRenderer.get().setCullDirection(Direction.EAST, x != states[0][0].length - 1);
-                        AreaBlockModelRenderer.get().setCullDirection(Direction.WEST, x != 0);
-                        AreaBlockModelRenderer.get().setCullDirection(Direction.SOUTH, z != states[0].length - 1);
-                        AreaBlockModelRenderer.get().setCullDirection(Direction.NORTH, z != 0);
-                        AreaBlockModelRenderer.get().setCullDirection(Direction.UP, y != states.length - 1);
-                        AreaBlockModelRenderer.get().setCullDirection(Direction.DOWN, y != 0);
+                            matrices.push();
 
-                        AreaBlockModelRenderer.get().render(client.world, client.getBlockRenderManager().getModel(state), state, renderPos, matrices, vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(state)), true, client.world.random, state.getRenderingSeed(renderPos), OverlayTexture.DEFAULT_UV);
-                        matrices.pop();
+                            areaBlockRenderer.clearCullingOverrides();
+                            areaBlockRenderer.setCullDirection(Direction.EAST, x == states[0][0].length - 1);
+                            areaBlockRenderer.setCullDirection(Direction.WEST, x == 0);
+                            areaBlockRenderer.setCullDirection(Direction.SOUTH, z == states[0].length - 1);
+                            areaBlockRenderer.setCullDirection(Direction.NORTH, z == 0);
+                            areaBlockRenderer.setCullDirection(Direction.UP, y == states.length - 1);
+                            areaBlockRenderer.setCullDirection(Direction.DOWN, y == 0);
+
+                            areaBlockRenderer.render(world, client.getBlockRenderManager().getModel(state), state, renderPos, matrices, vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(state)), true, client.world.random, state.getRenderingSeed(renderPos), OverlayTexture.DEFAULT_UV);
+                            matrices.pop();
+                        }
                         x++;
                         matrices.translate(1, 0, 0);
                     }
@@ -98,10 +108,15 @@ public class IsometricRenderPresets {
                 matrices.pop();
                 y++;
                 matrices.translate(0, 1, 0);
-            }
 
+            }
             matrices.pop();
+
+            BlockModelRenderer.disableBrightnessCache();
+
         }, "areas/" + "area_render");
+
+
     }
 
     public static void setupBlockEntityRender(IsometricRenderScreen screen, @NotNull BlockEntity entity) {
