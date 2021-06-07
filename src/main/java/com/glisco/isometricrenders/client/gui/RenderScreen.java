@@ -4,7 +4,7 @@ import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -19,6 +19,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.function.Consumer;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 public abstract class RenderScreen extends Screen {
 
@@ -121,30 +122,32 @@ public abstract class RenderScreen extends Screen {
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         final boolean drawOnlyBackground = ((captureScheduled && !useExternalRenderer) || studioMode) && !this.drawBackground;
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0, 0, -760);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0, 0, -760);
         if (this.drawBackground || drawOnlyBackground) {
             fill(matrices, 0, 0, this.width, this.height, RuntimeConfig.backgroundColor | 255 << 24);
         } else {
             renderBackground(matrices);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
 
         IsometricRenderHelper.setupLighting();
 
         int i = (this.width - 248) / 2 + 10;
         int j = (this.height - 166) / 2 + 8;
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0, 0, !drawOnlyBackground ? -750 : 10);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.translatef(i, j, 10F);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0, 0, !drawOnlyBackground ? -750 : 10);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.translatef(i, j, 10F);
         drawContent(matrices);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
 
         if (!drawOnlyBackground) {
             if (!this.drawBackground) drawFramingHint(matrices);
 
             drawGuiBackground(matrices);
+
+            RenderSystem.clear(GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
             super.render(matrices, mouseX, mouseY, delta);
 
             drawGuiText(matrices);

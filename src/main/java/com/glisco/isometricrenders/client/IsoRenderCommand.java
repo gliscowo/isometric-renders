@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.client;
 
+import com.glisco.isometricrenders.client.gui.AreaIsometricRenderScreen;
 import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
 import com.glisco.isometricrenders.client.gui.IsometricRenderPresets;
 import com.glisco.isometricrenders.client.gui.IsometricRenderScreen;
@@ -14,7 +15,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.Entity;
@@ -58,7 +58,6 @@ public class IsoRenderCommand {
         };
     }
 
-    //TODO clean this up
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("isorender").then(literal("block").executes(context -> executeBlockTarget(context.getSource())).then(argument("block", BlockStateArgumentType.blockState()).executes(context -> {
             final BlockStateArgument blockStateArgument = context.getArgument("block", BlockStateArgument.class);
@@ -97,30 +96,8 @@ public class IsoRenderCommand {
             BlockPos start = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
             BlockPos end = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
 
-            int xDiff = end.getX() - start.getX();
-            int yDiff = end.getY() - start.getY();
-            int zDiff = end.getZ() - start.getZ();
-
-            BlockState[][][] states = new BlockState[yDiff + 1][zDiff + 1][xDiff + 1];
-
-            final ClientWorld world = context.getSource().getWorld();
-            for (int y = 0; y <= yDiff; y++) {
-                for (int z = 0; z <= zDiff; z++) {
-                    for (int x = 0; x <= xDiff; x++) {
-                        final BlockPos pos = start.add(x, y, z);
-                        BlockState state = world.getBlockState(pos);
-
-                        if (!(x == 0 || x == xDiff || y == 0 || y == yDiff || z == 0 || z == zDiff)) {
-                            state = nullifyIfInvisible(state, pos, world);
-                        }
-
-                        states[y][z][x] = state;
-                    }
-                }
-            }
-
-            IsometricRenderScreen screen = new IsometricRenderScreen();
-            IsometricRenderPresets.setupAreaRender(screen, states, start);
+            AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen();
+            IsometricRenderPresets.setupAreaRender(screen, start, end);
             IsometricRenderHelper.scheduleScreen(screen);
 
             return 0;
@@ -138,7 +115,6 @@ public class IsoRenderCommand {
             return 0;
         })))));
     }
-
 
     private static int executeBlockState(FabricClientCommandSource source, BlockState state, CompoundTag tag) {
 
@@ -251,7 +227,7 @@ public class IsoRenderCommand {
     }
 
     private static BlockState nullifyIfInvisible(BlockState state, BlockPos pos, World world) {
-        if(state.isAir()) return null;
+        if (state.isAir()) return null;
         for (Direction direction : Direction.values()) {
             if (Block.shouldDrawSide(state, world, pos, direction))
                 return state;
