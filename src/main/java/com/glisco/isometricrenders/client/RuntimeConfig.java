@@ -3,7 +3,7 @@ package com.glisco.isometricrenders.client;
 public class RuntimeConfig {
 
     //Transform Options
-    public static int rotation = 315;
+    public static int rotation = 225;
     public static int angle = 30;
     public static int renderScale = 150;
     public static int renderHeight = 130;

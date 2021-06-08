@@ -52,7 +52,6 @@ public abstract class RenderScreen extends Screen {
         ((ParticleManagerAccessor) client.particleManager).getParticles().clear();
         IsometricRenderHelper.allowParticles = false;
 
-        buttons.clear();
         buildGuiElements();
 
         TextFieldWidget colorField = new TextFieldWidget(client.textRenderer, viewportEndX + 10, 38, 50, 20, Text.of("#0000ff"));
@@ -105,42 +104,44 @@ public abstract class RenderScreen extends Screen {
             }
         });
 
-        addButton(colorField);
+        addDrawableChild(colorField);
 
-        addButton(playAnimationsCheckbox);
-        addButton(doHiResCheckbox);
-        addButton(allowMultipleRendersCheckbox);
-        addButton(playParticlesCheckbox);
-        addButton(dumpIntoRootCheckbox);
+        addDrawableChild(playAnimationsCheckbox);
+        addDrawableChild(doHiResCheckbox);
+        addDrawableChild(allowMultipleRendersCheckbox);
+        addDrawableChild(playParticlesCheckbox);
+        addDrawableChild(dumpIntoRootCheckbox);
 
-        addButton(resolutionField);
-        addButton(exportButton);
-        addButton(clearQueueButton);
+        addDrawableChild(resolutionField);
+        addDrawableChild(exportButton);
+        addDrawableChild(clearQueueButton);
     }
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         final boolean drawOnlyBackground = ((captureScheduled && !useExternalRenderer) || studioMode) && !this.drawBackground;
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0, 0, -760);
+        matrices.push();
+        matrices.translate(0, 0, -760);
+
         if (this.drawBackground || drawOnlyBackground) {
             fill(matrices, 0, 0, this.width, this.height, RuntimeConfig.backgroundColor | 255 << 24);
         } else {
             renderBackground(matrices);
         }
-        RenderSystem.popMatrix();
+        matrices.pop();
 
         IsometricRenderHelper.setupLighting();
 
         int i = (this.width - 248) / 2 + 10;
         int j = (this.height - 166) / 2 + 8;
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0, 0, !drawOnlyBackground ? -750 : 10);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.translatef(i, j, 10F);
+
+        matrices.push();
+        matrices.loadIdentity();
+        matrices.translate(0, 0, !drawOnlyBackground ? 750 : 1000);
+        matrices.translate(i, -j, 0);
         drawContent(matrices);
-        RenderSystem.popMatrix();
+        matrices.pop();
 
         if (!drawOnlyBackground) {
             if (!this.drawBackground) drawFramingHint(matrices);

@@ -2,17 +2,16 @@ package com.glisco.isometricrenders.client.gui;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,8 +65,9 @@ public class IsometricRenderPresets {
 
             client.getBlockRenderManager().renderBlockAsEntity(entity.getCachedState(), matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
 
-            if (BlockEntityRenderDispatcher.INSTANCE.get(entity) != null) {
-                BlockEntityRenderDispatcher.INSTANCE.get(entity).render(entity, tickDelta, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
+
+            if (client.getBlockEntityRenderDispatcher().get(entity) != null) {
+                client.getBlockEntityRenderDispatcher().get(entity).render(entity, tickDelta, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
             }
 
             double xOffset = client.player.getX() % 1d;
@@ -85,9 +85,10 @@ public class IsometricRenderPresets {
 
         screen.setTickCallback(() -> {
 
-            if (entity instanceof Tickable) {
-                ((Tickable) entity).tick();
+            if(entity.getCachedState().getBlockEntityTicker(client.world, entity.getType()) != null){
+                entity.getCachedState().getBlockEntityTicker(client.world, (BlockEntityType<BlockEntity>) entity.getType()).tick(client.world, entity.getPos(), entity.getCachedState(), entity);
             }
+
             if (client.world.random.nextDouble() < 0.150) {
                 entity.getCachedState().getBlock().randomDisplayTick(entity.getCachedState(), client.world, client.player.getBlockPos(), client.world.random);
             }
@@ -102,7 +103,7 @@ public class IsometricRenderPresets {
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
             matrices.scale(4, 4, 4);
-            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider);
+            MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
             matrices.pop();
         }, itemId.getNamespace() + "/items/" + itemId.getPath());
     }
@@ -114,12 +115,12 @@ public class IsometricRenderPresets {
 
         screen.setup((matrixStack, vertexConsumerProvider, delta) -> {
             matrixStack.push();
-            matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(180));
+            matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
             entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
             client.getEntityRenderDispatcher().render(entity, 0, 0, 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
 
-            matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(-180));
-            matrixStack.translate(0, 2, 0);
+            matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
+            matrixStack.translate(0, 1.65, 0);
             client.particleManager.renderParticles(matrixStack, (VertexConsumerProvider.Immediate) vertexConsumerProvider, client.gameRenderer.getLightmapTextureManager(), getParticleCamera(), delta);
             matrixStack.pop();
         }, entityId.getNamespace() + "/entities/" + entityId.getPath());

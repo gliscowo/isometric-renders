@@ -22,7 +22,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -70,10 +70,10 @@ public class IsoRenderCommand {
             return executeItem(context.getSource(), stack);
         }))).then(literal("entity").then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
-            return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), new CompoundTag());
-        }).then(argument("nbt", NbtCompoundTagArgumentType.nbtCompound()).executes(context -> {
+            return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), new NbtCompound());
+        }).then(argument("nbt", NbtCompoundArgumentType.nbtCompound()).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
-            return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), context.getArgument("nbt", CompoundTag.class));
+            return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), context.getArgument("nbt", NbtCompound.class));
         })))).then(literal("insanity").executes(context -> {
 
             RuntimeConfig.allowInsaneResolutions = !RuntimeConfig.allowInsaneResolutions;
@@ -116,26 +116,26 @@ public class IsoRenderCommand {
         })))));
     }
 
-    private static int executeBlockState(FabricClientCommandSource source, BlockState state, CompoundTag tag) {
+    private static int executeBlockState(FabricClientCommandSource source, BlockState state, NbtCompound tag) {
 
         IsometricRenderScreen screen = new IsometricRenderScreen();
 
         BlockEntity be = null;
 
         if (state.getBlock() instanceof BlockWithEntity) {
-            be = ((BlockWithEntity) state.getBlock()).createBlockEntity(MinecraftClient.getInstance().world);
+            be = ((BlockWithEntity) state.getBlock()).createBlockEntity(MinecraftClient.getInstance().player.getBlockPos(), state);
             ((BlockEntityAccessor) be).setCachedState(state);
-            be.setLocation(MinecraftClient.getInstance().world, MinecraftClient.getInstance().player.getBlockPos());
+            be.setWorld(MinecraftClient.getInstance().world);
 
             if (tag != null) {
 
-                CompoundTag copyTag = tag.copy();
+                NbtCompound copyTag = tag.copy();
 
                 copyTag.putInt("x", 0);
                 copyTag.putInt("y", 0);
                 copyTag.putInt("z", 0);
 
-                be.fromTag(be.getCachedState(), copyTag);
+                be.readNbt(copyTag);
             }
         }
 
@@ -167,20 +167,20 @@ public class IsoRenderCommand {
 
         if (state.getBlock() instanceof BlockWithEntity) {
 
-            CompoundTag tag = client.world.getBlockEntity(hitPos).toTag(new CompoundTag());
+            NbtCompound tag = client.world.getBlockEntity(hitPos).writeNbt(new NbtCompound());
 
-            be = ((BlockWithEntity) state.getBlock()).createBlockEntity(client.world);
+            be = ((BlockWithEntity) state.getBlock()).createBlockEntity(hitPos, state);
             ((BlockEntityAccessor) be).setCachedState(state);
-            be.setLocation(client.world, MinecraftClient.getInstance().player.getBlockPos());
+            be.setWorld(client.world);
 
-            CompoundTag copyTag = tag.copy();
+            NbtCompound copyTag = tag.copy();
 
             copyTag.putInt("x", 0);
             copyTag.putInt("y", 0);
             copyTag.putInt("z", 0);
 
-            be.fromTag(be.getCachedState(), copyTag);
-            be.setLocation(client.world, MinecraftClient.getInstance().player.getBlockPos());
+            be.readNbt(copyTag);
+            be.setWorld(client.world);
         }
 
         if (be != null) {
@@ -193,7 +193,7 @@ public class IsoRenderCommand {
         return 0;
     }
 
-    private static int executeEntity(FabricClientCommandSource source, Identifier entityType, CompoundTag entityTag) {
+    private static int executeEntity(FabricClientCommandSource source, Identifier entityType, NbtCompound entityTag) {
 
         final MinecraftClient client = MinecraftClient.getInstance();
         IsometricRenderScreen screen = new IsometricRenderScreen();
@@ -202,7 +202,7 @@ public class IsoRenderCommand {
 
         Entity entity = EntityType.loadEntityWithPassengers(entityTag, client.world, Function.identity());
         entity.updatePosition(client.player.getX(), client.player.getY(), client.player.getZ());
-        entity.setWorld(client.world);
+
         if (entity instanceof MobEntity) {
             ((MobEntity) entity).setPersistent();
         }
@@ -228,8 +228,10 @@ public class IsoRenderCommand {
 
     private static BlockState nullifyIfInvisible(BlockState state, BlockPos pos, World world) {
         if (state.isAir()) return null;
+        BlockPos.Mutable mutable = pos.mutableCopy();
         for (Direction direction : Direction.values()) {
-            if (Block.shouldDrawSide(state, world, pos, direction))
+            mutable.set(pos, direction);
+            if (Block.shouldDrawSide(state, world, pos, direction, mutable))
                 return state;
         }
         return null;

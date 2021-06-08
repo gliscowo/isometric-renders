@@ -16,13 +16,7 @@
     "ParticleManagerAccessor",
     "ParticleManagerMixin",
     "SliderWidgetInvoker",
-    "TextureManagerMixin",
-    "angerables.BeeEntityMixin",
-    "angerables.EndermanEntityMixin",
-    "angerables.IronGolemEntityMixin",
-    "angerables.PolarBearEntityMixin",
-    "angerables.WolfEntityMixin",
-    "angerables.ZombifiedPiglinEntityMixin"
+    "TextureManagerMixin"
   ],
   "client": [
   ],

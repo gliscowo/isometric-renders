@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.DiffuseLighting;
@@ -17,9 +18,8 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.ScreenshotUtils;
+import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.command.argument.DefaultPosArgument;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
@@ -28,7 +28,7 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.util.math.Vec3f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
@@ -52,7 +52,7 @@ public class IsometricRenderHelper {
     static {
         LIGHT_MATRIX = new Matrix4f();
         LIGHT_MATRIX.loadIdentity();
-        LIGHT_MATRIX.addToLastColumn(new Vector3f(0.15f, 0.5f, 0.15f));
+        LIGHT_MATRIX.addToLastColumn(new Vec3f(0.15f, 0.5f, 0.15f));
     }
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
@@ -101,7 +101,7 @@ public class IsometricRenderHelper {
 
                     ItemStack stack = stacks.get(index);
 
-                    MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider);
+                    MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
 
                     matrices.translate(1.2, 0, 0);
 
@@ -121,9 +121,12 @@ public class IsometricRenderHelper {
 
     public static NativeImage renderIntoImage(int size, RenderCallback renderCallback) {
 
-        Framebuffer framebuffer = new Framebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
+        Framebuffer framebuffer = new SimpleFramebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
 
-        RenderSystem.pushMatrix();
+        Matrix4f modelMatrix = RenderSystem.getModelViewMatrix().copy();
+        MatrixStack modelStack = RenderSystem.getModelViewStack();
+        modelStack.push();
+
         RenderSystem.enableBlend();
         RenderSystem.clear(16640, MinecraftClient.IS_SYSTEM_MAC);
 
@@ -136,28 +139,34 @@ public class IsometricRenderHelper {
 
         framebuffer.beginWrite(true);
 
-        RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(-1, 1, 1, -1, -100.0, 100.0);
-        RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
+        RenderSystem.backupProjectionMatrix();
+        Matrix4f projectionMatrix = Matrix4f.projectionMatrix(-1, 1, 1, -1, -100, 100);
+        RenderSystem.setProjectionMatrix(projectionMatrix);
+
+        modelStack.push();
+        modelStack.loadIdentity();
+        modelStack.scale(1, -1, -1);
+
+        RenderSystem.applyModelViewMatrix();
 
         setupLighting();
 
         VertexConsumerProvider.Immediate vertexConsumers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         MatrixStack matrixStack = new MatrixStack();
+        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
 
         renderCallback.render(matrixStack, vertexConsumers, ((MinecraftClientAccessor) MinecraftClient.getInstance()).getRenderTickCounter().tickDelta);
 
         vertexConsumers.draw();
 
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.popMatrix();
+        modelStack.pop();
+
+        modelStack.loadIdentity();
+        modelStack.method_34425(modelMatrix);
+        RenderSystem.applyModelViewMatrix();
+        modelStack.pop();
+
+        RenderSystem.restoreProjectionMatrix();
 
         framebuffer.endWrite();
 
@@ -165,7 +174,7 @@ public class IsometricRenderHelper {
     }
 
     public static NativeImage takeKeyedSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop) {
-        NativeImage img = ScreenshotUtils.takeScreenshot(0, 0, framebuffer);
+        NativeImage img = ScreenshotRecorder.takeScreenshot(0, 0, framebuffer);
         if (framebuffer != MinecraftClient.getInstance().getFramebuffer()) framebuffer.delete();
 
         int argbColor = backgroundColor | 255 << 24;
@@ -235,12 +244,15 @@ public class IsometricRenderHelper {
     }
 
     public static void setupLighting() {
-        DiffuseLighting.enableForLevel(LIGHT_MATRIX);
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.loadIdentity();
+        matrix4f.addToLastColumn(new Vec3f(-0.15f, -0.5f, -0.15f));
+        DiffuseLighting.enableForLevel(matrix4f);
     }
 
     public static Camera getParticleCamera() {
         Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
-        ((CameraInvoker) camera).invokeSetRotation(RuntimeConfig.rotation, RuntimeConfig.angle);
+        ((CameraInvoker) camera).invokeSetRotation(RuntimeConfig.rotation + 180, RuntimeConfig.angle);
         return camera;
     }
 

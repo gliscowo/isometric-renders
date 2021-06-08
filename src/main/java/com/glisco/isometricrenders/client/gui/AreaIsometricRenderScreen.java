@@ -6,9 +6,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.BlockPos;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3f;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
@@ -50,32 +50,24 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
                     float windowScale = scaleFramebuffer ? window.getFramebufferHeight() / (float) window.getFramebufferWidth() : 1;
                     if (!scaleFramebuffer) scaleFramebuffer = true;
 
-                    RenderSystem.pushMatrix();
-                    RenderSystem.matrixMode(GL11.GL_PROJECTION);
-                    RenderSystem.pushMatrix();
-                    RenderSystem.loadIdentity();
-                    RenderSystem.ortho(-1 / windowScale, 1 / windowScale, 1, -1, -1000, 3000);
-                    RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-                    RenderSystem.pushMatrix();
-                    RenderSystem.loadIdentity();
+                    RenderSystem.backupProjectionMatrix();
+                    Matrix4f projectionMatrix = Matrix4f.projectionMatrix(-1 / windowScale, 1 / windowScale, 1, -1, -1000, 3000);
+                    RenderSystem.setProjectionMatrix(projectionMatrix);
+
                     final MatrixStack stack = new MatrixStack();
 
-                    stack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(-angle));
-                    stack.multiply(Vector3f.NEGATIVE_Y.getDegreesQuaternion(rotation));
-                    stack.multiply(Vector3f.POSITIVE_Z.getDegreesQuaternion(180));
+                    stack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
+                    stack.multiply(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotation));
+                    stack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(180));
 
                     float scaledRenderScale = renderScale * (window.getScaledHeight() / 515f) * 0.001f;
-                    stack.scale(scaledRenderScale, scaledRenderScale, -scaledRenderScale);
+                    stack.scale(scaledRenderScale, -scaledRenderScale, -scaledRenderScale);
 
                     stack.translate(-xSize / 2f, (renderHeight - 130) * -0.1, -zSize / 2f);
 
                     mesh.render(stack.peek().getModel());
 
-                    RenderSystem.popMatrix();
-                    RenderSystem.matrixMode(GL11.GL_PROJECTION);
-                    RenderSystem.popMatrix();
-                    RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-                    RenderSystem.popMatrix();
+                    RenderSystem.restoreProjectionMatrix();
                 }
             }
         }

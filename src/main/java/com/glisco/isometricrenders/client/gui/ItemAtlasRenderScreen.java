@@ -8,8 +8,9 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3f;
 
 import java.util.Locale;
 
@@ -70,16 +71,16 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             atlasColumns = s.length() > 0 ? Integer.parseInt(s) : atlasColumns;
         });
 
-        addButton(scaleField);
-        addButton(scaleSlider);
+        addDrawableChild(scaleField);
+        addDrawableChild(scaleSlider);
 
-        addButton(heightField);
-        addButton(heightSlider);
+        addDrawableChild(heightField);
+        addDrawableChild(heightSlider);
 
-        addButton(shiftField);
-        addButton(shiftSlider);
+        addDrawableChild(shiftField);
+        addDrawableChild(shiftSlider);
 
-        addButton(columnsField);
+        addDrawableChild(columnsField);
     }
 
     @Override
@@ -92,22 +93,28 @@ public class ItemAtlasRenderScreen extends RenderScreen {
     protected void drawContent(MatrixStack matrices) {
         float scale = atlasScale * 90 * height / 515f;
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float) Math.round(230 - atlasShift * 1f + (height - 515f) / 30f), (float) Math.round(atlasHeight * 1f + (height - 515f) / 10f), 1500);
-        RenderSystem.scalef(1, 1, -1);
+        Matrix4f modelMatrix = RenderSystem.getModelViewMatrix().copy();
 
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.translate(0, 0, 1000);
+        MatrixStack modelStack = RenderSystem.getModelViewStack();
+        modelStack.push();
+        modelStack.translate((float) Math.round(230 - atlasShift * 1f + (height - 515f) / 30f), (float) Math.round(atlasHeight * 1f + (height - 515f) / 10f), 1500);
+        modelStack.scale(1, -1, -1);
+        RenderSystem.applyModelViewMatrix();
 
-        matrixStack.scale(scale, scale, 1);
-        matrixStack.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(180));
+        matrices.scale(scale, scale, -1);
 
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
-        renderCallback.render(matrixStack, immediate, playAnimations ? ((MinecraftClientAccessor) client).getRenderTickCounter().tickDelta : 0);
+        renderCallback.render(matrices, immediate, playAnimations ? ((MinecraftClientAccessor) client).getRenderTickCounter().tickDelta : 0);
 
         immediate.draw();
-        RenderSystem.popMatrix();
+
+        modelStack.loadIdentity();
+        modelStack.method_34425(modelMatrix);
+
+        RenderSystem.applyModelViewMatrix();
+
+        modelStack.pop();
     }
 
     @Override
@@ -116,10 +123,11 @@ public class ItemAtlasRenderScreen extends RenderScreen {
 
             matrices.push();
 
-            matrices.translate((115 - atlasShift) / 270d, 0.20 + ((atlasHeight - 115) / 270d), 0);
-            matrices.scale(atlasScale * 85 * 0.004f, atlasScale * 85 * 0.004f, -1f);
+            matrices.translate(-(115 - atlasShift) / 270d, 0.20 + ((atlasHeight - 115) / 270d), 0);
+            matrices.scale(atlasScale * 85 * 0.004f, atlasScale * 85 * 0.004f, 1f);
 
-            matrices.multiply(Vector3f.POSITIVE_X.getDegreesQuaternion(180));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180));
+            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
 
             renderCallback.render(matrices, vertexConsumerProvider, tickDelta);
 

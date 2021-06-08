@@ -10,9 +10,10 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
+import net.minecraft.util.math.Vec3f;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
@@ -50,7 +51,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempRot == rotation) return;
             rotSlider.setValue(tempRot / 360d);
         });
-        rotSlider = new SliderWidgetImpl(50, 70, sliderWidth, Text.of("Rotation"), 0.875, 0.125, rotation / 360d, aDouble -> {
+        rotSlider = new SliderWidgetImpl(50, 70, sliderWidth, Text.of("Rotation"), 0.625, 0.125, rotation / 360d, aDouble -> {
             rotation = (int) Math.round(aDouble * 360);
             rotationField.setText(String.valueOf(rotation));
         });
@@ -95,22 +96,20 @@ public class IsometricRenderScreen extends RenderScreen {
             opacityField.setText(String.valueOf(exportOpacity));
         });
 
-        buttons.clear();
+        addDrawableChild(scaleSlider);
+        addDrawableChild(scaleField);
 
-        addButton(scaleSlider);
-        addButton(scaleField);
+        addDrawableChild(rotationField);
+        addDrawableChild(rotSlider);
 
-        addButton(rotationField);
-        addButton(rotSlider);
+        addDrawableChild(angleField);
+        addDrawableChild(angleSlider);
 
-        addButton(angleField);
-        addButton(angleSlider);
+        addDrawableChild(heightField);
+        addDrawableChild(heightSlider);
 
-        addButton(heightField);
-        addButton(heightSlider);
-
-        addButton(opacityField);
-        addButton(opacitySlider);
+        addDrawableChild(opacityField);
+        addDrawableChild(opacitySlider);
     }
 
     @Override
@@ -122,33 +121,45 @@ public class IsometricRenderScreen extends RenderScreen {
     protected void drawContent(MatrixStack matrices) {
         float scale = renderScale * height / 515f;
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(115, (float) Math.round(renderHeight * 1f + (height - 515f) / 10f), 1500);
-        RenderSystem.scalef(1, 1, -1);
+        Matrix4f modelMatrix = RenderSystem.getModelViewMatrix().copy();
 
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.translate(0, 0, 1000);
+        MatrixStack modelStack = RenderSystem.getModelViewStack();
+        modelStack.push();
 
-        matrixStack.scale(scale, scale, 1);
+        modelStack.translate(115, (float) Math.round(renderHeight * 1f + (height - 515f) / 10f), 1500);
+        modelStack.scale(1, -1, -1);
 
-        Quaternion flip = Vector3f.POSITIVE_Z.getDegreesQuaternion(180);
-        flip.hamiltonProduct(Vector3f.POSITIVE_X.getDegreesQuaternion(-angle));
+        RenderSystem.applyModelViewMatrix();
 
-        Quaternion rotation = Vector3f.POSITIVE_Y.getDegreesQuaternion(RuntimeConfig.rotation);
+        matrices.push();
+        matrices.scale(scale, scale, -1);
 
-        matrixStack.multiply(flip);
-        matrixStack.multiply(rotation);
+        Quaternion flip = Vec3f.POSITIVE_Z.getDegreesQuaternion(0);
+        flip.hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
+
+        Quaternion rotation = Vec3f.POSITIVE_Y.getDegreesQuaternion(RuntimeConfig.rotation);
+
+        matrices.multiply(flip);
+        matrices.multiply(rotation);
 
         EntityRenderDispatcher entityRenderDispatcher = MinecraftClient.getInstance().getEntityRenderDispatcher();
         entityRenderDispatcher.setRenderShadows(false);
 
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
-        renderCallback.render(matrixStack, immediate, playAnimations ? ((MinecraftClientAccessor) client).getRenderTickCounter().tickDelta : 0);
+        renderCallback.render(matrices, immediate, playAnimations ? ((MinecraftClientAccessor) client).getRenderTickCounter().tickDelta : 0);
 
+        matrices.pop();
         immediate.draw();
         entityRenderDispatcher.setRenderShadows(true);
-        RenderSystem.popMatrix();
+
+        modelStack.loadIdentity();
+        modelStack.method_34425(modelMatrix);
+
+        RenderSystem.applyModelViewMatrix();
+
+        modelStack.pop();
+
     }
 
     @Override
@@ -159,13 +170,13 @@ public class IsometricRenderScreen extends RenderScreen {
 
             MinecraftClient.getInstance().getEntityRenderDispatcher().setRenderShadows(false);
 
-            Quaternion flip = Vector3f.POSITIVE_Z.getDegreesQuaternion(180);
-            flip.hamiltonProduct(Vector3f.POSITIVE_X.getDegreesQuaternion(-angle));
+            Quaternion flip = Vec3f.POSITIVE_Z.getDegreesQuaternion(180);
+            flip.hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
 
             matrices.translate(0, 0.25 + ((renderHeight - 130) / 270d), 0);
-            matrices.scale(renderScale * 0.004f, renderScale * 0.004f, -1f);
+            matrices.scale(renderScale * 0.004f, renderScale * 0.004f, 1f);
 
-            Quaternion rotate = Vector3f.POSITIVE_Y.getDegreesQuaternion(rotation);
+            Quaternion rotate = Vec3f.POSITIVE_Y.getDegreesQuaternion(rotation);
 
             matrices.multiply(flip);
             matrices.multiply(rotate);

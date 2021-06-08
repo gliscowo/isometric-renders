@@ -3,7 +3,7 @@ package com.glisco.isometricrenders.client.gui;
 import com.glisco.isometricrenders.client.ImageExporter;
 import com.glisco.isometricrenders.client.RuntimeConfig;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 
@@ -44,9 +44,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     @Override
     protected void init() {
         super.init();
-        for (AbstractButtonWidget widget : buttons) {
-            widget.active = false;
-        }
+        children().stream().filter(element -> element instanceof ClickableWidget).forEach(element -> ((ClickableWidget)element).active = false);
     }
 
     @Override

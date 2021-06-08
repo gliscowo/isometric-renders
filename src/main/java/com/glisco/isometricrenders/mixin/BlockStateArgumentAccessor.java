@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.mixin;
 
 import net.minecraft.command.argument.BlockStateArgument;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -9,6 +9,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface BlockStateArgumentAccessor {
 
     @Accessor
-    CompoundTag getData();
+    NbtCompound getData();
 
 }
