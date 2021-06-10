@@ -20,6 +20,18 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         return super.getExternalExportCallback();
     }
 
+    @Override
+    protected void drawGuiText(MatrixStack matrices) {
+        super.drawGuiText(matrices);
+
+        final var renderCallback = (AreaRenderCallback) this.renderCallback;
+        StringBuilder buildString = new StringBuilder("§cBuilding - ");
+        buildString.append(Math.round(renderCallback.getMeshProgress() * 100));
+        buildString.append("%");
+
+        MinecraftClient.getInstance().textRenderer.draw(matrices, "Mesh Status: " + (renderCallback.canRender() ? "§aReady" : buildString), 12, 200, 0xAAAAAA);
+    }
+
     public static class AreaRenderCallback implements IsometricRenderHelper.RenderCallback {
 
         private final Window window = MinecraftClient.getInstance().getWindow();
@@ -36,6 +48,14 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
             zSize = 1 + Math.max(origin.getZ(), end.getZ()) - Math.min(origin.getZ(), end.getZ());
         }
 
+        public boolean canRender() {
+            return mesh.canRender();
+        }
+
+        public float getMeshProgress() {
+            return mesh.getBuildProgress();
+        }
+
         public void doSquareFramebufferOnce() {
             this.scaleFramebuffer = false;
         }
@@ -44,7 +64,6 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, float tickDelta) {
             if (!mesh.canRender()) {
                 mesh.scheduleRebuild();
-                MinecraftClient.getInstance().textRenderer.draw(new MatrixStack(), "Building...", 0, 0, 0xFFFFFF);
             } else {
                 if (mesh.canRender()) {
                     float windowScale = scaleFramebuffer ? window.getFramebufferHeight() / (float) window.getFramebufferWidth() : 1;
