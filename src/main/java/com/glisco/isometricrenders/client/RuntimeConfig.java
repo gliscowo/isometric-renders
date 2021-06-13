@@ -6,7 +6,7 @@ public class RuntimeConfig {
     public static int rotation = 225;
     public static int angle = 30;
     public static int renderScale = 150;
-    public static int renderHeight = 130;
+    public static int renderHeight = 0;
 
     //Atlas Options
     public static int atlasColumns = 12;

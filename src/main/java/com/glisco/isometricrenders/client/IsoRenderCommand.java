@@ -8,9 +8,9 @@ import com.glisco.isometricrenders.mixin.BlockEntityAccessor;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
@@ -30,9 +30,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -86,22 +84,10 @@ public class IsoRenderCommand {
 
             return 0;
         })).then(literal("area").then(argument("start", BlockPosArgumentType.blockPos()).then(argument("end", BlockPosArgumentType.blockPos()).executes(context -> {
-
-            DefaultPosArgument startArg = context.getArgument("start", DefaultPosArgument.class);
-            DefaultPosArgument endArg = context.getArgument("end", DefaultPosArgument.class);
-
-            BlockPos pos1 = IsometricRenderHelper.getPosFromArgument(startArg, context.getSource());
-            BlockPos pos2 = IsometricRenderHelper.getPosFromArgument(endArg, context.getSource());
-
-            BlockPos start = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
-            BlockPos end = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
-
-            AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen();
-            IsometricRenderPresets.setupAreaRender(screen, start, end);
-            IsometricRenderHelper.scheduleScreen(screen);
-
-            return 0;
-        })))).then(literal("creative_tab").then(argument("itemgroup", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("batch").then(literal("blocks").executes(context -> {
+            return executeArea(context, false);
+        }).then(literal("enable_translucency").executes(context -> {
+            return executeArea(context, true);
+        }))))).then(literal("creative_tab").then(argument("itemgroup", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("batch").then(literal("blocks").executes(context -> {
             ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
             IsometricRenderHelper.batchRenderItemGroupBlocks(group);
             return 0;
@@ -226,14 +212,20 @@ public class IsoRenderCommand {
         return 0;
     }
 
-    private static BlockState nullifyIfInvisible(BlockState state, BlockPos pos, World world) {
-        if (state.isAir()) return null;
-        BlockPos.Mutable mutable = pos.mutableCopy();
-        for (Direction direction : Direction.values()) {
-            mutable.set(pos, direction);
-            if (Block.shouldDrawSide(state, world, pos, direction, mutable))
-                return state;
-        }
-        return null;
+    private static int executeArea(CommandContext<FabricClientCommandSource> context, boolean enableTranslucency){
+        DefaultPosArgument startArg = context.getArgument("start", DefaultPosArgument.class);
+        DefaultPosArgument endArg = context.getArgument("end", DefaultPosArgument.class);
+
+        BlockPos pos1 = IsometricRenderHelper.getPosFromArgument(startArg, context.getSource());
+        BlockPos pos2 = IsometricRenderHelper.getPosFromArgument(endArg, context.getSource());
+
+        BlockPos start = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
+        BlockPos end = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
+
+        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen(enableTranslucency);
+        IsometricRenderPresets.setupAreaRender(screen, start, end, enableTranslucency);
+        IsometricRenderHelper.scheduleScreen(screen);
+
+        return 0;
     }
 }

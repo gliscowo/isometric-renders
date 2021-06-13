@@ -29,6 +29,8 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    modImplementation "com.ptsmods:devlogin:1.2"
+
     modImplementation "com.glisco:worldmesher-0.1-dev"
     include "com.glisco:worldmesher-0.1"
 }

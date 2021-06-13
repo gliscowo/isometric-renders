@@ -5,6 +5,7 @@ import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -23,7 +24,6 @@ public class IsometricRenderScreen extends RenderScreen {
     private SliderWidgetImpl rotSlider;
     private SliderWidgetImpl angleSlider;
     private SliderWidgetImpl heightSlider;
-    private SliderWidgetImpl opacitySlider;
 
     @Override
     protected void buildGuiElements() {
@@ -41,7 +41,6 @@ public class IsometricRenderScreen extends RenderScreen {
             renderScale = (int) Math.round(1d + aDouble * 449d);
             scaleField.setText(String.valueOf(renderScale));
         });
-
 
         TextFieldWidget rotationField = new TextFieldWidget(client.textRenderer, 10, 70, 35, 20, Text.of(String.valueOf(rotation)));
         rotationField.setTextPredicate(s -> s.matches("[0-9]{0,3}+"));
@@ -61,39 +60,38 @@ public class IsometricRenderScreen extends RenderScreen {
         angleField.setTextPredicate(s -> s.matches("-?[0-9]{0,2}+"));
         angleField.setText(String.valueOf(angle));
         angleField.setChangedListener(s -> {
-            int tempAngle = 30 + (s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : angle);
+            int tempAngle = 90 + (s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : angle);
             if (tempAngle == angle) return;
-            angleSlider.setValue(tempAngle / 60d);
+            angleSlider.setValue(tempAngle / 180d);
         });
-        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Angle"), 1, 0.25, (30 + angle) / 60d, aDouble -> {
-            angle = -30 + (int) Math.round(aDouble * 60);
+        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Angle"), 2/3d, 5/30d, (90 + angle) / 180d, aDouble -> {
+            angle = -90 + (int) Math.round(aDouble * 180);
             angleField.setText(String.valueOf(angle));
         });
 
         TextFieldWidget heightField = new TextFieldWidget(client.textRenderer, 10, 130, 35, 20, Text.of(String.valueOf(renderHeight)));
         heightField.setTextPredicate(s -> s.matches("-?[0-9]{0,4}"));
-        heightField.setText(String.valueOf(130 - renderHeight));
+        heightField.setText(String.valueOf(renderHeight));
         heightField.setChangedListener(s -> {
-            int tempHeight = s.length() > 0 && !s.equals("-") ? 130 - Integer.parseInt(s) : renderHeight;
+            int tempHeight = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : renderHeight;
             if (tempHeight == renderHeight) return;
-            heightSlider.setValue(1 - ((tempHeight + 170) / 600d));
+            heightSlider.setValue(((tempHeight + 300) / 600d));
         });
-        heightSlider = new SliderWidgetImpl(50, 130, sliderWidth, Text.of("Render Height"), 0.5, 0.05, 1 - ((renderHeight + 170) / 600d), aDouble -> {
-            renderHeight = 430 - (int) Math.round(aDouble * 600);
-            heightField.setText(String.valueOf(130 - renderHeight));
+        heightSlider = new SliderWidgetImpl(50, 130, sliderWidth, Text.of("Render Height"), 0.5, 0.05, (renderHeight + 300) / 600d, aDouble -> {
+            renderHeight = (int) Math.round(aDouble * 600) - 300;
+            heightField.setText(String.valueOf(renderHeight));
         });
 
-        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 160, 35, 20, Text.of(String.valueOf(exportOpacity)));
-        opacityField.setTextPredicate(s -> s.matches("[0-9]{0,3}"));
-        opacityField.setText(String.valueOf(exportOpacity));
-        opacityField.setChangedListener(s -> {
-            int tempOpacity = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : exportOpacity;
-            if (tempOpacity == exportOpacity) return;
-            opacitySlider.setValue(exportOpacity / 100f);
+        ButtonWidget dimetricButton = new ButtonWidget(10, 180, 60, 20, Text.of("Dimetric"), button -> {
+            rotationField.setText("225");
+            angleField.setText("30");
+            heightField.setText("0");
         });
-        opacitySlider = new SliderWidgetImpl(50, 160, sliderWidth, Text.of("Export Opacity"), 1, 0.05, exportOpacity / 100f, aDouble -> {
-            exportOpacity = (int) Math.round(aDouble * 100);
-            opacityField.setText(String.valueOf(exportOpacity));
+
+        ButtonWidget isometricButton = new ButtonWidget(75, 180, 60, 20, Text.of("Isometric"), button -> {
+            rotationField.setText("225");
+            angleField.setText("36");
+            heightField.setText("0");
         });
 
         addDrawableChild(scaleSlider);
@@ -108,13 +106,14 @@ public class IsometricRenderScreen extends RenderScreen {
         addDrawableChild(heightField);
         addDrawableChild(heightSlider);
 
-        addDrawableChild(opacityField);
-        addDrawableChild(opacitySlider);
+        addDrawableChild(dimetricButton);
+        addDrawableChild(isometricButton);
     }
 
     @Override
     protected void drawGuiText(MatrixStack matrices) {
         client.textRenderer.draw(matrices, "Transform Options", 12, 20, 0xAAAAAA);
+        client.textRenderer.draw(matrices, "Presets", 12, 165, 0xAAAAAA);
     }
 
     @Override
@@ -126,8 +125,8 @@ public class IsometricRenderScreen extends RenderScreen {
         MatrixStack modelStack = RenderSystem.getModelViewStack();
         modelStack.push();
 
-        modelStack.translate(115, (float) Math.round(renderHeight * 1f + (height - 515f) / 10f), 1500);
         modelStack.scale(1, -1, -1);
+        modelStack.translate(0, (float) Math.round(renderHeight * (height / 515f)), 0);
 
         RenderSystem.applyModelViewMatrix();
 
@@ -173,7 +172,7 @@ public class IsometricRenderScreen extends RenderScreen {
             Quaternion flip = Vec3f.POSITIVE_Z.getDegreesQuaternion(180);
             flip.hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
 
-            matrices.translate(0, 0.25 + ((renderHeight - 130) / 270d), 0);
+            matrices.translate(0, (renderHeight / -300d), 0);
             matrices.scale(renderScale * 0.004f, renderScale * 0.004f, 1f);
 
             Quaternion rotate = Vec3f.POSITIVE_Y.getDegreesQuaternion(rotation);

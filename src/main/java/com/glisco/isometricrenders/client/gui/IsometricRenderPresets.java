@@ -8,6 +8,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -25,7 +26,7 @@ public class IsometricRenderPresets {
 
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
-            matrices.translate(-0.5, 0, -0.5);
+            matrices.translate(-0.5, -0.5, -0.5);
 
             client.getBlockRenderManager().renderBlockAsEntity(state, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
 
@@ -49,8 +50,8 @@ public class IsometricRenderPresets {
         });
     }
 
-    public static void setupAreaRender(IsometricRenderScreen screen, BlockPos origin, BlockPos end) {
-        screen.setup(new AreaIsometricRenderScreen.AreaRenderCallback(origin, end), "areas/" + "area_render");
+    public static void setupAreaRender(IsometricRenderScreen screen, BlockPos origin, BlockPos end, boolean enableTranslucency) {
+        screen.setup(new AreaIsometricRenderScreen.AreaRenderCallback(origin, end, enableTranslucency), "areas/" + "area_render");
     }
 
     public static void setupBlockEntityRender(IsometricRenderScreen screen, @NotNull BlockEntity entity) {
@@ -102,6 +103,7 @@ public class IsometricRenderPresets {
 
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
+            matrices.translate(0, stack.getItem() instanceof BlockItem ?  -0.75 : - 0.5, 0);
             matrices.scale(4, 4, 4);
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
             matrices.pop();
@@ -115,7 +117,10 @@ public class IsometricRenderPresets {
 
         screen.setup((matrixStack, vertexConsumerProvider, delta) -> {
             matrixStack.push();
+
+            matrixStack.translate(0, 0.1 +entity.getHeight() * -0.5d, 0);
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
+
             entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
             client.getEntityRenderDispatcher().render(entity, 0, 0, 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
 

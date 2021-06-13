@@ -133,12 +133,12 @@ public abstract class RenderScreen extends Screen {
 
         IsometricRenderHelper.setupLighting();
 
-        int i = (this.width - 248) / 2 + 10;
-        int j = (this.height - 166) / 2 + 8;
+        int i = (width) / 2;
+        int j = (height) / 2;
 
         matrices.push();
         matrices.loadIdentity();
-        matrices.translate(0, 0, !drawOnlyBackground ? 750 : 1000);
+        matrices.translate(0, 0, 750);
         matrices.translate(i, -j, 0);
         drawContent(matrices);
         matrices.pop();

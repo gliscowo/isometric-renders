@@ -3,9 +3,11 @@ package com.glisco.isometricrenders.client.gui;
 import com.glisco.worldmesher.WorldMesh;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
@@ -14,10 +16,41 @@ import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
+    private SliderWidgetImpl opacitySlider;
+    private final boolean translucencyEnabled;
+
+    public AreaIsometricRenderScreen(boolean enableTranslucency) {
+        this.translucencyEnabled = enableTranslucency;
+    }
+
     @Override
     protected IsometricRenderHelper.RenderCallback getExternalExportCallback() {
         if (this.renderCallback instanceof AreaRenderCallback) ((AreaRenderCallback) this.renderCallback).doSquareFramebufferOnce();
         return super.getExternalExportCallback();
+    }
+
+    @Override
+    protected void buildGuiElements() {
+        super.buildGuiElements();
+
+        if (!translucencyEnabled) return;
+
+        final int sliderWidth = viewportBeginX - 55;
+        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 245, 35, 20, Text.of(String.valueOf(exportOpacity)));
+        opacityField.setTextPredicate(s -> s.matches("[0-9]{0,3}"));
+        opacityField.setText(String.valueOf(exportOpacity));
+        opacityField.setChangedListener(s -> {
+            int tempOpacity = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : exportOpacity;
+            if (tempOpacity == exportOpacity) return;
+            opacitySlider.setValue(exportOpacity / 100f);
+        });
+        opacitySlider = new SliderWidgetImpl(50, 245, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, exportOpacity / 100f, aDouble -> {
+            exportOpacity = (int) Math.round(aDouble * 100);
+            opacityField.setText(String.valueOf(exportOpacity));
+        });
+
+        addDrawableChild(opacityField);
+        addDrawableChild(opacitySlider);
     }
 
     @Override
@@ -29,7 +62,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         buildString.append(Math.round(renderCallback.getMeshProgress() * 100));
         buildString.append("%");
 
-        MinecraftClient.getInstance().textRenderer.draw(matrices, "Mesh Status: " + (renderCallback.canRender() ? "§aReady" : buildString), 12, 200, 0xAAAAAA);
+        MinecraftClient.getInstance().textRenderer.draw(matrices, "Mesh Status: " + (renderCallback.canRender() ? "§aReady" : buildString), 12, 230, 0xAAAAAA);
     }
 
     public static class AreaRenderCallback implements IsometricRenderHelper.RenderCallback {
@@ -38,13 +71,26 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         private final WorldMesh mesh;
 
         private final int xSize;
+        private final int ySize;
         private final int zSize;
 
         private boolean scaleFramebuffer = true;
 
-        public AreaRenderCallback(BlockPos origin, BlockPos end) {
-            mesh = new WorldMesh.Builder(MinecraftClient.getInstance().world, origin, end).build();
+        public AreaRenderCallback(BlockPos origin, BlockPos end, boolean translucencyEnabled) {
+            final var builder = new WorldMesh.Builder(MinecraftClient.getInstance().world, origin, end);
+            if(translucencyEnabled){
+                builder.renderActions(() -> {
+                    RenderSystem.enableBlend();
+                    RenderSystem.setShaderColor(1, 1, 1, exportOpacity / 100f);
+                }, () -> {
+                    RenderSystem.setShaderColor(1, 1, 1, 1);
+                    RenderSystem.disableBlend();
+                });
+                builder.disableCulling();
+            }
+            mesh = builder.build();
             xSize = 1 + Math.max(origin.getX(), end.getX()) - Math.min(origin.getX(), end.getX());
+            ySize = 1 + Math.max(origin.getY(), end.getY()) - Math.min(origin.getY(), end.getY());
             zSize = 1 + Math.max(origin.getZ(), end.getZ()) - Math.min(origin.getZ(), end.getZ());
         }
 
@@ -82,7 +128,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
                     float scaledRenderScale = renderScale * (window.getScaledHeight() / 515f) * 0.001f;
                     stack.scale(scaledRenderScale, -scaledRenderScale, -scaledRenderScale);
 
-                    stack.translate(-xSize / 2f, (renderHeight - 130) * -0.1, -zSize / 2f);
+                    stack.translate(-xSize / 2f, renderHeight * -0.1 - ySize / 2f, -zSize / 2f);
 
                     mesh.render(stack.peek().getModel());
 
