@@ -1,13 +1,11 @@
 package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.isometricrenders.client.RuntimeConfig;
-import com.glisco.isometricrenders.mixin.CameraInvoker;
-import com.glisco.isometricrenders.mixin.DefaultPosArgumentAccessor;
-import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
-import com.glisco.isometricrenders.mixin.NativeImageAccessor;
+import com.glisco.isometricrenders.mixin.*;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
@@ -24,11 +22,13 @@ import net.minecraft.command.argument.DefaultPosArgument;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
@@ -241,6 +241,32 @@ public class IsometricRenderHelper {
 
             ++i;
         }
+    }
+
+    /**
+     * Tries to prepare a {@link BlockEntity} for rendering inside a screen
+     *
+     * @param state The {@link BlockState} this {@code BlockEntity} should use
+     * @param be The {@code BlockEntity} to prepare, this can be null if the block does not have one for some reason
+     * @param nbt An optional {@link NbtCompound} tag to write to the entity
+     */
+    public static void initBlockEntity(BlockState state, @Nullable BlockEntity be, @Nullable NbtCompound nbt) {
+
+        if (be == null) return;
+
+        ((BlockEntityAccessor) be).setCachedState(state);
+        be.setWorld(MinecraftClient.getInstance().world);
+
+        if (nbt == null) return;
+
+        NbtCompound copyTag = nbt.copy();
+
+        copyTag.putInt("x", 0);
+        copyTag.putInt("y", 0);
+        copyTag.putInt("z", 0);
+
+        be.readNbt(copyTag);
+
     }
 
     public static void setupLighting() {

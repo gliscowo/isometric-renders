@@ -4,7 +4,6 @@ import com.glisco.isometricrenders.client.gui.AreaIsometricRenderScreen;
 import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
 import com.glisco.isometricrenders.client.gui.IsometricRenderPresets;
 import com.glisco.isometricrenders.client.gui.IsometricRenderScreen;
-import com.glisco.isometricrenders.mixin.BlockEntityAccessor;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
@@ -110,22 +109,10 @@ public class IsoRenderCommand {
 
         if (state.getBlock() instanceof BlockWithEntity) {
             be = ((BlockWithEntity) state.getBlock()).createBlockEntity(MinecraftClient.getInstance().player.getBlockPos(), state);
-            ((BlockEntityAccessor) be).setCachedState(state);
-            be.setWorld(MinecraftClient.getInstance().world);
-
-            if (tag != null) {
-
-                NbtCompound copyTag = tag.copy();
-
-                copyTag.putInt("x", 0);
-                copyTag.putInt("y", 0);
-                copyTag.putInt("z", 0);
-
-                be.readNbt(copyTag);
-            }
         }
 
         if (be != null) {
+            IsometricRenderHelper.initBlockEntity(state, be, tag);
             IsometricRenderPresets.setupBlockEntityRender(screen, be);
         } else {
             IsometricRenderPresets.setupBlockStateRender(screen, state);
@@ -151,22 +138,10 @@ public class IsoRenderCommand {
 
         BlockEntity be = null;
 
-        if (state.getBlock() instanceof BlockWithEntity) {
-
+        if (state.getBlock() instanceof BlockWithEntity && client.world.getBlockEntity(hitPos) != null) {
             NbtCompound tag = client.world.getBlockEntity(hitPos).writeNbt(new NbtCompound());
-
             be = ((BlockWithEntity) state.getBlock()).createBlockEntity(hitPos, state);
-            ((BlockEntityAccessor) be).setCachedState(state);
-            be.setWorld(client.world);
-
-            NbtCompound copyTag = tag.copy();
-
-            copyTag.putInt("x", 0);
-            copyTag.putInt("y", 0);
-            copyTag.putInt("z", 0);
-
-            be.readNbt(copyTag);
-            be.setWorld(client.world);
+            IsometricRenderHelper.initBlockEntity(state, be, tag);
         }
 
         if (be != null) {
@@ -212,7 +187,7 @@ public class IsoRenderCommand {
         return 0;
     }
 
-    private static int executeArea(CommandContext<FabricClientCommandSource> context, boolean enableTranslucency){
+    private static int executeArea(CommandContext<FabricClientCommandSource> context, boolean enableTranslucency) {
         DefaultPosArgument startArg = context.getArgument("start", DefaultPosArgument.class);
         DefaultPosArgument endArg = context.getArgument("end", DefaultPosArgument.class);
 
