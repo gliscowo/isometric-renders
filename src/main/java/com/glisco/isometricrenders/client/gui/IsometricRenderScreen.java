@@ -158,7 +158,6 @@ public class IsometricRenderScreen extends RenderScreen {
         RenderSystem.applyModelViewMatrix();
 
         modelStack.pop();
-
     }
 
     @Override

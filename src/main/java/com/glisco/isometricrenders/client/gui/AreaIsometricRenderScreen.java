@@ -36,17 +36,17 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         if (!translucencyEnabled) return;
 
         final int sliderWidth = viewportBeginX - 55;
-        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 245, 35, 20, Text.of(String.valueOf(exportOpacity)));
+        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 245, 35, 20, Text.of(String.valueOf(areaRenderOpacity)));
         opacityField.setTextPredicate(s -> s.matches("[0-9]{0,3}"));
-        opacityField.setText(String.valueOf(exportOpacity));
+        opacityField.setText(String.valueOf(areaRenderOpacity));
         opacityField.setChangedListener(s -> {
-            int tempOpacity = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : exportOpacity;
-            if (tempOpacity == exportOpacity) return;
-            opacitySlider.setValue(exportOpacity / 100f);
+            int tempOpacity = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : areaRenderOpacity;
+            if (tempOpacity == areaRenderOpacity) return;
+            opacitySlider.setValue(areaRenderOpacity / 100f);
         });
-        opacitySlider = new SliderWidgetImpl(50, 245, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, exportOpacity / 100f, aDouble -> {
-            exportOpacity = (int) Math.round(aDouble * 100);
-            opacityField.setText(String.valueOf(exportOpacity));
+        opacitySlider = new SliderWidgetImpl(50, 245, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
+            areaRenderOpacity = (int) Math.round(aDouble * 100);
+            opacityField.setText(String.valueOf(areaRenderOpacity));
         });
 
         addDrawableChild(opacityField);
@@ -78,10 +78,11 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
         public AreaRenderCallback(BlockPos origin, BlockPos end, boolean translucencyEnabled) {
             final var builder = new WorldMesh.Builder(MinecraftClient.getInstance().world, origin, end);
-            if(translucencyEnabled){
+//            builder.enableBlockEntities();
+            if (translucencyEnabled) {
                 builder.renderActions(() -> {
                     RenderSystem.enableBlend();
-                    RenderSystem.setShaderColor(1, 1, 1, exportOpacity / 100f);
+                    RenderSystem.setShaderColor(1, 1, 1, areaRenderOpacity / 100f);
                 }, () -> {
                     RenderSystem.setShaderColor(1, 1, 1, 1);
                     RenderSystem.disableBlend();
@@ -130,7 +131,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
                     stack.translate(-xSize / 2f, renderHeight * -0.1 - ySize / 2f, -zSize / 2f);
 
-                    mesh.render(stack.peek().getModel());
+                    mesh.render(stack);
 
                     RenderSystem.restoreProjectionMatrix();
                 }

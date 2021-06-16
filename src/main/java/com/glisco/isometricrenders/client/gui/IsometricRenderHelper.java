@@ -195,9 +195,9 @@ public class IsometricRenderHelper {
             }
         }
 
-        if (RuntimeConfig.exportOpacity != 100) {
+        if (RuntimeConfig.areaRenderOpacity != 100) {
 
-            int opacityMask = 0xFFFFFF | (Math.round(RuntimeConfig.exportOpacity * 2.55f) << 24);
+            int opacityMask = 0xFFFFFF | (Math.round(RuntimeConfig.areaRenderOpacity * 2.55f) << 24);
 
             for (int i = 0; i < pixelColors.length; i++) {
                 pixelColors[i] = pixelColors[i] & opacityMask;

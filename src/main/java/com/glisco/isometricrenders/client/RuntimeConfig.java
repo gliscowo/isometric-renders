@@ -16,6 +16,7 @@ public class RuntimeConfig {
 
     //Render Options
     public static int backgroundColor = 0x0000ff;
+    public static int areaRenderOpacity = 100;
 
     //Export Options
     public static boolean useExternalRenderer = false;
@@ -23,6 +24,5 @@ public class RuntimeConfig {
     public static boolean allowInsaneResolutions = false;
     public static boolean dumpIntoRoot = false;
     public static int exportResolution = 2048;
-    public static int exportOpacity = 100;
 
 }
