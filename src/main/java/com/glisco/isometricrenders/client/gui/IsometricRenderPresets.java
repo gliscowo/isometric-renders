@@ -62,10 +62,9 @@ public class IsometricRenderPresets {
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
 
             matrices.push();
-            matrices.translate(-0.5, 0, -0.5);
+            matrices.translate(-0.5, -0.5, -0.5);
 
             client.getBlockRenderManager().renderBlockAsEntity(entity.getCachedState(), matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
-
 
             if (client.getBlockEntityRenderDispatcher().get(entity) != null) {
                 client.getBlockEntityRenderDispatcher().get(entity).render(entity, tickDelta, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
@@ -87,7 +86,7 @@ public class IsometricRenderPresets {
         screen.setTickCallback(() -> {
 
             if(entity.getCachedState().getBlockEntityTicker(client.world, entity.getType()) != null){
-                entity.getCachedState().getBlockEntityTicker(client.world, (BlockEntityType<BlockEntity>) entity.getType()).tick(client.world, entity.getPos(), entity.getCachedState(), entity);
+                entity.getCachedState().getBlockEntityTicker(client.world, (BlockEntityType<BlockEntity>) entity.getType()).tick(client.world, client.player.getBlockPos(), entity.getCachedState(), entity);
             }
 
             if (client.world.random.nextDouble() < 0.150) {

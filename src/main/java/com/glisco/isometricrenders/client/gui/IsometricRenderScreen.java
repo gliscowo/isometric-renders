@@ -94,6 +94,16 @@ public class IsometricRenderScreen extends RenderScreen {
             heightField.setText("0");
         });
 
+        ButtonWidget lightingButton = new ButtonWidget(10, 225, 90, 20, Text.of("Flat"), button -> {
+            if (lightingProfile == DefaultLightingProfiles.FLAT) {
+                setLightingProfile(DefaultLightingProfiles.DEFAULT_DEPTH_LIGHTING);
+                button.setMessage(Text.of("Shaded"));
+            } else {
+                setLightingProfile(DefaultLightingProfiles.FLAT);
+                button.setMessage(Text.of("Flat"));
+            }
+        });
+
         addDrawableChild(scaleSlider);
         addDrawableChild(scaleField);
 
@@ -108,12 +118,15 @@ public class IsometricRenderScreen extends RenderScreen {
 
         addDrawableChild(dimetricButton);
         addDrawableChild(isometricButton);
+
+        addDrawableChild(lightingButton);
     }
 
     @Override
     protected void drawGuiText(MatrixStack matrices) {
         client.textRenderer.draw(matrices, "Transform Options", 12, 20, 0xAAAAAA);
         client.textRenderer.draw(matrices, "Presets", 12, 165, 0xAAAAAA);
+        client.textRenderer.draw(matrices, "Lighting Profile", 12, 210, 0xAAAAAA);
     }
 
     @Override

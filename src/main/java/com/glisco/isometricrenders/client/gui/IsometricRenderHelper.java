@@ -88,27 +88,20 @@ public class IsometricRenderHelper {
             matrices.scale(0.125f, 0.125f, 1);
 
             int rows = (int) Math.ceil(stacks.size() / (double) RuntimeConfig.atlasColumns);
-
             for (int i = 0; i < rows; i++) {
-
                 matrices.push();
                 matrices.translate(0, -1.2 * i, 0);
 
                 for (int j = 0; j < RuntimeConfig.atlasColumns; j++) {
-
                     int index = i * RuntimeConfig.atlasColumns + j;
                     if (index > stacks.size() - 1) continue;
 
                     ItemStack stack = stacks.get(index);
-
                     MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
 
                     matrices.translate(1.2, 0, 0);
-
                 }
-
                 matrices.pop();
-
             }
         }, "atlases/" + name);
 
@@ -119,7 +112,7 @@ public class IsometricRenderHelper {
         }
     }
 
-    public static NativeImage renderIntoImage(int size, RenderCallback renderCallback) {
+    public static NativeImage renderIntoImage(int size, RenderCallback renderCallback, LightingProfile lightingProfile) {
 
         Framebuffer framebuffer = new SimpleFramebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
 
@@ -149,7 +142,7 @@ public class IsometricRenderHelper {
 
         RenderSystem.applyModelViewMatrix();
 
-        setupLighting();
+        lightingProfile.setupForExternal();
 
         VertexConsumerProvider.Immediate vertexConsumers = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
         MatrixStack matrixStack = new MatrixStack();
@@ -247,8 +240,8 @@ public class IsometricRenderHelper {
      * Tries to prepare a {@link BlockEntity} for rendering inside a screen
      *
      * @param state The {@link BlockState} this {@code BlockEntity} should use
-     * @param be The {@code BlockEntity} to prepare, this can be null if the block does not have one for some reason
-     * @param nbt An optional {@link NbtCompound} tag to write to the entity
+     * @param be    The {@code BlockEntity} to prepare, this can be null if the block does not have one for some reason
+     * @param nbt   An optional {@link NbtCompound} tag to write to the entity
      */
     public static void initBlockEntity(BlockState state, @Nullable BlockEntity be, @Nullable NbtCompound nbt) {
 

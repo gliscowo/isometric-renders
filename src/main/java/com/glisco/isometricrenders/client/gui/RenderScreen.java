@@ -5,6 +5,7 @@ import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -26,6 +28,7 @@ public abstract class RenderScreen extends Screen {
     private ButtonWidget exportButton;
 
     protected IsometricRenderHelper.RenderCallback renderCallback = (matrices, vertexConsumerProvider, tickDelta) -> {};
+    protected LightingProfile lightingProfile = DefaultLightingProfiles.FLAT;
     protected Runnable tickCallback = () -> {};
     protected Runnable closedCallback = () -> {};
 
@@ -104,6 +107,10 @@ public abstract class RenderScreen extends Screen {
             }
         });
 
+        ButtonWidget rendersFolderButton = new ButtonWidget(viewportEndX + 10, 285, 90, 20, Text.of("Open Folder"), button -> {
+            Util.getOperatingSystem().open(FabricLoader.getInstance().getGameDir().resolve("renders").toFile());
+        });
+
         addDrawableChild(colorField);
 
         addDrawableChild(playAnimationsCheckbox);
@@ -115,6 +122,7 @@ public abstract class RenderScreen extends Screen {
         addDrawableChild(resolutionField);
         addDrawableChild(exportButton);
         addDrawableChild(clearQueueButton);
+        addDrawableChild(rendersFolderButton);
     }
 
     @Override
@@ -131,7 +139,7 @@ public abstract class RenderScreen extends Screen {
         }
         matrices.pop();
 
-        IsometricRenderHelper.setupLighting();
+        lightingProfile.setup();
 
         int i = (width) / 2;
         int j = (height) / 2;
@@ -214,7 +222,7 @@ public abstract class RenderScreen extends Screen {
 
     protected void capture() {
         if (useExternalRenderer) {
-            addImageToExportQueue(IsometricRenderHelper.renderIntoImage(exportResolution, getExternalExportCallback()));
+            addImageToExportQueue(IsometricRenderHelper.renderIntoImage(exportResolution, getExternalExportCallback(), lightingProfile));
         } else {
             addImageToExportQueue(IsometricRenderHelper.takeKeyedSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true));
         }
@@ -247,6 +255,10 @@ public abstract class RenderScreen extends Screen {
     public void setup(IsometricRenderHelper.RenderCallback renderCallback, String filename) {
         this.renderCallback = renderCallback;
         this.currentFilename = filename;
+    }
+
+    public void setLightingProfile(LightingProfile lightingProfile) {
+        this.lightingProfile = lightingProfile;
     }
 
     public void setTickCallback(Runnable tickCallback) {

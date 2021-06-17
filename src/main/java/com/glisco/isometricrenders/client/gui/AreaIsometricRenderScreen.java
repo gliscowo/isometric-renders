@@ -36,7 +36,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         if (!translucencyEnabled) return;
 
         final int sliderWidth = viewportBeginX - 55;
-        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 245, 35, 20, Text.of(String.valueOf(areaRenderOpacity)));
+        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 275, 35, 20, Text.of(String.valueOf(areaRenderOpacity)));
         opacityField.setTextPredicate(s -> s.matches("[0-9]{0,3}"));
         opacityField.setText(String.valueOf(areaRenderOpacity));
         opacityField.setChangedListener(s -> {
@@ -44,7 +44,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
             if (tempOpacity == areaRenderOpacity) return;
             opacitySlider.setValue(areaRenderOpacity / 100f);
         });
-        opacitySlider = new SliderWidgetImpl(50, 245, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
+        opacitySlider = new SliderWidgetImpl(50, 275, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
             areaRenderOpacity = (int) Math.round(aDouble * 100);
             opacityField.setText(String.valueOf(areaRenderOpacity));
         });
@@ -62,7 +62,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         buildString.append(Math.round(renderCallback.getMeshProgress() * 100));
         buildString.append("%");
 
-        MinecraftClient.getInstance().textRenderer.draw(matrices, "Mesh Status: " + (renderCallback.canRender() ? "§aReady" : buildString), 12, 230, 0xAAAAAA);
+        MinecraftClient.getInstance().textRenderer.draw(matrices, "Mesh Status: " + (renderCallback.canRender() ? "§aReady" : buildString), 12, 260, 0xAAAAAA);
     }
 
     public static class AreaRenderCallback implements IsometricRenderHelper.RenderCallback {
