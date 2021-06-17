@@ -3,9 +3,14 @@
   "id": "isometric-renders",
   "version": "${version}",
   "name": "Isometric Renders",
-  "description": "",
-  "authors": [],
-  "contact": {},
+  "description": "Creates high-resolution renders of game objects",
+  "authors": [
+    "glisco"
+  ],
+  "contact": {
+    "issues": "https://github.com/glisco03/isometric-renders/issues",
+    "sources": "https://github.com/glisco03/isometric-renders"
+  },
   "license": "MIT",
   "icon": "assets/isometric-renders/icon.png",
   "environment": "client",
@@ -26,5 +31,12 @@
     "fabric": "*",
     "worldmesher": "*",
     "minecraft": ">=1.17"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/xrwHKktV2d"
+      }
+    }
   }
 }
