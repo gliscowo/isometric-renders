@@ -18,7 +18,7 @@ public class RuntimeConfig {
     public static int backgroundColor = 0x0000ff;
 
     //Export Options
-    public static boolean useExternalRenderer = false;
+    public static boolean useExternalRenderer = true;
     public static boolean allowMultipleNonThreadedJobs = false;
     public static boolean allowInsaneResolutions = false;
     public static boolean dumpIntoRoot = false;
