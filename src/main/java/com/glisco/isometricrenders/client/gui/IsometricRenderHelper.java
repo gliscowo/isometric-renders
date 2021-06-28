@@ -125,11 +125,7 @@ public class IsometricRenderHelper {
         RenderSystem.enableBlend();
         RenderSystem.clear(16640, MinecraftClient.IS_SYSTEM_MAC);
 
-        float r = (RuntimeConfig.backgroundColor >> 16) / 255f;
-        float g = (RuntimeConfig.backgroundColor >> 8 & 0xFF) / 255f;
-        float b = (RuntimeConfig.backgroundColor & 0xFF) / 255f;
-
-        framebuffer.setClearColor(r, g, b, 0);
+        framebuffer.setClearColor(0, 0, 0, 0);
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
 
         framebuffer.beginWrite(true);
