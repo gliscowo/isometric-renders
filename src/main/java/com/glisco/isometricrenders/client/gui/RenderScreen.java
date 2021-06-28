@@ -224,7 +224,7 @@ public abstract class RenderScreen extends Screen {
         if (useExternalRenderer) {
             addImageToExportQueue(IsometricRenderHelper.renderIntoImage(exportResolution, getExternalExportCallback(), lightingProfile));
         } else {
-            addImageToExportQueue(IsometricRenderHelper.takeKeyedSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true));
+            addImageToExportQueue(IsometricRenderHelper.takeSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true, true));
         }
     }
 

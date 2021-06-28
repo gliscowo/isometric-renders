@@ -16,7 +16,6 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.DefaultPosArgument;
 import net.minecraft.item.BlockItem;
@@ -38,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -127,7 +125,7 @@ public class IsometricRenderHelper {
         float g = (RuntimeConfig.backgroundColor >> 8 & 0xFF) / 255f;
         float b = (RuntimeConfig.backgroundColor & 0xFF) / 255f;
 
-        framebuffer.setClearColor(r, g, b, 0);
+        framebuffer.setClearColor(0, 0, 0, 0);
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
 
         framebuffer.beginWrite(true);
@@ -163,77 +161,61 @@ public class IsometricRenderHelper {
 
         framebuffer.endWrite();
 
-        return takeKeyedSnapshot(framebuffer, RuntimeConfig.backgroundColor, false);
+        return takeSnapshot(framebuffer, RuntimeConfig.backgroundColor, false, false);
     }
 
-    public static NativeImage takeKeyedSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop) {
-        NativeImage img = ScreenshotRecorder.takeScreenshot(0, 0, framebuffer);
+    public static NativeImage takeSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop, boolean key) {
+
+        final var img = new NativeImage(framebuffer.textureWidth, framebuffer.textureHeight, false);
+        RenderSystem.bindTexture(framebuffer.getColorAttachment());
+        img.loadFromTextureImage(0, false);
+        img.mirrorVertically();
+
         if (framebuffer != MinecraftClient.getInstance().getFramebuffer()) framebuffer.delete();
 
-        int argbColor = backgroundColor | 255 << 24;
-        int r = (argbColor >> 16) & 0xFF;
-        int b = argbColor & 0xFF;
-        int abgrColor = (argbColor & 0xFF00FF00) | (b << 16) | r;
+        if(key){
+            int argbColor = backgroundColor | 255 << 24;
+            int r = (argbColor >> 16) & 0xFF;
+            int b = argbColor & 0xFF;
+            int abgrColor = (argbColor & 0xFF00FF00) | (b << 16) | r;
 
-        long pointer = ((NativeImageAccessor) (Object) img).getPointer();
+            long pointer = ((NativeImageAccessor) (Object) img).getPointer();
 
-        final IntBuffer buffer = MemoryUtil.memIntBuffer(pointer, (img.getWidth() * img.getHeight()));
-        int[] pixelColors = new int[buffer.remaining()];
-        buffer.get(pixelColors);
-        buffer.clear();
-
-        for (int i = 0; i < pixelColors.length; i++) {
-            if (pixelColors[i] == abgrColor) {
-                pixelColors[i] = 0;
-            }
-        }
-
-        if (RuntimeConfig.areaRenderOpacity != 100) {
-
-            int opacityMask = 0xFFFFFF | (Math.round(RuntimeConfig.areaRenderOpacity * 2.55f) << 24);
+            final IntBuffer buffer = MemoryUtil.memIntBuffer(pointer, (img.getWidth() * img.getHeight()));
+            int[] pixelColors = new int[buffer.remaining()];
+            buffer.get(pixelColors);
+            buffer.clear();
 
             for (int i = 0; i < pixelColors.length; i++) {
-                pixelColors[i] = pixelColors[i] & opacityMask;
+                if (pixelColors[i] == abgrColor) {
+                    pixelColors[i] = 0;
+                }
             }
+
+            buffer.put(pixelColors);
+            buffer.clear();
         }
 
-        buffer.put(pixelColors);
-        buffer.clear();
+        int imgWidth = img.getWidth();
+        int imgHeight = img.getHeight();
 
-        int i = img.getWidth();
-        int j = img.getHeight();
-        int k = 0;
-        int l = 0;
-        if (i > j) {
-            k = (i - j) / 2;
-            i = j;
-        } else {
-            l = (j - i) / 2;
-            j = i;
-        }
-
-        NativeImage rect = new NativeImage(i, i, false);
+        NativeImage rect = new NativeImage(imgWidth, imgWidth, false);
         if (crop) {
-            img.resizeSubRectTo(k, l, i, j, rect);
+            int k = 0;
+            int l = 0;
+            if (imgWidth > imgHeight) {
+                k = (imgWidth - imgHeight) / 2;
+                imgWidth = imgHeight;
+            } else {
+                l = (imgHeight - imgWidth) / 2;
+                imgHeight = imgWidth;
+            }
+            img.resizeSubRectTo(k, l, imgWidth, imgHeight, rect);
         } else {
             rect = img;
         }
 
         return rect;
-    }
-
-    public static File getScreenshotFilename(File directory) {
-        String string = DATE_FORMAT.format(new Date());
-        int i = 1;
-
-        while (true) {
-            File file = new File(directory, string + (i == 1 ? "" : "_" + i) + ".png");
-            if (!file.exists()) {
-                return file;
-            }
-
-            ++i;
-        }
     }
 
     /**
