@@ -16,6 +16,8 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Consumer;
+
 import static com.glisco.isometricrenders.client.gui.IsometricRenderHelper.getParticleCamera;
 
 public class IsometricRenderPresets {
@@ -85,7 +87,7 @@ public class IsometricRenderPresets {
 
         screen.setTickCallback(() -> {
 
-            if(entity.getCachedState().getBlockEntityTicker(client.world, entity.getType()) != null){
+            if (entity.getCachedState().getBlockEntityTicker(client.world, entity.getType()) != null) {
                 entity.getCachedState().getBlockEntityTicker(client.world, (BlockEntityType<BlockEntity>) entity.getType()).tick(client.world, client.player.getBlockPos(), entity.getCachedState(), entity);
             }
 
@@ -102,26 +104,30 @@ public class IsometricRenderPresets {
 
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
             matrices.push();
-            matrices.translate(0, stack.getItem() instanceof BlockItem ?  -0.75 : - 0.5, 0);
+            matrices.translate(0, stack.getItem() instanceof BlockItem ? -0.75 : -0.5, 0);
             matrices.scale(4, 4, 4);
             MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GROUND, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
             matrices.pop();
         }, itemId.getNamespace() + "/items/" + itemId.getPath());
     }
 
-    public static void setupEntityRender(IsometricRenderScreen screen, @NotNull Entity entity) {
+    public static void setupEntityRender(IsometricRenderScreen screen, @NotNull Entity rootEntity) {
 
         final MinecraftClient client = MinecraftClient.getInstance();
-        final Identifier entityId = Registry.ENTITY_TYPE.getId(entity.getType());
+        final Identifier entityId = Registry.ENTITY_TYPE.getId(rootEntity.getType());
 
         screen.setup((matrixStack, vertexConsumerProvider, delta) -> {
             matrixStack.push();
 
-            matrixStack.translate(0, 0.1 +entity.getHeight() * -0.5d, 0);
+            matrixStack.translate(0, 0.1 + rootEntity.getHeight() * -0.5d, 0);
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
 
-            entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
-            client.getEntityRenderDispatcher().render(entity, 0, 0, 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
+            applyToEntityAndPassengers(rootEntity, entity -> {
+                entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
+                double y = entity.hasVehicle() ? entity.getVehicle().getMountedHeightOffset() + entity.getHeightOffset() : 0;
+
+                client.getEntityRenderDispatcher().render(entity, 0, y, 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
+            });
 
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
             matrixStack.translate(0, 1.65, 0);
@@ -129,11 +135,17 @@ public class IsometricRenderPresets {
             matrixStack.pop();
         }, entityId.getNamespace() + "/entities/" + entityId.getPath());
         screen.setTickCallback(() -> {
-            client.world.tickEntity(entity);
+            applyToEntityAndPassengers(rootEntity, entity -> client.world.tickEntity(entity));
         });
         screen.setClosedCallback(() -> {
-            entity.updatePosition(0, 0, 0);
+            applyToEntityAndPassengers(rootEntity, entity -> entity.updatePosition(0, 0, 0));
         });
+    }
+
+    private static void applyToEntityAndPassengers(Entity entity, Consumer<Entity> action) {
+        action.accept(entity);
+        if (entity.getPassengerList().isEmpty()) return;
+        for (Entity e : entity.getPassengerList()) applyToEntityAndPassengers(e, action);
     }
 
 }
