@@ -1,5 +1,8 @@
 package com.glisco.isometricrenders.client;
 
+import com.glisco.isometricrenders.client.gui.DefaultLightingProfiles;
+import com.glisco.isometricrenders.client.gui.LightingProfile;
+
 public class RuntimeConfig {
 
     //Transform Options
@@ -17,6 +20,7 @@ public class RuntimeConfig {
     //Render Options
     public static int backgroundColor = 0x0000ff;
     public static int areaRenderOpacity = 100;
+    public static LightingProfile lightingProfile = DefaultLightingProfiles.FLAT;
 
     //Export Options
     public static boolean useExternalRenderer = true;

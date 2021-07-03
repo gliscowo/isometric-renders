@@ -82,7 +82,12 @@ public class IsoRenderCommand {
             }
 
             return 0;
-        })).then(literal("area").then(argument("start", BlockPosArgumentType.blockPos()).then(argument("end", BlockPosArgumentType.blockPos()).executes(context -> {
+        })).then(literal("area").executes(context -> {
+            if(!AreaSelectionHelper.tryOpenScreen()){
+                context.getSource().sendError(Text.of("Your selection is not complete!"));
+            }
+            return 0;
+        }).then(argument("start", BlockPosArgumentType.blockPos()).then(argument("end", BlockPosArgumentType.blockPos()).executes(context -> {
             return executeArea(context, false);
         }).then(literal("enable_translucency").executes(context -> {
             return executeArea(context, true);

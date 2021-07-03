@@ -16,7 +16,8 @@
     "ParticleManagerAccessor",
     "ParticleManagerMixin",
     "SliderWidgetInvoker",
-    "TextureManagerMixin"
+    "TextureManagerMixin",
+    "WorldRendererMixin"
   ],
   "client": [
   ],

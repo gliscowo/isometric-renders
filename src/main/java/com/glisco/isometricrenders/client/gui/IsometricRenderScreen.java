@@ -94,12 +94,12 @@ public class IsometricRenderScreen extends RenderScreen {
             heightField.setText("0");
         });
 
-        ButtonWidget lightingButton = new ButtonWidget(10, 225, 90, 20, Text.of("Flat"), button -> {
+        ButtonWidget lightingButton = new ButtonWidget(10, 225, 90, 20, Text.of(lightingProfile == DefaultLightingProfiles.FLAT ? "Flat" : "Shaded"), button -> {
             if (lightingProfile == DefaultLightingProfiles.FLAT) {
-                setLightingProfile(DefaultLightingProfiles.DEFAULT_DEPTH_LIGHTING);
+                lightingProfile = DefaultLightingProfiles.DEFAULT_DEPTH_LIGHTING;
                 button.setMessage(Text.of("Shaded"));
             } else {
-                setLightingProfile(DefaultLightingProfiles.FLAT);
+                lightingProfile = DefaultLightingProfiles.FLAT;
                 button.setMessage(Text.of("Flat"));
             }
         });

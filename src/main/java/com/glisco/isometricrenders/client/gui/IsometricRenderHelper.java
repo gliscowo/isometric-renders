@@ -173,7 +173,7 @@ public class IsometricRenderHelper {
 
         if (framebuffer != MinecraftClient.getInstance().getFramebuffer()) framebuffer.delete();
 
-        if(key){
+        if (key) {
             int argbColor = backgroundColor | 255 << 24;
             int r = (argbColor >> 16) & 0xFF;
             int b = argbColor & 0xFF;

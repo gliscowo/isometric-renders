@@ -18,9 +18,6 @@
   "entrypoints": {
     "client": [
       "com.glisco.isometricrenders.client.IsometricRendersClient"
-    ],
-    "main": [
-      "com.glisco.isometricrenders.IsometricRenders"
     ]
   },
   "mixins": [

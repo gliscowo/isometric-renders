@@ -28,7 +28,6 @@ public abstract class RenderScreen extends Screen {
     private ButtonWidget exportButton;
 
     protected IsometricRenderHelper.RenderCallback renderCallback = (matrices, vertexConsumerProvider, tickDelta) -> {};
-    protected LightingProfile lightingProfile = DefaultLightingProfiles.FLAT;
     protected Runnable tickCallback = () -> {};
     protected Runnable closedCallback = () -> {};
 
@@ -255,10 +254,6 @@ public abstract class RenderScreen extends Screen {
     public void setup(IsometricRenderHelper.RenderCallback renderCallback, String filename) {
         this.renderCallback = renderCallback;
         this.currentFilename = filename;
-    }
-
-    public void setLightingProfile(LightingProfile lightingProfile) {
-        this.lightingProfile = lightingProfile;
     }
 
     public void setTickCallback(Runnable tickCallback) {
