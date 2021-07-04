@@ -27,6 +27,7 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -65,7 +66,9 @@ public class IsoRenderCommand {
         }).then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
             final ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             return executeItem(context.getSource(), stack);
-        }))).then(literal("entity").then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
+        }))).then(literal("entity").executes(context -> {
+            return executeEntityTarget(context.getSource());
+        }).then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), new NbtCompound());
         }).then(argument("nbt", NbtCompoundArgumentType.nbtCompound()).executes(context -> {
@@ -180,13 +183,33 @@ public class IsoRenderCommand {
         return 0;
     }
 
-    private static int executeItem(FabricClientCommandSource source, ItemStack stack) {
-
-        MinecraftClient client = MinecraftClient.getInstance();
+    private static int executeEntityTarget(FabricClientCommandSource source){
+        final MinecraftClient client = MinecraftClient.getInstance();
         IsometricRenderScreen screen = new IsometricRenderScreen();
 
-        IsometricRenderPresets.setupItemStackRender(screen, stack);
+        if (client.crosshairTarget.getType() != HitResult.Type.ENTITY) {
+            source.sendError(Text.of("You're not looking at an entity"));
+            return 0;
+        }
 
+        final var targetEntity = ((EntityHitResult)client.crosshairTarget).getEntity();
+        final var entityTag = targetEntity.writeNbt(new NbtCompound());
+
+        entityTag.remove("UUID");
+        entityTag.putString("id", Registry.ENTITY_TYPE.getId(targetEntity.getType()).toString());
+
+        final var renderEntity = EntityType.loadEntityWithPassengers(entityTag, client.world, Function.identity());
+
+        IsometricRenderPresets.setupEntityRender(screen, renderEntity);
+        IsometricRenderHelper.scheduleScreen(screen);
+
+        return 0;
+    }
+
+    private static int executeItem(FabricClientCommandSource source, ItemStack stack) {
+
+        IsometricRenderScreen screen = new IsometricRenderScreen();
+        IsometricRenderPresets.setupItemStackRender(screen, stack);
         IsometricRenderHelper.scheduleScreen(screen);
 
         return 0;
