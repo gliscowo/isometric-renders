@@ -64,7 +64,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempAngle == angle) return;
             angleSlider.setValue(tempAngle / 180d);
         });
-        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Angle"), 2/3d, 5/30d, (90 + angle) / 180d, aDouble -> {
+        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Angle"), 2 / 3d, 5 / 30d, (90 + angle) / 180d, aDouble -> {
             angle = -90 + (int) Math.round(aDouble * 180);
             angleField.setText(String.valueOf(angle));
         });
@@ -94,14 +94,15 @@ public class IsometricRenderScreen extends RenderScreen {
             heightField.setText("0");
         });
 
-        ButtonWidget lightingButton = new ButtonWidget(10, 225, 90, 20, Text.of(lightingProfile == DefaultLightingProfiles.FLAT ? "Flat" : "Shaded"), button -> {
-            if (lightingProfile == DefaultLightingProfiles.FLAT) {
+        ButtonWidget lightingButton = new ButtonWidget(10, 225, 90, 20, lightingProfile.getFriendlyName(), button -> {
+            if (lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile) {
+                lightingProfile = DefaultLightingProfiles.FLAT;
+            } else if (lightingProfile == DefaultLightingProfiles.FLAT) {
                 lightingProfile = DefaultLightingProfiles.DEFAULT_DEPTH_LIGHTING;
-                button.setMessage(Text.of("Shaded"));
             } else {
                 lightingProfile = DefaultLightingProfiles.FLAT;
-                button.setMessage(Text.of("Flat"));
             }
+            button.setMessage(lightingProfile.getFriendlyName());
         });
 
         addDrawableChild(scaleSlider);

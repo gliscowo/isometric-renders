@@ -1,12 +1,10 @@
 package com.glisco.isometricrenders.client;
 
-import com.glisco.isometricrenders.client.gui.AreaIsometricRenderScreen;
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
-import com.glisco.isometricrenders.client.gui.IsometricRenderPresets;
-import com.glisco.isometricrenders.client.gui.IsometricRenderScreen;
+import com.glisco.isometricrenders.client.gui.*;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
@@ -86,7 +84,7 @@ public class IsoRenderCommand {
 
             return 0;
         })).then(literal("area").executes(context -> {
-            if(!AreaSelectionHelper.tryOpenScreen()){
+            if (!AreaSelectionHelper.tryOpenScreen()) {
                 context.getSource().sendError(Text.of("Your selection is not complete!"));
             }
             return 0;
@@ -106,7 +104,18 @@ public class IsoRenderCommand {
             ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
             IsometricRenderHelper.renderItemGroupAtlas(group);
             return 0;
-        })))));
+        })))).then(literal("lighting").executes(context -> {
+            if (RuntimeConfig.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
+                context.getSource().sendFeedback(prefix("§aCustom Lighting: §7[§c" + profile.getVector().getX() + " §a" + profile.getVector().getY() + " §b" + profile.getVector().getZ() + "§7]"));
+            } else {
+                context.getSource().sendFeedback(prefix("Current Profile: " + RuntimeConfig.lightingProfile.getFriendlyName()));
+            }
+            return 0;
+        }).then(argument("x", FloatArgumentType.floatArg()).then(argument("y", FloatArgumentType.floatArg()).then(argument("z", FloatArgumentType.floatArg()).executes(context -> {
+            RuntimeConfig.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(FloatArgumentType.getFloat(context, "x"), FloatArgumentType.getFloat(context, "y"), FloatArgumentType.getFloat(context, "z"));
+            context.getSource().sendFeedback(IsometricRendersClient.prefix("§aLighting profile updated"));
+            return 0;
+        }))))));
     }
 
     private static int executeBlockState(FabricClientCommandSource source, BlockState state, NbtCompound tag) {
@@ -183,7 +192,7 @@ public class IsoRenderCommand {
         return 0;
     }
 
-    private static int executeEntityTarget(FabricClientCommandSource source){
+    private static int executeEntityTarget(FabricClientCommandSource source) {
         final MinecraftClient client = MinecraftClient.getInstance();
         IsometricRenderScreen screen = new IsometricRenderScreen();
 
@@ -192,7 +201,7 @@ public class IsoRenderCommand {
             return 0;
         }
 
-        final var targetEntity = ((EntityHitResult)client.crosshairTarget).getEntity();
+        final var targetEntity = ((EntityHitResult) client.crosshairTarget).getEntity();
         final var entityTag = targetEntity.writeNbt(new NbtCompound());
 
         entityTag.remove("UUID");

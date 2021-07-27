@@ -65,7 +65,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
         });
 
         TextFieldWidget columnsField = new TextFieldWidget(client.textRenderer, 10, 130, 35, 20, Text.of(String.valueOf(atlasColumns)));
-        columnsField.setTextPredicate(s -> s.matches("[0-9]{0,3}+"));
+        columnsField.setTextPredicate(s -> s.matches("^([1-9][0-9]{0,2})?$"));
         columnsField.setText(String.valueOf(atlasColumns));
         columnsField.setChangedListener(s -> {
             atlasColumns = s.length() > 0 ? Integer.parseInt(s) : atlasColumns;

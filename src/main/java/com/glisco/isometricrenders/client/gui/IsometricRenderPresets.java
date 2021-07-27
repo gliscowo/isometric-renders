@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
+import org.apache.commons.lang3.mutable.MutableFloat;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -122,11 +123,13 @@ public class IsometricRenderPresets {
             matrixStack.translate(0, 0.1 + rootEntity.getHeight() * -0.5d, 0);
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
 
+            final MutableFloat y = new MutableFloat();
+
             applyToEntityAndPassengers(rootEntity, entity -> {
                 entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
-                double y = entity.hasVehicle() ? entity.getVehicle().getMountedHeightOffset() + entity.getHeightOffset() : 0;
+                y.add(entity.hasVehicle() ? entity.getVehicle().getMountedHeightOffset() + entity.getHeightOffset() : 0);
 
-                client.getEntityRenderDispatcher().render(entity, 0, y, 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
+                client.getEntityRenderDispatcher().render(entity, 0, y.floatValue(), 0, 0, delta, matrixStack, vertexConsumerProvider, 15728880);
             });
 
             matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
