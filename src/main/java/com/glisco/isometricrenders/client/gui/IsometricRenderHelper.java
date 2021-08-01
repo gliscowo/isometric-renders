@@ -27,6 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
@@ -59,7 +60,7 @@ public class IsometricRenderHelper {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks), group.getName());
+        BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks), "creative-tab_" + group.getName());
         scheduleScreen(screen);
     }
 
@@ -67,14 +68,34 @@ public class IsometricRenderHelper {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
 
-        BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), group.getName());
+        BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), "creative-tab_" + group.getName());
         scheduleScreen(screen);
+    }
+
+    public static void batchRenderNamespaceItems(String namespace) {
+        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+
+        BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), "namespace_" + namespace);
+        scheduleScreen(screen);
+    }
+
+    public static void batchRenderNamespaceBlocks(String namespace) {
+        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+
+        BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks.toList()), "namespace_" + namespace);
+        scheduleScreen(screen);
+    }
+
+    public static void renderNamespaceAtlas(String namespace) {
+        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+
+        renderItemAtlas("namespace_" + namespace, stacks.toList(), false);
     }
 
     public static void renderItemGroupAtlas(ItemGroup group) {
         DefaultedList<ItemStack> stacks = DefaultedList.of();
         group.appendStacks(stacks);
-        renderItemAtlas(group.getName(), stacks, false);
+        renderItemAtlas("creative-tab_" + group.getName(), stacks, false);
     }
 
     public static void renderItemAtlas(String name, List<ItemStack> stacks, boolean forceOpen) {

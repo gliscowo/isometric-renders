@@ -5,6 +5,7 @@ import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
@@ -30,7 +31,9 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
@@ -41,6 +44,10 @@ public class IsoRenderCommand {
 
     private static final SuggestionProvider<FabricClientCommandSource> CLIENT_SUMMONABLE_ENTITIES;
     private static final SuggestionProvider<FabricClientCommandSource> ITEM_GROUPS;
+    private static final SuggestionProvider<FabricClientCommandSource> NAMESPACE_PROVIDER;
+
+    private static final List<String> NAMESPACES = new ArrayList<>();
+
 
     static {
         CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> {
@@ -52,6 +59,21 @@ public class IsoRenderCommand {
         ITEM_GROUPS = (context, builder) -> {
             return CommandSource.suggestMatching(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName), builder);
         };
+
+        NAMESPACE_PROVIDER = (context, builder) -> {
+            cacheNamespaces();
+            return CommandSource.suggestMatching(NAMESPACES, builder);
+        };
+    }
+
+    private static void cacheNamespaces() {
+        if (!NAMESPACES.isEmpty()) return;
+
+        Registry.ITEM.forEach(item -> {
+            final var namespace = Registry.ITEM.getId(item).getNamespace();
+            if (NAMESPACES.contains(namespace)) return;
+            NAMESPACES.add(namespace);
+        });
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -115,7 +137,19 @@ public class IsoRenderCommand {
             RuntimeConfig.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(FloatArgumentType.getFloat(context, "x"), FloatArgumentType.getFloat(context, "y"), FloatArgumentType.getFloat(context, "z"));
             context.getSource().sendFeedback(IsometricRendersClient.prefix("§aLighting profile updated"));
             return 0;
-        }))))));
+        }))))).then(literal("namespace").then(argument("namespace", StringArgumentType.string()).suggests(NAMESPACE_PROVIDER).then(literal("batch").then(literal("items").executes(context -> {
+            String namespace = StringArgumentType.getString(context, "namespace");
+            IsometricRenderHelper.batchRenderNamespaceItems(namespace);
+            return 0;
+        })).then(literal("blocks").executes(context -> {
+            String namespace = StringArgumentType.getString(context, "namespace");
+            IsometricRenderHelper.batchRenderNamespaceBlocks(namespace);
+            return 0;
+        }))).then(literal("atlas").executes(context -> {
+            String namespace = StringArgumentType.getString(context, "namespace");
+            IsometricRenderHelper.renderNamespaceAtlas(namespace);
+            return 0;
+        })))));
     }
 
     private static int executeBlockState(FabricClientCommandSource source, BlockState state, NbtCompound tag) {
