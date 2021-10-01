@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
 import com.glisco.worldmesher.WorldMesh;
+import com.glisco.worldmesher.WorldMesh.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -57,7 +58,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
     protected void drawGuiText(MatrixStack matrices) {
         super.drawGuiText(matrices);
 
-        final var renderCallback = (AreaRenderCallback) this.renderCallback;
+        final AreaRenderCallback renderCallback = (AreaRenderCallback) this.renderCallback;
         StringBuilder buildString = new StringBuilder("§cBuilding - ");
         buildString.append(Math.round(renderCallback.getMeshProgress() * 100));
         buildString.append("%");
@@ -77,7 +78,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         private boolean scaleFramebuffer = true;
 
         public AreaRenderCallback(BlockPos origin, BlockPos end, boolean translucencyEnabled) {
-            final var builder = new WorldMesh.Builder(MinecraftClient.getInstance().world, origin, end);
+            final Builder builder = new Builder(MinecraftClient.getInstance().world, origin, end);
 //            builder.enableBlockEntities();
             if (translucencyEnabled) {
                 builder.renderActions(() -> {

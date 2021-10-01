@@ -70,7 +70,7 @@ public class IsoRenderCommand {
         if (!NAMESPACES.isEmpty()) return;
 
         Registry.ITEM.forEach(item -> {
-            final var namespace = Registry.ITEM.getId(item).getNamespace();
+            final String namespace = Registry.ITEM.getId(item).getNamespace();
             if (NAMESPACES.contains(namespace)) return;
             NAMESPACES.add(namespace);
         });
@@ -190,7 +190,7 @@ public class IsoRenderCommand {
         BlockEntity be = null;
 
         if (state.getBlock() instanceof BlockWithEntity && client.world.getBlockEntity(hitPos) != null) {
-            NbtCompound tag = client.world.getBlockEntity(hitPos).writeNbt(new NbtCompound());
+            NbtCompound tag = client.world.getBlockEntity(hitPos).createNbt();
             be = ((BlockWithEntity) state.getBlock()).createBlockEntity(hitPos, state);
             IsometricRenderHelper.initBlockEntity(state, be, tag);
         }
@@ -235,13 +235,13 @@ public class IsoRenderCommand {
             return 0;
         }
 
-        final var targetEntity = ((EntityHitResult) client.crosshairTarget).getEntity();
-        final var entityTag = targetEntity.writeNbt(new NbtCompound());
+        final Entity targetEntity = ((EntityHitResult) client.crosshairTarget).getEntity();
+        final NbtCompound entityTag = targetEntity.writeNbt(new NbtCompound());
 
         entityTag.remove("UUID");
         entityTag.putString("id", Registry.ENTITY_TYPE.getId(targetEntity.getType()).toString());
 
-        final var renderEntity = EntityType.loadEntityWithPassengers(entityTag, client.world, Function.identity());
+        final Entity renderEntity = EntityType.loadEntityWithPassengers(entityTag, client.world, Function.identity());
 
         IsometricRenderPresets.setupEntityRender(screen, renderEntity);
         IsometricRenderHelper.scheduleScreen(screen);

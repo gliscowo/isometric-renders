@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
 
-    @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void openScheduled(Screen screen, CallbackInfo ci) {
         if (screen == null && IsometricRenderHelper.isScreenScheduled()) {
             IsometricRenderHelper.openScheduledScreen();

@@ -33,10 +33,10 @@ public class HandledScreenMixin<T extends ScreenHandler> extends Screen {
     public void renderInventory(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if (keyCode == GLFW.GLFW_KEY_F12) {
             if (Screen.hasControlDown()) {
-                client.openScreen(new BatchIsometricBlockRenderScreen(IsometricRenderHelper.extractBlocks(handler.slots.stream().map(Slot::getStack).collect(Collectors.toList())), "inventory"));
+                client.setScreen(new BatchIsometricBlockRenderScreen(IsometricRenderHelper.extractBlocks(handler.slots.stream().map(Slot::getStack).collect(Collectors.toList())), "inventory"));
                 cir.cancel();
             } else if (Screen.hasAltDown()) {
-                client.openScreen(new BatchIsometricItemRenderScreen(handler.slots.stream().map(Slot::getStack).iterator(), "inventory"));
+                client.setScreen(new BatchIsometricItemRenderScreen(handler.slots.stream().map(Slot::getStack).iterator(), "inventory"));
                 cir.cancel();
             } else if (Screen.hasShiftDown()) {
                 IsometricRenderHelper.renderItemAtlas("inventory", handler.slots.stream().map(Slot::getStack).filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList()), true);

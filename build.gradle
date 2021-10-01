@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -7,7 +7,7 @@ sourceCompatibility = JavaVersion.VERSION_16
 targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version
+version = project.mod_version + "-" + project.minecraft_version
 group = project.maven_group
 
 minecraft {
@@ -29,10 +29,10 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "com.ptsmods:devlogin:1.2"
+//    modImplementation "com.ptsmods:devlogin:1.2"
 
-    modImplementation "com.glisco:worldmesher-0.1-dev"
-    include "com.glisco:worldmesher-0.1"
+    modImplementation "com.glisco:worldmesher-0.1-21w39a"
+    include "com.glisco:worldmesher-0.1-21w39a"
 }
 
 processResources {

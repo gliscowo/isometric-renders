@@ -40,6 +40,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class IsometricRenderHelper {
 
@@ -73,21 +74,21 @@ public class IsometricRenderHelper {
     }
 
     public static void batchRenderNamespaceItems(String namespace) {
-        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+        Stream stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
 
         BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), "namespace_" + namespace);
         scheduleScreen(screen);
     }
 
     public static void batchRenderNamespaceBlocks(String namespace) {
-        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+        Stream stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
 
         BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks.toList()), "namespace_" + namespace);
         scheduleScreen(screen);
     }
 
     public static void renderNamespaceAtlas(String namespace) {
-        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+        Stream stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
 
         renderItemAtlas("namespace_" + namespace, stacks.toList(), false);
     }
@@ -125,7 +126,7 @@ public class IsometricRenderHelper {
         }, "atlases/" + name);
 
         if (forceOpen) {
-            MinecraftClient.getInstance().openScreen(screen);
+            MinecraftClient.getInstance().setScreen(screen);
         } else {
             IsometricRenderHelper.scheduleScreen(screen);
         }
@@ -187,7 +188,7 @@ public class IsometricRenderHelper {
 
     public static NativeImage takeSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop, boolean key) {
 
-        final var img = new NativeImage(framebuffer.textureWidth, framebuffer.textureHeight, false);
+        final NativeImage img = new NativeImage(framebuffer.textureWidth, framebuffer.textureHeight, false);
         RenderSystem.bindTexture(framebuffer.getColorAttachment());
         img.loadFromTextureImage(0, false);
         img.mirrorVertically();
@@ -323,7 +324,7 @@ public class IsometricRenderHelper {
 
     public static void scheduleScreen(Screen screen) {
         if (MinecraftClient.getInstance().currentScreen == null) {
-            MinecraftClient.getInstance().openScreen(screen);
+            MinecraftClient.getInstance().setScreen(screen);
         } else {
             SCHEDULED_SCREEN = screen;
         }
@@ -334,7 +335,7 @@ public class IsometricRenderHelper {
     }
 
     public static void openScheduledScreen() {
-        MinecraftClient.getInstance().openScreen(SCHEDULED_SCREEN);
+        MinecraftClient.getInstance().setScreen(SCHEDULED_SCREEN);
         SCHEDULED_SCREEN = null;
     }
 

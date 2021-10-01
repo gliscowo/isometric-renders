@@ -99,7 +99,7 @@ public class ImageExporter extends Thread {
 
         IsometricRendersClient.LOGGER.info("Started saving image: {}", file);
         try {
-            job.getLeft().writeFile(file);
+            job.getLeft().writeTo(file);
             IsometricRendersClient.LOGGER.info("Finished");
         } catch (IOException e) {
             IsometricRendersClient.LOGGER.error("Saving image failed, stacktrace below");

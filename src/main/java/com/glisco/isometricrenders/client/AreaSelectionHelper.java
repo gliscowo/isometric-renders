@@ -4,6 +4,7 @@ import com.glisco.isometricrenders.client.gui.AreaIsometricRenderScreen;
 import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
 import com.glisco.isometricrenders.client.gui.IsometricRenderPresets;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
@@ -32,8 +33,8 @@ public class AreaSelectionHelper {
     public static void renderSelectionBox(MatrixStack matrices, Camera camera) {
         if (!AreaSelectionHelper.shouldDraw()) return;
 
-        var client = MinecraftClient.getInstance();
-        var player = client.player;
+        MinecraftClient client = MinecraftClient.getInstance();
+        ClientPlayerEntity player = client.player;
 
         BlockPos origin = AreaSelectionHelper.pos1;
 
@@ -55,10 +56,10 @@ public class AreaSelectionHelper {
     }
 
     public static void select() {
-        final var client = MinecraftClient.getInstance();
-        final var target = client.crosshairTarget;
+        final MinecraftClient client = MinecraftClient.getInstance();
+        final HitResult target = client.crosshairTarget;
         if ((target == null)) return;
-        var targetPos = new BlockPos(target.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) target).getBlockPos() : new BlockPos(target.getPos()));
+        BlockPos targetPos = new BlockPos(target.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) target).getBlockPos() : new BlockPos(target.getPos()));
 
         if (pos1 == null) {
             pos1 = targetPos;
@@ -72,7 +73,7 @@ public class AreaSelectionHelper {
     public static boolean tryOpenScreen() {
         if (pos1 == null || pos2 == null) return false;
 
-        var screen = new AreaIsometricRenderScreen(false);
+        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen(false);
         IsometricRenderPresets.setupAreaRender(screen, pos1, pos2, false);
         IsometricRenderHelper.scheduleScreen(screen);
         return true;
