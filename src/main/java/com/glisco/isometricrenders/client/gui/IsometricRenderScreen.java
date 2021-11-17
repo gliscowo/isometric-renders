@@ -167,7 +167,7 @@ public class IsometricRenderScreen extends RenderScreen {
         entityRenderDispatcher.setRenderShadows(true);
 
         modelStack.loadIdentity();
-        modelStack.method_34425(modelMatrix);
+        modelStack.multiplyPositionMatrix(modelMatrix);
 
         RenderSystem.applyModelViewMatrix();
 

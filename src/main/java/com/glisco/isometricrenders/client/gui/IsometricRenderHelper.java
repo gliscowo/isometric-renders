@@ -175,7 +175,7 @@ public class IsometricRenderHelper {
         modelStack.pop();
 
         modelStack.loadIdentity();
-        modelStack.method_34425(modelMatrix);
+        modelStack.multiplyPositionMatrix(modelMatrix);
         RenderSystem.applyModelViewMatrix();
         modelStack.pop();
 

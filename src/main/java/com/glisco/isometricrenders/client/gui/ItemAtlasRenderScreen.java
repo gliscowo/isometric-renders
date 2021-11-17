@@ -110,7 +110,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
         immediate.draw();
 
         modelStack.loadIdentity();
-        modelStack.method_34425(modelMatrix);
+        modelStack.multiplyPositionMatrix(modelMatrix);
 
         RenderSystem.applyModelViewMatrix();
 

@@ -1,8 +1,7 @@
 package com.glisco.isometricrenders.client.gui;
 
-import com.glisco.worldmesher.WorldMesh;
-import com.glisco.worldmesher.WorldMesh.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.worldmesher.WorldMesh;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -78,7 +77,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         private boolean scaleFramebuffer = true;
 
         public AreaRenderCallback(BlockPos origin, BlockPos end, boolean translucencyEnabled) {
-            final Builder builder = new Builder(MinecraftClient.getInstance().world, origin, end);
+            final WorldMesh.Builder builder = new WorldMesh.Builder(MinecraftClient.getInstance().world, origin, end);
 //            builder.enableBlockEntities();
             if (translucencyEnabled) {
                 builder.renderActions(() -> {
