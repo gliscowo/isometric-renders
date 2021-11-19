@@ -5,6 +5,7 @@ import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -130,7 +131,7 @@ public class IsoRenderCommand {
             if (RuntimeConfig.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
                 context.getSource().sendFeedback(prefix("§aCustom Lighting: §7[§c" + profile.getVector().getX() + " §a" + profile.getVector().getY() + " §b" + profile.getVector().getZ() + "§7]"));
             } else {
-                context.getSource().sendFeedback(prefix("Current Profile: " + RuntimeConfig.lightingProfile.getFriendlyName()));
+                context.getSource().sendFeedback(prefix("Current Profile: " + RuntimeConfig.lightingProfile.getFriendlyName().getString()));
             }
             return 0;
         }).then(argument("x", FloatArgumentType.floatArg()).then(argument("y", FloatArgumentType.floatArg()).then(argument("z", FloatArgumentType.floatArg()).executes(context -> {
@@ -149,7 +150,30 @@ public class IsoRenderCommand {
             String namespace = StringArgumentType.getString(context, "namespace");
             IsometricRenderHelper.renderNamespaceAtlas(namespace);
             return 0;
-        })))));
+        })))).then(literal("server").then(literal("open").then(argument("port", IntegerArgumentType.integer(1, 65535)).executes(context -> {
+            int port = IntegerArgumentType.getInteger(context, "port");
+            var started = CommandServer.open(port);
+
+            if (started) {
+                context.getSource().sendError(prefix("Command server started"));
+            } else {
+                context.getSource().sendError(prefix("§cCommand server is already running"));
+            }
+
+            return 0;
+        }))).then(literal("close").executes(context -> {
+            var closed = CommandServer.close();
+
+            if (closed) {
+                context.getSource().sendFeedback(prefix("Command server closed successfully"));
+            } else if (!CommandServer.running()) {
+                context.getSource().sendFeedback(prefix("§cThe command server is not running"));
+            } else {
+                context.getSource().sendFeedback(prefix("§cCould not close command server, check your log for details"));
+            }
+
+            return 0;
+        }))));
     }
 
     private static int executeBlockState(FabricClientCommandSource source, BlockState state, NbtCompound tag) {

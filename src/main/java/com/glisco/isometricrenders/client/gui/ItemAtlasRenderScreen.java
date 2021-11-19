@@ -12,7 +12,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
+import java.io.File;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
 
@@ -137,7 +139,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
     }
 
     @Override
-    protected void addImageToExportQueue(NativeImage image) {
-        ImageExporter.addJob(image, currentFilename);
+    protected CompletableFuture<File> addImageToExportQueue(NativeImage image) {
+        return ImageExporter.addJob(image, currentFilename);
     }
 }

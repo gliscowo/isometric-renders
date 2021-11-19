@@ -17,6 +17,8 @@ loom {
 
 repositories {
     maven { url "https://maven.wispforest.io"}
+
+    mavenCentral()
 }
 
 dependencies {
@@ -32,6 +34,8 @@ dependencies {
 
     modImplementation "io.wispforest:worldmesher:${project.worldmesher_version}"
     include "io.wispforest:worldmesher:${project.worldmesher_version}"
+
+    implementation "org.java-websocket:Java-WebSocket:1.5.2"
 }
 
 processResources {

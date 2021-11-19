@@ -18,6 +18,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.File;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.glisco.isometricrenders.client.RuntimeConfig.*;
@@ -30,6 +32,7 @@ public abstract class RenderScreen extends Screen {
     protected IsometricRenderHelper.RenderCallback renderCallback = (matrices, vertexConsumerProvider, tickDelta) -> {};
     protected Runnable tickCallback = () -> {};
     protected Runnable closedCallback = () -> {};
+    protected Consumer<File> exportCallback = (file) -> {};
 
     public boolean playAnimations = false;
     protected boolean studioMode = false;
@@ -183,7 +186,7 @@ public abstract class RenderScreen extends Screen {
         }
 
         if (captureScheduled) {
-            capture();
+            capture().whenComplete((file, throwable) -> exportCallback.accept(file));
             captureScheduled = false;
         }
     }
@@ -207,6 +210,10 @@ public abstract class RenderScreen extends Screen {
         IsometricRenderHelper.allowParticles = false;
     }
 
+    public void scheduleCapture() {
+        this.captureScheduled = true;
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_F12) {
@@ -219,11 +226,11 @@ public abstract class RenderScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    protected void capture() {
+    protected CompletableFuture<File> capture() {
         if (useExternalRenderer) {
-            addImageToExportQueue(IsometricRenderHelper.renderIntoImage(exportResolution, getExternalExportCallback(), lightingProfile));
+            return addImageToExportQueue(IsometricRenderHelper.renderIntoImage(exportResolution, getExternalExportCallback(), lightingProfile));
         } else {
-            addImageToExportQueue(IsometricRenderHelper.takeSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true, true));
+            return addImageToExportQueue(IsometricRenderHelper.takeSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true, true));
         }
     }
 
@@ -264,6 +271,10 @@ public abstract class RenderScreen extends Screen {
         this.closedCallback = closedCallback;
     }
 
+    public void setExportCallback(Consumer<File> exportCallback) {
+        this.exportCallback = exportCallback;
+    }
+
     protected abstract void buildGuiElements();
 
     protected abstract void drawGuiText(MatrixStack matrices);
@@ -272,7 +283,7 @@ public abstract class RenderScreen extends Screen {
 
     protected abstract IsometricRenderHelper.RenderCallback getExternalExportCallback();
 
-    protected abstract void addImageToExportQueue(NativeImage image);
+    protected abstract CompletableFuture<File> addImageToExportQueue(NativeImage image);
 
     protected static class SliderWidgetImpl extends SliderWidget {
 

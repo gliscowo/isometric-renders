@@ -7,7 +7,9 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 
+import java.io.File;
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 
 import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
 import static com.glisco.isometricrenders.client.RuntimeConfig.exportResolution;
@@ -44,7 +46,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     @Override
     protected void init() {
         super.init();
-        children().stream().filter(element -> element instanceof ClickableWidget).forEach(element -> ((ClickableWidget)element).active = false);
+        children().stream().filter(element -> element instanceof ClickableWidget).forEach(element -> ((ClickableWidget) element).active = false);
     }
 
     @Override
@@ -54,8 +56,8 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     }
 
     @Override
-    protected void addImageToExportQueue(NativeImage image) {
-        ImageExporter.Threaded.submit(image, currentFilename);
+    protected CompletableFuture<File> addImageToExportQueue(NativeImage image) {
+        return ImageExporter.Threaded.submit(image, currentFilename);
     }
 
     @Override
