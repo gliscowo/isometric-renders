@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
+import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
