@@ -54,6 +54,7 @@ public class IsoRenderCommand {
 
     private static final List<String> NAMESPACES = new ArrayList<>();
 
+
     static {
         CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> {
             return CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable), builder, EntityType::getId, entityType -> {

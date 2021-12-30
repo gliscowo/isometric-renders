@@ -22,9 +22,6 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
-import java.io.File;
-import java.util.concurrent.CompletableFuture;
-
 import static com.glisco.isometricrenders.Translator.tr;
 
 public class IsometricRenderScreen extends RenderScreen {
