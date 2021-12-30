@@ -1,6 +1,7 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
+import com.glisco.isometricrenders.IsometricRendersClient;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -14,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
+import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
 
 public class ImageExporter extends Thread {
 
@@ -42,6 +43,9 @@ public class ImageExporter extends Thread {
 
         var future = new CompletableFuture<File>();
         jobs.add(new Job(image, name, future));
+        synchronized (INSTANCE) {
+            INSTANCE.notify();
+        }
         return future;
     }
 
@@ -62,7 +66,7 @@ public class ImageExporter extends Thread {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         while (true) {
 
             while (!jobs.isEmpty()) {
@@ -75,7 +79,7 @@ public class ImageExporter extends Thread {
             }
 
             try {
-                Thread.sleep(5000);
+                this.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;

@@ -1,8 +1,10 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.client.ImageExporter;
-import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
+import com.glisco.isometricrenders.render.DefaultLightingProfiles;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.util.ImageExporter;
+import com.glisco.isometricrenders.util.RuntimeConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -19,7 +21,7 @@ import net.minecraft.util.math.Vec3f;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
-import static com.glisco.isometricrenders.client.RuntimeConfig.*;
+import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class IsometricRenderScreen extends RenderScreen {
 

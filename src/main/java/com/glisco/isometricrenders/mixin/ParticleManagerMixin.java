@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.mixin;
 
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import org.spongepowered.asm.mixin.Mixin;

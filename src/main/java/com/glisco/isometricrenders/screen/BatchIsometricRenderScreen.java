@@ -1,7 +1,7 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.client.ImageExporter;
-import com.glisco.isometricrenders.client.RuntimeConfig;
+import com.glisco.isometricrenders.util.ImageExporter;
+import com.glisco.isometricrenders.util.RuntimeConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.NativeImage;
@@ -11,9 +11,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
-import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
-import static com.glisco.isometricrenders.client.RuntimeConfig.exportResolution;
-import static com.glisco.isometricrenders.client.RuntimeConfig.useExternalRenderer;
+import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
+import static com.glisco.isometricrenders.util.RuntimeConfig.exportResolution;
+import static com.glisco.isometricrenders.util.RuntimeConfig.useExternalRenderer;
 
 public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScreen {
 

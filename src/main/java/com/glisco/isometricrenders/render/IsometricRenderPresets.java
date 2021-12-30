@@ -1,5 +1,7 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
+import com.glisco.isometricrenders.screen.IsometricRenderScreen;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -19,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-import static com.glisco.isometricrenders.client.gui.IsometricRenderHelper.getParticleCamera;
+import static com.glisco.isometricrenders.render.IsometricRenderHelper.getParticleCamera;
 
 public class IsometricRenderPresets {
 

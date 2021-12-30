@@ -1,9 +1,10 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.client.ImageExporter;
-import com.glisco.isometricrenders.client.RuntimeConfig;
 import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
 import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.util.ImageExporter;
+import com.glisco.isometricrenders.util.RuntimeConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -22,7 +23,7 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static com.glisco.isometricrenders.client.RuntimeConfig.*;
+import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 public abstract class RenderScreen extends Screen {
@@ -55,7 +56,7 @@ public abstract class RenderScreen extends Screen {
         viewportEndX = (int) (this.width - (this.width - this.height) * 0.5) + 1;
 
         ((ParticleManagerAccessor) client.particleManager).getParticles().clear();
-        IsometricRenderHelper.allowParticles = false;
+        com.glisco.isometricrenders.render.IsometricRenderHelper.allowParticles = false;
 
         buildGuiElements();
 

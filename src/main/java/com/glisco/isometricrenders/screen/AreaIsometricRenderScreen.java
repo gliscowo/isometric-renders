@@ -1,5 +1,6 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.screen;
 
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.worldmesher.WorldMesh;
 import net.minecraft.client.MinecraftClient;
@@ -12,11 +13,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
-import static com.glisco.isometricrenders.client.RuntimeConfig.*;
+import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
-    private SliderWidgetImpl opacitySlider;
+    private RenderScreen.SliderWidgetImpl opacitySlider;
     private final boolean translucencyEnabled;
 
     public AreaIsometricRenderScreen(boolean enableTranslucency) {
@@ -25,7 +26,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
     @Override
     protected IsometricRenderHelper.RenderCallback getExternalExportCallback() {
-        if (this.renderCallback instanceof AreaRenderCallback) ((AreaRenderCallback) this.renderCallback).doSquareFramebufferOnce();
+        if (this.renderCallback instanceof AreaRenderCallback areaCallback) areaCallback.doSquareFramebufferOnce();
         return super.getExternalExportCallback();
     }
 
@@ -44,7 +45,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
             if (tempOpacity == areaRenderOpacity) return;
             opacitySlider.setValue(areaRenderOpacity / 100f);
         });
-        opacitySlider = new SliderWidgetImpl(50, 275, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
+        opacitySlider = new RenderScreen.SliderWidgetImpl(50, 275, sliderWidth, Text.of("Opacity §c(Beta)"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
             areaRenderOpacity = (int) Math.round(aDouble * 100);
             opacityField.setText(String.valueOf(areaRenderOpacity));
         });
