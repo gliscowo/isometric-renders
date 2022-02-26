@@ -27,14 +27,14 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
         this.name = name;
 
         if (ImageExporter.Threaded.busy()) {
-            MinecraftClient.getInstance().player.sendMessage(prefix("§cThe threaded export system is not available, try again in a few seconds. If this doesn't fix itself, restart your client"), false);
+            MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.threaded_export_system_not_available"), false);
             invalid = true;
         }
 
         ImageExporter.Threaded.init();
 
         if (useExternalRenderer && exportResolution > 2048 && !RuntimeConfig.allowInsaneResolutions) {
-            MinecraftClient.getInstance().player.sendMessage(prefix("§cResolutions over 2048x2048 are not supported for batch-rendering. If you want to risk it, use §6/isorender insanity"), false);
+            MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.resolution_not_supported"), false);
             invalid = true;
         }
 

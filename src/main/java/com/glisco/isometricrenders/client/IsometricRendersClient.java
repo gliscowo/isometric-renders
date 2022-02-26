@@ -17,6 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
+import static com.glisco.isometricrenders.Translator.tr;
+
 @Environment(EnvType.CLIENT)
 public class IsometricRendersClient implements ClientModInitializer {
 
@@ -55,7 +57,7 @@ public class IsometricRendersClient implements ClientModInitializer {
         });
     }
 
-    public static Text prefix(String text) {
-        return new LiteralText(PREFIX + text);
+    public static Text prefix(String text, Object... args) {
+        return new LiteralText(PREFIX).append(tr(text, args));
     }
 }
