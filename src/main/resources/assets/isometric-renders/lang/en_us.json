@@ -1,3 +1,60 @@
 {
-  "key.isometric-renders.area_select": "[ISO] Select Area"
+  "key.isometric-renders.area_select": "[ISO] Select Area",
+
+  "gui.isometric-renders.animations": "Animations",
+  "gui.isometric-renders.particles": "Particles (requires animations)",
+  "gui.isometric-renders.use_external_renderer": "Use External Renderer",
+  "gui.isometric-renders.allow_multiple_export_jobs": "Allow Multiple Export Jobs",
+  "gui.isometric-renders.dump_into_root": "Dump into root",
+  "gui.isometric-renders.clear_queue": "Clear Queue",
+  "gui.isometric-renders.export": "Export",
+  "gui.isometric-renders.open_folder": "Open Folder",
+
+  "gui.isometric-renders.scale": "Scale",
+  "gui.isometric-renders.rotation": "Rotation",
+  "gui.isometric-renders.angle": "Angle",
+  "gui.isometric-renders.dimetric": "Dimetric",
+  "gui.isometric-renders.isometric": "Isometric",
+
+  "gui.isometric-renders.render_height": "Render Height",
+  "gui.isometric-renders.render_shift": "Render Shift",
+  "gui.isometric-renders.atlas_options": "Atlas Options",
+  "gui.isometric-renders.columns": "Columns",
+
+  "gui.isometric-renders.transform_options": "Transform Options",
+  "gui.isometric-renders.presets": "Presets",
+  "gui.isometric-renders.lighting_profile": "Lighting Profile",
+
+  "gui.isometric-renders.render_options": "Render Options",
+  "gui.isometric-renders.background_color": "Background Color",
+  "gui.isometric-renders.export_options": "Export Options",
+  "gui.isometric-renders.renderer_resolution": "Renderer Resolution",
+  "gui.isometric-renders.hotkeys": "F10: Studio Mode  F12: Export",
+  "gui.isometric-renders.memory_warning": "Warning: Unless you have at least 6GB \nof memory available for Minecraft, \nresolutions over 8192x8192 \nare not recommended if you want \nyour computer to survive",
+
+  "gui.isometric-renders.lighting_profile.flat": "Flat",
+  "gui.isometric-renders.lighting_profile.default": "Default",
+  "gui.isometric-renders.lighting_profile.custom": "Custom",
+
+  "message.isometric-renders.no_block": "You're not looking at a block",
+  "message.isometric-renders.no_entity": "You're not looking at an entity",
+  "message.isometric-renders.incomplete_selection": "Your selection is not complete!",
+
+  "message.isometric-renders.custom_lighting": "§aCustom Lighting: §7[§c%1$s §a%1$s §b%1$s§7]",
+  "message.isometric-renders.current_profile": "Current Profile: %1$s",
+  "message.isometric-renders.lighting_profile_updated": "§aLighting profile updated",
+  "message.isometric-renders.insane_resolution_unlocked": "Insane resolutions §cunlocked§7. I will not be your place to cry if this blows up your computer.",
+  "message.isometric-renders.insane_resolution_locked": "Insane resolutions §alocked§7. You're safe again",
+
+  "message.isometric-renders.selection_cleared": "§7[§cSelection cleared§7]",
+  "message.isometric-renders.selection_started": "§7[§aSelection started§7]",
+  "message.isometric-renders.selection_finished": "§7[§aSelection finished§7]",
+  "message.isometric-renders.opacity": "Opacity §c(Beta)",
+
+  "message.isometric-renders.full_queue": "§cYour job could not be submitted because the export queue is full!",
+  "message.isometric-renders.threaded_export_system_initialized": "Threaded export system initialized",
+  "message.isometric-renders.threaded_export_system_shutdown": "Threaded export system shutting down",
+  "message.isometric-renders.threaded_export_system_shutdown_with_job": "Threaded export system shutting down with %1$s tasks remaining",
+  "message.isometric-renders.threaded_export_system_not_available": "§cThe threaded export system is not available, try again in a few seconds. If this doesn't fix itself, restart your client",
+  "message.isometric-renders.resolution_not_supported": "§cResolutions over 2048x2048 are not supported for batch-rendering. If you want to risk it, use §6/isorender insanity"
 }

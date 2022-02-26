@@ -62,7 +62,7 @@ public class ImageExporter extends Thread {
     }
 
     private static void sendErrorMessage() {
-        MinecraftClient.getInstance().player.sendMessage(prefix("§cYour job could not be submitted because the export queue is full!"), false);
+        MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.full_queue"), false);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class ImageExporter extends Thread {
         public static void init() {
             exporters = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             exporters.setThreadFactory(new ThreadFactoryBuilder().setNameFormat("image-export-worker-%d").build());
-            MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system initialized"), false);
+            MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.threaded_export_system_initialized"), false);
         }
 
         public static CompletableFuture<File> submit(NativeImage image, String name) {
@@ -140,9 +140,9 @@ public class ImageExporter extends Thread {
         public static void finish() {
             exporters.shutdown();
             if (getJobCount() > 0) {
-                MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system shutting down with " + getJobCount() + " tasks remaining"), false);
+                MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.threaded_export_system_shutdown_with_job", getJobCount()), false);
             } else {
-                MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system shutting down"), false);
+                MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.threaded_export_system_shutdown"), false);
             }
         }
 

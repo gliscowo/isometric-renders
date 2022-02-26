@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
+import static com.glisco.isometricrenders.Translator.tr;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
