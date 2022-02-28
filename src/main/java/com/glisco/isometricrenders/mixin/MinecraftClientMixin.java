@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.mixin;
 
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;

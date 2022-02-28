@@ -1,8 +1,13 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.client.gui.*;
+import com.glisco.isometricrenders.IsometricRendersClient;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
+import com.glisco.isometricrenders.render.DefaultLightingProfiles;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.IsometricRenderPresets;
+import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
+import com.glisco.isometricrenders.screen.IsometricRenderScreen;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -36,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
+import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
@@ -47,7 +52,6 @@ public class IsoRenderCommand {
     private static final SuggestionProvider<FabricClientCommandSource> NAMESPACE_PROVIDER;
 
     private static final List<String> NAMESPACES = new ArrayList<>();
-
 
     static {
         CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> {
@@ -130,7 +134,7 @@ public class IsoRenderCommand {
             if (RuntimeConfig.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
                 context.getSource().sendFeedback(prefix("§aCustom Lighting: §7[§c" + profile.getVector().getX() + " §a" + profile.getVector().getY() + " §b" + profile.getVector().getZ() + "§7]"));
             } else {
-                context.getSource().sendFeedback(prefix("Current Profile: " + RuntimeConfig.lightingProfile.getFriendlyName()));
+                context.getSource().sendFeedback(prefix("Current Profile: " + RuntimeConfig.lightingProfile.getFriendlyName().getString()));
             }
             return 0;
         }).then(argument("x", FloatArgumentType.floatArg()).then(argument("y", FloatArgumentType.floatArg()).then(argument("z", FloatArgumentType.floatArg()).executes(context -> {

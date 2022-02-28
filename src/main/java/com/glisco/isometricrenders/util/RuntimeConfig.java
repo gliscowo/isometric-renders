@@ -1,7 +1,7 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.client.gui.DefaultLightingProfiles;
-import com.glisco.isometricrenders.client.gui.LightingProfile;
+import com.glisco.isometricrenders.render.DefaultLightingProfiles;
+import com.glisco.isometricrenders.render.LightingProfile;
 
 public class RuntimeConfig {
 

@@ -1,4 +1,4 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders.util;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;

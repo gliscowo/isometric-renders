@@ -1,8 +1,8 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.client.gui.AreaIsometricRenderScreen;
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
-import com.glisco.isometricrenders.client.gui.IsometricRenderPresets;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.IsometricRenderPresets;
+import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;

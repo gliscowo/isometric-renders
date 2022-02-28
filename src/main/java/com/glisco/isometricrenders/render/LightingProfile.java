@@ -1,4 +1,4 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.render;
 
 import net.minecraft.text.Text;
 

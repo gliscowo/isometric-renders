@@ -17,7 +17,10 @@
   "accessWidener": "isometricrenders.accesswidener",
   "entrypoints": {
     "client": [
-      "com.glisco.isometricrenders.client.IsometricRendersClient"
+      "com.glisco.isometricrenders.IsometricRendersClient"
+    ],
+    "exo": [
+      "com.glisco.isometricrenders.util.IsometricChannel"
     ]
   },
   "mixins": [
@@ -30,7 +33,7 @@
     "fabricloader": ">=0.11.3",
     "fabric": "*",
     "worldmesher": "*",
-    "minecraft": ">=1.17"
+    "minecraft": ">=1.18"
   },
   "custom": {
     "modmenu": {

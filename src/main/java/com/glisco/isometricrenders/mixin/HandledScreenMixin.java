@@ -1,8 +1,8 @@
 package com.glisco.isometricrenders.mixin;
 
-import com.glisco.isometricrenders.client.gui.BatchIsometricBlockRenderScreen;
-import com.glisco.isometricrenders.client.gui.BatchIsometricItemRenderScreen;
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.screen.BatchIsometricBlockRenderScreen;
+import com.glisco.isometricrenders.screen.BatchIsometricItemRenderScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.ScreenHandler;

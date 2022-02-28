@@ -1,7 +1,13 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.render;
 
-import com.glisco.isometricrenders.client.RuntimeConfig;
-import com.glisco.isometricrenders.mixin.*;
+import com.glisco.isometricrenders.mixin.BlockEntityAccessor;
+import com.glisco.isometricrenders.mixin.CameraInvoker;
+import com.glisco.isometricrenders.mixin.DefaultPosArgumentAccessor;
+import com.glisco.isometricrenders.mixin.NativeImageAccessor;
+import com.glisco.isometricrenders.screen.BatchIsometricBlockRenderScreen;
+import com.glisco.isometricrenders.screen.BatchIsometricItemRenderScreen;
+import com.glisco.isometricrenders.screen.ItemAtlasRenderScreen;
+import com.glisco.isometricrenders.util.RuntimeConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
@@ -40,20 +46,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class IsometricRenderHelper {
 
     public static boolean allowParticles = true;
-    public static final Matrix4f LIGHT_MATRIX;
-
     private static Screen SCHEDULED_SCREEN = null;
-
-    static {
-        LIGHT_MATRIX = new Matrix4f();
-        LIGHT_MATRIX.loadIdentity();
-        LIGHT_MATRIX.addToLastColumn(new Vec3f(0.15f, 0.5f, 0.15f));
-    }
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 
@@ -74,21 +71,21 @@ public class IsometricRenderHelper {
     }
 
     public static void batchRenderNamespaceItems(String namespace) {
-        Stream stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
 
         BatchIsometricItemRenderScreen screen = new BatchIsometricItemRenderScreen(stacks.iterator(), "namespace_" + namespace);
         scheduleScreen(screen);
     }
 
     public static void batchRenderNamespaceBlocks(String namespace) {
-        Stream stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
 
         BatchIsometricBlockRenderScreen screen = new BatchIsometricBlockRenderScreen(extractBlocks(stacks.toList()), "namespace_" + namespace);
         scheduleScreen(screen);
     }
 
     public static void renderNamespaceAtlas(String namespace) {
-        Stream stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
+        var stacks = Registry.ITEM.stream().filter(item -> Registry.ITEM.getId(item).getNamespace().equals(namespace)).map(ItemStack::new);
 
         renderItemAtlas("namespace_" + namespace, stacks.toList(), false);
     }
@@ -117,7 +114,8 @@ public class IsometricRenderHelper {
                     if (index > stacks.size() - 1) continue;
 
                     ItemStack stack = stacks.get(index);
-                    MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Mode.GUI, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
+                    MinecraftClient.getInstance().getItemRenderer()
+                            .renderItem(stack, ModelTransformation.Mode.GUI, 15728880, OverlayTexture.DEFAULT_UV, matrices, vertexConsumerProvider, 0);
 
                     matrices.translate(1.2, 0, 0);
                 }
@@ -143,10 +141,6 @@ public class IsometricRenderHelper {
         RenderSystem.enableBlend();
         RenderSystem.clear(16640, MinecraftClient.IS_SYSTEM_MAC);
 
-        float r = (RuntimeConfig.backgroundColor >> 16) / 255f;
-        float g = (RuntimeConfig.backgroundColor >> 8 & 0xFF) / 255f;
-        float b = (RuntimeConfig.backgroundColor & 0xFF) / 255f;
-
         framebuffer.setClearColor(0, 0, 0, 0);
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
 
@@ -168,7 +162,7 @@ public class IsometricRenderHelper {
         MatrixStack matrixStack = new MatrixStack();
         matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
 
-        renderCallback.render(matrixStack, vertexConsumers, ((MinecraftClientAccessor) MinecraftClient.getInstance()).getRenderTickCounter().tickDelta);
+        renderCallback.render(matrixStack, vertexConsumers, MinecraftClient.getInstance().getTickDelta());
 
         vertexConsumers.draw();
 
@@ -263,7 +257,6 @@ public class IsometricRenderHelper {
         copyTag.putInt("z", 0);
 
         be.readNbt(copyTag);
-
     }
 
     public static void setupLighting() {

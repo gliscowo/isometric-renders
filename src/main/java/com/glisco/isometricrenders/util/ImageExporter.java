@@ -1,27 +1,28 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.client.gui.IsometricRenderHelper;
+import com.glisco.isometricrenders.IsometricRendersClient;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.glisco.isometricrenders.client.IsometricRendersClient.prefix;
+import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
 
 public class ImageExporter extends Thread {
 
     private static ImageExporter INSTANCE = null;
 
-    private static final List<Pair<NativeImage, String>> jobs = new ArrayList<>();
-    private static Pair<NativeImage, String> currentJob = null;
+    private static final List<Job> jobs = new ArrayList<>();
+    private static Job currentJob = null;
 
     public static void init() {
         if (INSTANCE != null) throw new IllegalStateException("Export Thread is already running!");
@@ -34,12 +35,18 @@ public class ImageExporter extends Thread {
         return getJobCount() < 10;
     }
 
-    public static void addJob(NativeImage image, String name) {
+    public static CompletableFuture<File> addJob(NativeImage image, String name) {
         if (!acceptsJobs()) {
             sendErrorMessage();
-            return;
+            return CompletableFuture.completedFuture(null);
         }
-        jobs.add(new Pair<>(image, name));
+
+        var future = new CompletableFuture<File>();
+        jobs.add(new Job(image, name, future));
+        synchronized (INSTANCE) {
+            INSTANCE.notify();
+        }
+        return future;
     }
 
     public static int getJobCount() {
@@ -59,7 +66,7 @@ public class ImageExporter extends Thread {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         while (true) {
 
             while (!jobs.isEmpty()) {
@@ -72,7 +79,7 @@ public class ImageExporter extends Thread {
             }
 
             try {
-                Thread.sleep(5000);
+                this.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 break;
@@ -86,26 +93,27 @@ public class ImageExporter extends Thread {
         return "Export Jobs: " + jobs;
     }
 
-    private static void exportImage(Pair<NativeImage, String> job) {
+    private static void exportImage(Job job) {
         final File renderDir = FabricLoader.getInstance().getGameDir().resolve("renders").toFile();
         File file;
         if (RuntimeConfig.dumpIntoRoot) {
-            file = IsometricRenderHelper.getNextFile(renderDir, IsometricRenderHelper.getLastFile(job.getRight()));
+            file = IsometricRenderHelper.getNextFile(renderDir, IsometricRenderHelper.getLastFile(job.name()));
         } else {
-            file = IsometricRenderHelper.getNextFile(renderDir, job.getRight());
+            file = IsometricRenderHelper.getNextFile(renderDir, job.name());
         }
 
         file.getParentFile().mkdirs();
 
         IsometricRendersClient.LOGGER.info("Started saving image: {}", file);
         try {
-            job.getLeft().writeTo(file);
+            job.image().writeTo(file);
             IsometricRendersClient.LOGGER.info("Finished");
         } catch (IOException e) {
             IsometricRendersClient.LOGGER.error("Saving image failed, stacktrace below");
             e.printStackTrace();
         }
-        job.getLeft().close();
+        job.image().close();
+        job.future.complete(file);
     }
 
     public static class Threaded {
@@ -118,14 +126,15 @@ public class ImageExporter extends Thread {
             MinecraftClient.getInstance().player.sendMessage(prefix("Threaded export system initialized"), false);
         }
 
-        public static void submit(NativeImage image, String name) {
+        public static CompletableFuture<File> submit(NativeImage image, String name) {
             if (!acceptsNew()) {
                 sendErrorMessage();
-                return;
+                return CompletableFuture.completedFuture(null);
             }
-            exporters.submit(() -> {
-                exportImage(new Pair<>(image, name));
-            });
+
+            var future = new CompletableFuture<File>();
+            exporters.submit(() -> exportImage(new Job(image, name, future)));
+            return future;
         }
 
         public static void finish() {
@@ -151,4 +160,6 @@ public class ImageExporter extends Thread {
         }
 
     }
+
+    private static record Job(NativeImage image, String name, CompletableFuture<File> future) {}
 }

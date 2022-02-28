@@ -1,7 +1,7 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.client.ImageExporter;
-import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.util.ImageExporter;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -9,12 +9,12 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3f;
 
+import java.io.File;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
-import static com.glisco.isometricrenders.client.RuntimeConfig.*;
+import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class ItemAtlasRenderScreen extends RenderScreen {
 
@@ -93,11 +93,9 @@ public class ItemAtlasRenderScreen extends RenderScreen {
     protected void drawContent(MatrixStack matrices) {
         float scale = atlasScale * 90 * height / 515f;
 
-        Matrix4f modelMatrix = RenderSystem.getModelViewMatrix().copy();
-
         MatrixStack modelStack = RenderSystem.getModelViewStack();
         modelStack.push();
-        modelStack.translate((float) Math.round(230 - atlasShift * 1f + (height - 515f) / 30f), (float) Math.round(atlasHeight * 1f + (height - 515f) / 10f), 1500);
+        modelStack.translate(230 - atlasShift, atlasHeight, 1500);
         modelStack.scale(1, -1, -1);
         RenderSystem.applyModelViewMatrix();
 
@@ -105,16 +103,12 @@ public class ItemAtlasRenderScreen extends RenderScreen {
 
         VertexConsumerProvider.Immediate immediate = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
 
-        renderCallback.render(matrices, immediate, playAnimations ? ((MinecraftClientAccessor) client).getRenderTickCounter().tickDelta : 0);
+        renderCallback.render(matrices, immediate, playAnimations ? client.getTickDelta() : 0);
 
         immediate.draw();
-
-        modelStack.loadIdentity();
-        modelStack.multiplyPositionMatrix(modelMatrix);
+        modelStack.pop();
 
         RenderSystem.applyModelViewMatrix();
-
-        modelStack.pop();
     }
 
     @Override
@@ -123,21 +117,17 @@ public class ItemAtlasRenderScreen extends RenderScreen {
 
             matrices.push();
 
-            matrices.translate(-(115 - atlasShift) / 270d, 0.20 + ((atlasHeight - 115) / 270d), 0);
-            matrices.scale(atlasScale * 85 * 0.004f, atlasScale * 85 * 0.004f, 1f);
-
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180));
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
+            matrices.translate((atlasShift - 225) / 250d, ((atlasHeight) / 250d), 0);
+            matrices.scale(atlasScale * 85 * -0.004f, atlasScale * 85 * -0.004f, .15f);
 
             renderCallback.render(matrices, vertexConsumerProvider, tickDelta);
 
             matrices.pop();
-
         };
     }
 
     @Override
-    protected void addImageToExportQueue(NativeImage image) {
-        ImageExporter.addJob(image, currentFilename);
+    protected CompletableFuture<File> addImageToExportQueue(NativeImage image) {
+        return ImageExporter.addJob(image, currentFilename);
     }
 }

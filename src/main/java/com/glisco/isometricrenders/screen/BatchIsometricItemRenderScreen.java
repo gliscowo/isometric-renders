@@ -1,5 +1,7 @@
-package com.glisco.isometricrenders.client.gui;
+package com.glisco.isometricrenders.screen;
 
+import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.IsometricRenderPresets;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 

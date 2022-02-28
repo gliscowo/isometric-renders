@@ -1,6 +1,9 @@
-package com.glisco.isometricrenders.client;
+package com.glisco.isometricrenders;
 
-import com.glisco.isometricrenders.client.gui.RenderScreen;
+import com.glisco.isometricrenders.screen.RenderScreen;
+import com.glisco.isometricrenders.util.AreaSelectionHelper;
+import com.glisco.isometricrenders.util.ImageExporter;
+import com.glisco.isometricrenders.util.IsoRenderCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
