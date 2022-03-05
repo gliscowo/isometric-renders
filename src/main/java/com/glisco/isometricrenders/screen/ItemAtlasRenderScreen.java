@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.screen;
 
+import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.glisco.isometricrenders.util.ImageExporter;
 import com.mojang.blaze3d.systems.RenderSystem;
