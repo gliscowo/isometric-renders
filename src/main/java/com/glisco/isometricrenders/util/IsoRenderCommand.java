@@ -1,6 +1,5 @@
 package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.IsometricRendersClient;
 import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
 import com.glisco.isometricrenders.render.DefaultLightingProfiles;
@@ -26,7 +25,6 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -42,8 +40,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.glisco.isometricrenders.util.Translator.msg;
-import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
-import static com.glisco.isometricrenders.Translator.tr;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
@@ -56,15 +52,13 @@ public class IsoRenderCommand {
     private static final List<String> NAMESPACES = new ArrayList<>();
 
     static {
-        CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> {
-            return CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable), builder, EntityType::getId, entityType -> {
-                return new TranslatableText(Util.createTranslationKey("entity", EntityType.getId(entityType)));
-            });
-        };
+        CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable), builder, EntityType::getId, entityType ->
+                new TranslatableText(Util.createTranslationKey("entity", EntityType.getId(entityType)))
+            );
 
-        ITEM_GROUPS = (context, builder) -> {
-            return CommandSource.suggestMatching(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName), builder);
-        };
+        ITEM_GROUPS = (context, builder) ->
+            CommandSource.suggestMatching(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName), builder);
+
 
         NAMESPACE_PROVIDER = (context, builder) -> {
             cacheNamespaces();
@@ -92,9 +86,8 @@ public class IsoRenderCommand {
         }).then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
             final ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             return executeItem(context.getSource(), stack);
-        }))).then(literal("entity").executes(context -> {
-            return executeEntityTarget(context.getSource());
-        }).then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
+        }))).then(literal("entity").executes(context -> executeEntityTarget(context.getSource())
+        ).then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), new NbtCompound());
         }).then(argument("nbt", NbtCompoundArgumentType.nbtCompound()).executes(context -> {
