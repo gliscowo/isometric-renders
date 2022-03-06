@@ -5,7 +5,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
-import static com.glisco.isometricrenders.Translator.tr;
+import static com.glisco.isometricrenders.util.Translator.tr;
 
 public class DefaultLightingProfiles {
 

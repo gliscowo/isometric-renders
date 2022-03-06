@@ -30,12 +30,25 @@
   "gui.isometric-renders.export_options": "Export Options",
   "gui.isometric-renders.renderer_resolution": "Renderer Resolution",
   "gui.isometric-renders.hotkeys": "F10: Studio Mode  F12: Export",
-  "gui.isometric-renders.memory_warning": "Warning: Unless you have at least 6GB \nof memory available for Minecraft, \nresolutions over 8192x8192 \nare not recommended if you want \nyour computer to survive",
+
+  "gui.isometric-renders.memory_warning1": "Warning: Unless you have at least 6GB ",
+  "gui.isometric-renders.memory_warning2": "of memory available for Minecraft,",
+  "gui.isometric-renders.memory_warning3": "resolutions over 8192x8192",
+  "gui.isometric-renders.memory_warning4": "are not recommended if you want",
+  "gui.isometric-renders.memory_warning5": "your computer to survive",
 
   "gui.isometric-renders.lighting_profile.flat": "Flat",
   "gui.isometric-renders.lighting_profile.default": "Default",
   "gui.isometric-renders.lighting_profile.custom": "Custom",
 
+  "gui.isometric-renders.mesh_status": "Mesh Status: ",
+  "gui.isometric-renders.mesh_building": "§cBuilding - ",
+  "gui.isometric-renders.mesh_ready": "§aReady",
+
+  "gui.isometric-renders.exporter.idle": "Exporter Idle",
+  "gui.isometric-renders.exporter.jobs": "Export Jobs: %s",
+
+  "message.isometric-renders.prefix": "§9[§aIsometric Renders§9]§7 ",
   "message.isometric-renders.no_block": "You're not looking at a block",
   "message.isometric-renders.no_entity": "You're not looking at an entity",
   "message.isometric-renders.incomplete_selection": "Your selection is not complete!",

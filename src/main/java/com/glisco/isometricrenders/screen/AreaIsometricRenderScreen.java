@@ -13,7 +13,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
-import static com.glisco.isometricrenders.Translator.tr;
+import static com.glisco.isometricrenders.util.Translator.gui;
+import static com.glisco.isometricrenders.util.Translator.tr;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
@@ -60,11 +61,15 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         super.drawGuiText(matrices);
 
         final AreaRenderCallback renderCallback = (AreaRenderCallback) this.renderCallback;
-        StringBuilder buildString = new StringBuilder("§cBuilding - ");
-        buildString.append(Math.round(renderCallback.getMeshProgress() * 100));
-        buildString.append("%");
+        var meshStatus = gui("mesh_status");
+        if (renderCallback.canRender()) {
+            meshStatus.append(gui("mesh_ready"));
+        } else {
+            var percentage = Math.round(renderCallback.getMeshProgress() * 100);
+            meshStatus.append(gui("mesh_building", percentage));
+        }
 
-        MinecraftClient.getInstance().textRenderer.draw(matrices, "Mesh Status: " + (renderCallback.canRender() ? "§aReady" : buildString), 12, 260, 0xAAAAAA);
+        MinecraftClient.getInstance().textRenderer.draw(matrices, meshStatus, 12, 260, 0xAAAAAA);
     }
 
     public static class AreaRenderCallback implements IsometricRenderHelper.RenderCallback {

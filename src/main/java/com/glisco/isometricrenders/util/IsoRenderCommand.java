@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.glisco.isometricrenders.util.Translator.msg;
 import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
 import static com.glisco.isometricrenders.Translator.tr;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
@@ -53,7 +54,6 @@ public class IsoRenderCommand {
     private static final SuggestionProvider<FabricClientCommandSource> NAMESPACE_PROVIDER;
 
     private static final List<String> NAMESPACES = new ArrayList<>();
-
 
     static {
         CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> {
@@ -105,15 +105,15 @@ public class IsoRenderCommand {
             RuntimeConfig.allowInsaneResolutions = !RuntimeConfig.allowInsaneResolutions;
 
             if (RuntimeConfig.allowInsaneResolutions) {
-                context.getSource().sendFeedback(prefix("Insane resolutions §cunlocked§7. I will not be your place to cry if this blows up your computer."));
+                context.getSource().sendFeedback(msg("insane_resolution_unlocked"));
             } else {
-                context.getSource().sendFeedback(prefix("Insane resolutions §alocked§7. You're safe again"));
+                context.getSource().sendFeedback(msg("insane_resolution_locked"));
             }
 
             return 0;
         })).then(literal("area").executes(context -> {
             if (!AreaSelectionHelper.tryOpenScreen()) {
-                context.getSource().sendError(Text.of("Your selection is not complete!"));
+                context.getSource().sendError(msg("incomplete_selection"));
             }
             return 0;
         }).then(argument("start", BlockPosArgumentType.blockPos()).then(argument("end", BlockPosArgumentType.blockPos()).executes(context -> {
@@ -134,14 +134,14 @@ public class IsoRenderCommand {
             return 0;
         })))).then(literal("lighting").executes(context -> {
             if (RuntimeConfig.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
-                context.getSource().sendFeedback(prefix("§aCustom Lighting: §7[§c" + profile.getVector().getX() + " §a" + profile.getVector().getY() + " §b" + profile.getVector().getZ() + "§7]"));
+                context.getSource().sendFeedback(msg("custom_lighting", profile.getVector().getX(), profile.getVector().getY(), profile.getVector().getZ()));
             } else {
-                context.getSource().sendFeedback(prefix("message.isometric-renders.current_profile", RuntimeConfig.lightingProfile.getFriendlyName()));
+                context.getSource().sendFeedback(msg("current_profile", RuntimeConfig.lightingProfile.getFriendlyName()));
             }
             return 0;
         }).then(argument("x", FloatArgumentType.floatArg()).then(argument("y", FloatArgumentType.floatArg()).then(argument("z", FloatArgumentType.floatArg()).executes(context -> {
             RuntimeConfig.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(FloatArgumentType.getFloat(context, "x"), FloatArgumentType.getFloat(context, "y"), FloatArgumentType.getFloat(context, "z"));
-            context.getSource().sendFeedback(IsometricRendersClient.prefix("§aLighting profile updated"));
+            context.getSource().sendFeedback(msg("lighting_profile_updated"));
             return 0;
         }))))).then(literal("namespace").then(argument("namespace", StringArgumentType.string()).suggests(NAMESPACE_PROVIDER).then(literal("batch").then(literal("items").executes(context -> {
             String namespace = StringArgumentType.getString(context, "namespace");
@@ -186,7 +186,7 @@ public class IsoRenderCommand {
         IsometricRenderScreen screen = new IsometricRenderScreen();
 
         if (client.crosshairTarget.getType() != HitResult.Type.BLOCK) {
-            source.sendError(Text.of("You're not looking at a block"));
+            source.sendError(msg("no_block"));
             return 0;
         }
 
@@ -237,7 +237,7 @@ public class IsoRenderCommand {
         IsometricRenderScreen screen = new IsometricRenderScreen();
 
         if (client.crosshairTarget.getType() != HitResult.Type.ENTITY) {
-            source.sendError(tr("message.isometric-renders.no_entity"));
+            source.sendError(msg("no_entity"));
             return 0;
         }
 

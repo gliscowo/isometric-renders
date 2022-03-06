@@ -21,8 +21,8 @@ import net.minecraft.util.math.Vec3f;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
+import static com.glisco.isometricrenders.util.Translator.gui;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
-import static com.glisco.isometricrenders.Translator.tr;
 
 public class IsometricRenderScreen extends RenderScreen {
 
@@ -43,7 +43,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempScale == renderScale || tempScale < 1) return;
             scaleSlider.setValue((tempScale - 1d) / 449d);
         });
-        scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, Text.of("Scale"), 0.399, 0.025, (renderScale - 1) / 449d, aDouble -> {
+        scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, gui("scale"), 0.399, 0.025, (renderScale - 1) / 449d, aDouble -> {
             renderScale = (int) Math.round(1d + aDouble * 449d);
             scaleField.setText(String.valueOf(renderScale));
         });
@@ -56,7 +56,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempRot == rotation) return;
             rotSlider.setValue(tempRot / 360d);
         });
-        rotSlider = new SliderWidgetImpl(50, 70, sliderWidth, Text.of("Rotation"), 0.625, 0.125, rotation / 360d, aDouble -> {
+        rotSlider = new SliderWidgetImpl(50, 70, sliderWidth, gui("rotation"),0.625, 0.125, rotation / 360d, aDouble -> {
             rotation = (int) Math.round(aDouble * 360);
             rotationField.setText(String.valueOf(rotation));
         });
@@ -70,7 +70,7 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempAngle == angle) return;
             angleSlider.setValue(tempAngle / 180d);
         });
-        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Angle"), 2 / 3d, 5 / 30d, (90 + angle) / 180d, aDouble -> {
+        angleSlider = new SliderWidgetImpl(50, 100, sliderWidth, gui("angle"), 2 / 3d, 5 / 30d, (90 + angle) / 180d, aDouble -> {
             angle = -90 + (int) Math.round(aDouble * 180);
             angleField.setText(String.valueOf(angle));
         });
@@ -83,18 +83,18 @@ public class IsometricRenderScreen extends RenderScreen {
             if (tempHeight == renderHeight) return;
             heightSlider.setValue(((tempHeight + 300) / 600d));
         });
-        heightSlider = new SliderWidgetImpl(50, 130, sliderWidth, Text.of("Render Height"), 0.5, 0.05, (renderHeight + 300) / 600d, aDouble -> {
+        heightSlider = new SliderWidgetImpl(50, 130, sliderWidth, gui("render_height"), 0.5, 0.05, (renderHeight + 300) / 600d, aDouble -> {
             renderHeight = (int) Math.round(aDouble * 600) - 300;
             heightField.setText(String.valueOf(renderHeight));
         });
 
-        ButtonWidget dimetricButton = new ButtonWidget(10, 180, 60, 20, Text.of("Dimetric"), button -> {
+        ButtonWidget dimetricButton = new ButtonWidget(10, 180, 60, 20, gui("dimetric"), button -> {
             rotationField.setText("225");
             angleField.setText("30");
             heightField.setText("0");
         });
 
-        ButtonWidget isometricButton = new ButtonWidget(75, 180, 60, 20, Text.of("Isometric"), button -> {
+        ButtonWidget isometricButton = new ButtonWidget(75, 180, 60, 20, gui("isometric"), button -> {
             rotationField.setText("225");
             angleField.setText("36");
             heightField.setText("0");
@@ -131,9 +131,9 @@ public class IsometricRenderScreen extends RenderScreen {
 
     @Override
     protected void drawGuiText(MatrixStack matrices) {
-        client.textRenderer.draw(matrices, "Transform Options", 12, 20, 0xAAAAAA);
-        client.textRenderer.draw(matrices, "Presets", 12, 165, 0xAAAAAA);
-        client.textRenderer.draw(matrices, "Lighting Profile", 12, 210, 0xAAAAAA);
+        client.textRenderer.draw(matrices, gui("transform_options"), 12, 20, 0xAAAAAA);
+        client.textRenderer.draw(matrices, gui("presets"), 12, 165, 0xAAAAAA);
+        client.textRenderer.draw(matrices, gui("lighting_profile"), 12, 210, 0xAAAAAA);
     }
 
     @Override

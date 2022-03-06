@@ -10,12 +10,12 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 
-import static com.glisco.isometricrenders.Translator.tr;
+import static com.glisco.isometricrenders.util.Translator.msg;
+import static com.glisco.isometricrenders.util.Translator.tr;
 
 public class AreaSelectionHelper {
 
@@ -29,7 +29,7 @@ public class AreaSelectionHelper {
     public static void clear() {
         AreaSelectionHelper.pos1 = null;
         AreaSelectionHelper.pos2 = null;
-        MinecraftClient.getInstance().player.sendMessage(tr("message.isometric-renders.selections_cleared"), true);
+        MinecraftClient.getInstance().player.sendMessage(msg("selection_cleared"), true);
     }
 
     public static void renderSelectionBox(MatrixStack matrices, Camera camera) {
@@ -65,9 +65,9 @@ public class AreaSelectionHelper {
 
         if (pos1 == null) {
             pos1 = targetPos;
-            client.player.sendMessage(tr("message.isometric-renders.selections_started"), true);
+            client.player.sendMessage(msg("selection_started"), true);
         } else {
-            client.player.sendMessage(tr("message.isometric-renders.selections_finished"), true);
+            client.player.sendMessage(msg("selection_finished"), true);
             pos2 = targetPos;
         }
     }

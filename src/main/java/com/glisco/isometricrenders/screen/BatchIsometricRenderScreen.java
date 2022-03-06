@@ -11,9 +11,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
-import static com.glisco.isometricrenders.IsometricRendersClient.prefix;
 import static com.glisco.isometricrenders.util.RuntimeConfig.exportResolution;
 import static com.glisco.isometricrenders.util.RuntimeConfig.useExternalRenderer;
+import static com.glisco.isometricrenders.util.Translator.msg;
 
 public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScreen {
 
@@ -29,14 +29,14 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
         this.name = name;
 
         if (ImageExporter.Threaded.busy()) {
-            MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.threaded_export_system_not_available"), false);
+            MinecraftClient.getInstance().player.sendMessage(msg("threaded_export_system_not_available"), false);
             invalid = true;
         }
 
         ImageExporter.Threaded.init();
 
         if (useExternalRenderer && exportResolution > 2048 && !RuntimeConfig.allowInsaneResolutions) {
-            MinecraftClient.getInstance().player.sendMessage(prefix("message.isometric-renders.resolution_not_supported"), false);
+            MinecraftClient.getInstance().player.sendMessage(msg("resolution_not_supported"), false);
             invalid = true;
         }
 
