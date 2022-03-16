@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.screen;
 
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.util.Translate;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.worldmesher.WorldMesh;
 import net.minecraft.client.MinecraftClient;
@@ -9,12 +10,11 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 
-import static com.glisco.isometricrenders.util.Translator.gui;
-import static com.glisco.isometricrenders.util.Translator.tr;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
@@ -47,7 +47,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
             if (tempOpacity == areaRenderOpacity) return;
             opacitySlider.setValue(areaRenderOpacity / 100f);
         });
-        opacitySlider = new RenderScreen.SliderWidgetImpl(50, 275, sliderWidth, tr("message.isometric-renders.opacity"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
+        opacitySlider = new RenderScreen.SliderWidgetImpl(50, 275, sliderWidth, Translate.make("message.isometric-renders.opacity"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
             areaRenderOpacity = (int) Math.round(aDouble * 100);
             opacityField.setText(String.valueOf(areaRenderOpacity));
         });
@@ -61,12 +61,12 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         super.drawGuiText(matrices);
 
         final AreaRenderCallback renderCallback = (AreaRenderCallback) this.renderCallback;
-        var meshStatus = gui("mesh_status");
+        var meshStatus = Translate.gui("mesh_status");
         if (renderCallback.canRender()) {
-            meshStatus.append(gui("mesh_ready"));
+            meshStatus.append(Translate.gui("mesh_ready").formatted(Formatting.GREEN));
         } else {
             var percentage = Math.round(renderCallback.getMeshProgress() * 100);
-            meshStatus.append(gui("mesh_building", percentage));
+            meshStatus.append(Translate.gui("mesh_building", percentage).formatted(Formatting.RED));
         }
 
         MinecraftClient.getInstance().textRenderer.draw(matrices, meshStatus, 12, 260, 0xAAAAAA);

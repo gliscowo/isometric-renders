@@ -1,4 +1,4 @@
-package com.glisco.isometricrenders.mixin;
+package com.glisco.isometricrenders.mixin.access;
 
 import net.minecraft.client.texture.NativeImage;
 import org.spongepowered.asm.mixin.Mixin;

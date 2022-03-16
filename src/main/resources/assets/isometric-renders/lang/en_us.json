@@ -42,13 +42,13 @@
   "gui.isometric-renders.lighting_profile.custom": "Custom",
 
   "gui.isometric-renders.mesh_status": "Mesh Status: ",
-  "gui.isometric-renders.mesh_building": "§cBuilding - ",
-  "gui.isometric-renders.mesh_ready": "§aReady",
+  "gui.isometric-renders.mesh_building": "Building - %d%%",
+  "gui.isometric-renders.mesh_ready": "Ready",
 
   "gui.isometric-renders.exporter.idle": "Exporter Idle",
   "gui.isometric-renders.exporter.jobs": "Export Jobs: %s",
 
-  "message.isometric-renders.prefix": "§9[§aIsometric Renders§9]§7 ",
+  "message.isometric-renders.prefix": "§9[§aIsometric Renders§9] ",
   "message.isometric-renders.no_block": "You're not looking at a block",
   "message.isometric-renders.no_entity": "You're not looking at an entity",
   "message.isometric-renders.incomplete_selection": "Your selection is not complete!",

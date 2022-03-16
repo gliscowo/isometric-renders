@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.mixin.ParticleManagerAccessor;
-import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
+import com.glisco.isometricrenders.mixin.access.ParticleManagerAccessor;
+import com.glisco.isometricrenders.mixin.access.SliderWidgetInvoker;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.glisco.isometricrenders.util.ImageExporter;
 import com.glisco.isometricrenders.util.RuntimeConfig;
@@ -23,8 +23,8 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static com.glisco.isometricrenders.util.Translator.*;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
+import static com.glisco.isometricrenders.util.Translate.gui;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 public abstract class RenderScreen extends Screen {

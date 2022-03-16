@@ -4,10 +4,8 @@ import com.glisco.isometricrenders.IsometricRendersClient;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.glisco.isometricrenders.util.Translator.gui;
-import static com.glisco.isometricrenders.util.Translator.msg;
+import static com.glisco.isometricrenders.util.Translate.gui;
 
 public class ImageExporter extends Thread {
 
@@ -65,7 +62,7 @@ public class ImageExporter extends Thread {
     }
 
     private static void sendErrorMessage() {
-        MinecraftClient.getInstance().player.sendMessage(msg("full_queue"), false);
+        Translate.chat("full_queue");
     }
 
     @Override
@@ -91,7 +88,7 @@ public class ImageExporter extends Thread {
     }
 
     public static Text getProgressBarText() {
-       int jobs = getJobCount();
+        int jobs = getJobCount();
         if (jobs == 0) return gui("exporter.idle");
         return gui("exporter.jobs", jobs);
     }
@@ -126,7 +123,7 @@ public class ImageExporter extends Thread {
         public static void init() {
             exporters = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             exporters.setThreadFactory(new ThreadFactoryBuilder().setNameFormat("image-export-worker-%d").build());
-            MinecraftClient.getInstance().player.sendMessage(msg("threaded_export_system_initialized"), false);
+            Translate.chat("threaded_export_system_initialized");
         }
 
         public static CompletableFuture<File> submit(NativeImage image, String name) {
@@ -143,9 +140,9 @@ public class ImageExporter extends Thread {
         public static void finish() {
             exporters.shutdown();
             if (getJobCount() > 0) {
-                MinecraftClient.getInstance().player.sendMessage(msg("threaded_export_system_shutdown_with_job", getJobCount()), false);
+                Translate.chat("threaded_export_system_shutdown_with_job", getJobCount());
             } else {
-                MinecraftClient.getInstance().player.sendMessage(msg("threaded_export_system_shutdown"), false);
+                Translate.chat("threaded_export_system_shutdown");
             }
         }
 
@@ -164,5 +161,5 @@ public class ImageExporter extends Thread {
 
     }
 
-    private static record Job(NativeImage image, String name, CompletableFuture<File> future) {}
+    private record Job(NativeImage image, String name, CompletableFuture<File> future) {}
 }

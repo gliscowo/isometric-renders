@@ -1,11 +1,10 @@
 package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.util.Translate;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
-
-import static com.glisco.isometricrenders.util.Translator.tr;
 
 public class DefaultLightingProfiles {
 
@@ -21,7 +20,7 @@ public class DefaultLightingProfiles {
 
         @Override
         public Text getFriendlyName() {
-            return tr("gui.isometric-renders.lighting_profile.flat");
+            return Translate.gui("lighting_profile.flat");
         }
     }
 
@@ -41,7 +40,7 @@ public class DefaultLightingProfiles {
 
         @Override
         public Text getFriendlyName() {
-            return tr("gui.isometric-renders.lighting_profile.default");
+            return Translate.gui("lighting_profile.default");
         }
 
         @Override
@@ -70,7 +69,7 @@ public class DefaultLightingProfiles {
 
         @Override
         public Text getFriendlyName() {
-            return tr("gui.isometric-renders.lighting_profile.custom");
+            return Translate.gui("lighting_profile.custom");
         }
 
         public Vec3f getVector() {

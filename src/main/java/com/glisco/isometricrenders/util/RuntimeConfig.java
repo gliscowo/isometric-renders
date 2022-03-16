@@ -29,4 +29,8 @@ public class RuntimeConfig {
     public static boolean dumpIntoRoot = false;
     public static int exportResolution = 2048;
 
+    public static boolean toggleInsaneResolutions() {
+        return allowInsaneResolutions = !allowInsaneResolutions;
+    }
+
 }

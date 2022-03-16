@@ -1,4 +1,4 @@
-package com.glisco.isometricrenders.mixin;
+package com.glisco.isometricrenders.mixin.access;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;

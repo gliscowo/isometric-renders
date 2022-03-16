@@ -2,6 +2,7 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
 import com.glisco.isometricrenders.screen.IsometricRenderScreen;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -62,14 +63,18 @@ public class IsometricRenderPresets {
     public static void setupBlockEntityRender(IsometricRenderScreen screen, @NotNull BlockEntity entity) {
 
         final MinecraftClient client = MinecraftClient.getInstance();
-        final Identifier blockId = Registry.BLOCK.getId(entity.getCachedState().getBlock());
+        final var state = entity.getCachedState();
+        final var block = state.getBlock();
+        final Identifier blockId = Registry.BLOCK.getId(block);
 
         screen.setup((matrices, vertexConsumerProvider, tickDelta) -> {
 
             matrices.push();
             matrices.translate(-0.5, -0.5, -0.5);
 
-            client.getBlockRenderManager().renderBlockAsEntity(entity.getCachedState(), matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
+            if (block.getRenderType(state) != BlockRenderType.ENTITYBLOCK_ANIMATED) {
+                client.getBlockRenderManager().renderBlockAsEntity(state, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
+            }
 
             if (client.getBlockEntityRenderDispatcher().get(entity) != null) {
                 client.getBlockEntityRenderDispatcher().get(entity).render(entity, tickDelta, matrices, vertexConsumerProvider, 15728880, OverlayTexture.DEFAULT_UV);
@@ -90,12 +95,12 @@ public class IsometricRenderPresets {
 
         screen.setTickCallback(() -> {
 
-            if (entity.getCachedState().getBlockEntityTicker(client.world, entity.getType()) != null) {
-                entity.getCachedState().getBlockEntityTicker(client.world, (BlockEntityType<BlockEntity>) entity.getType()).tick(client.world, client.player.getBlockPos(), entity.getCachedState(), entity);
+            if (state.getBlockEntityTicker(client.world, entity.getType()) != null) {
+                state.getBlockEntityTicker(client.world, (BlockEntityType<BlockEntity>) entity.getType()).tick(client.world, client.player.getBlockPos(), state, entity);
             }
 
             if (client.world.random.nextDouble() < 0.150) {
-                entity.getCachedState().getBlock().randomDisplayTick(entity.getCachedState(), client.world, client.player.getBlockPos(), client.world.random);
+                block.randomDisplayTick(state, client.world, client.player.getBlockPos(), client.world.random);
             }
         });
 

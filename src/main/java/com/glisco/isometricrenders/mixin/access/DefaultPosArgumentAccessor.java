@@ -1,4 +1,4 @@
-package com.glisco.isometricrenders.mixin;
+package com.glisco.isometricrenders.mixin.access;
 
 import net.minecraft.command.argument.CoordinateArgument;
 import net.minecraft.command.argument.DefaultPosArgument;

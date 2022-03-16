@@ -1,9 +1,9 @@
 package com.glisco.isometricrenders.render;
 
-import com.glisco.isometricrenders.mixin.BlockEntityAccessor;
-import com.glisco.isometricrenders.mixin.CameraInvoker;
-import com.glisco.isometricrenders.mixin.DefaultPosArgumentAccessor;
-import com.glisco.isometricrenders.mixin.NativeImageAccessor;
+import com.glisco.isometricrenders.mixin.access.BlockEntityAccessor;
+import com.glisco.isometricrenders.mixin.access.CameraInvoker;
+import com.glisco.isometricrenders.mixin.access.DefaultPosArgumentAccessor;
+import com.glisco.isometricrenders.mixin.access.NativeImageAccessor;
 import com.glisco.isometricrenders.screen.BatchIsometricBlockRenderScreen;
 import com.glisco.isometricrenders.screen.BatchIsometricItemRenderScreen;
 import com.glisco.isometricrenders.screen.ItemAtlasRenderScreen;

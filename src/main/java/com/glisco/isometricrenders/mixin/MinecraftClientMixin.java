@@ -13,10 +13,10 @@ public class MinecraftClientMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void openScheduled(Screen screen, CallbackInfo ci) {
-        if (screen == null && IsometricRenderHelper.isScreenScheduled()) {
-            IsometricRenderHelper.openScheduledScreen();
-            ci.cancel();
-        }
+        if (screen != null || !IsometricRenderHelper.isScreenScheduled()) return;
+
+        IsometricRenderHelper.openScheduledScreen();
+        ci.cancel();
     }
 
 }

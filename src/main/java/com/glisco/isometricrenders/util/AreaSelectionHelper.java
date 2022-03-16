@@ -14,9 +14,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 
-import static com.glisco.isometricrenders.util.Translator.msg;
-import static com.glisco.isometricrenders.util.Translator.tr;
-
 public class AreaSelectionHelper {
 
     public static BlockPos pos1 = null;
@@ -29,7 +26,7 @@ public class AreaSelectionHelper {
     public static void clear() {
         AreaSelectionHelper.pos1 = null;
         AreaSelectionHelper.pos2 = null;
-        MinecraftClient.getInstance().player.sendMessage(msg("selection_cleared"), true);
+        Translate.actionBar("selection_cleared");
     }
 
     public static void renderSelectionBox(MatrixStack matrices, Camera camera) {
@@ -65,9 +62,9 @@ public class AreaSelectionHelper {
 
         if (pos1 == null) {
             pos1 = targetPos;
-            client.player.sendMessage(msg("selection_started"), true);
+            Translate.actionBar("selection_started");
         } else {
-            client.player.sendMessage(msg("selection_finished"), true);
+            Translate.actionBar("selection_finished");
             pos2 = targetPos;
         }
     }

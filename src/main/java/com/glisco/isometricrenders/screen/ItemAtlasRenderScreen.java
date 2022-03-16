@@ -1,6 +1,5 @@
 package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.glisco.isometricrenders.util.ImageExporter;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -15,8 +14,8 @@ import java.io.File;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static com.glisco.isometricrenders.util.Translator.gui;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
+import static com.glisco.isometricrenders.util.Translate.gui;
 
 public class ItemAtlasRenderScreen extends RenderScreen {
 

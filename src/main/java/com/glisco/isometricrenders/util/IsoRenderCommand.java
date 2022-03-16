@@ -1,15 +1,17 @@
 package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.mixin.BlockStateArgumentAccessor;
-import com.glisco.isometricrenders.mixin.EntitySummonArgumentTypeAccessor;
+import com.glisco.isometricrenders.mixin.access.BlockStateArgumentAccessor;
+import com.glisco.isometricrenders.mixin.access.EntitySummonArgumentTypeAccessor;
 import com.glisco.isometricrenders.render.DefaultLightingProfiles;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.glisco.isometricrenders.render.IsometricRenderPresets;
 import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
 import com.glisco.isometricrenders.screen.IsometricRenderScreen;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
@@ -39,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.glisco.isometricrenders.util.Translator.msg;
+import static com.glisco.isometricrenders.util.Translate.msg;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
@@ -51,14 +53,16 @@ public class IsoRenderCommand {
 
     private static final List<String> NAMESPACES = new ArrayList<>();
 
+    private static final ArgKey<ItemGroup> ITEMGROUP = new ArgKey<>(ItemGroup.class, "itemgroup");
+    private static final ArgKey<String> NAMESPACE = new ArgKey<>(String.class, "namespace");
+
     static {
-        CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable), builder, EntityType::getId, entityType ->
-                new TranslatableText(Util.createTranslationKey("entity", EntityType.getId(entityType)))
-            );
+        CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable),
+                builder, EntityType::getId, entityType -> new TranslatableText(Util.createTranslationKey("entity", EntityType.getId(entityType)))
+        );
 
         ITEM_GROUPS = (context, builder) ->
-            CommandSource.suggestMatching(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName), builder);
-
+                CommandSource.suggestMatching(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName), builder);
 
         NAMESPACE_PROVIDER = (context, builder) -> {
             cacheNamespaces();
@@ -86,67 +90,60 @@ public class IsoRenderCommand {
         }).then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
             final ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             return executeItem(context.getSource(), stack);
-        }))).then(literal("entity").executes(context -> executeEntityTarget(context.getSource())
-        ).then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
+        }))).then(literal("entity").executes(context -> {
+            return executeEntityTarget(context.getSource());
+        }).then(argument("entity", EntitySummonArgumentType.entitySummon()).suggests(CLIENT_SUMMONABLE_ENTITIES).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), new NbtCompound());
         }).then(argument("nbt", NbtCompoundArgumentType.nbtCompound()).executes(context -> {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), context.getArgument("nbt", NbtCompound.class));
         })))).then(literal("insanity").executes(context -> {
-
-            RuntimeConfig.allowInsaneResolutions = !RuntimeConfig.allowInsaneResolutions;
-
-            if (RuntimeConfig.allowInsaneResolutions) {
-                context.getSource().sendFeedback(msg("insane_resolution_unlocked"));
-            } else {
-                context.getSource().sendFeedback(msg("insane_resolution_locked"));
-            }
-
+            Translate.commandFeedback(context, RuntimeConfig.toggleInsaneResolutions() ? "insane_resolution_unlocked" : "insane_resolution_locked");
             return 0;
         })).then(literal("area").executes(context -> {
-            if (!AreaSelectionHelper.tryOpenScreen()) {
-                context.getSource().sendError(msg("incomplete_selection"));
-            }
+            if (AreaSelectionHelper.tryOpenScreen()) return 0;
+            Translate.commandError(context, "incomplete_selection");
             return 0;
         }).then(argument("start", BlockPosArgumentType.blockPos()).then(argument("end", BlockPosArgumentType.blockPos()).executes(context -> {
             return executeArea(context, false);
         }).then(literal("enable_translucency").executes(context -> {
             return executeArea(context, true);
-        }))))).then(literal("creative_tab").then(argument("itemgroup", ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("batch").then(literal("blocks").executes(context -> {
-            ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
-            IsometricRenderHelper.batchRenderItemGroupBlocks(group);
+        }))))).then(literal("creative_tab").then(ITEMGROUP.toNode(ItemGroupArgumentType.itemGroup()).suggests(ITEM_GROUPS).then(literal("batch").then(literal("blocks").executes(context -> {
+            IsometricRenderHelper.batchRenderItemGroupBlocks(ITEMGROUP.get(context));
             return 0;
         })).then(literal("items").executes(context -> {
-            ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
-            IsometricRenderHelper.batchRenderItemGroupItems(group);
+            IsometricRenderHelper.batchRenderItemGroupItems(ITEMGROUP.get(context));
             return 0;
         }))).then(literal("atlas").executes(context -> {
-            ItemGroup group = context.getArgument("itemgroup", ItemGroup.class);
-            IsometricRenderHelper.renderItemGroupAtlas(group);
+            IsometricRenderHelper.renderItemGroupAtlas(ITEMGROUP.get(context));
             return 0;
         })))).then(literal("lighting").executes(context -> {
             if (RuntimeConfig.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
-                context.getSource().sendFeedback(msg("custom_lighting", profile.getVector().getX(), profile.getVector().getY(), profile.getVector().getZ()));
+                final var vector = profile.getVector();
+                Translate.commandFeedback(context, "custom_lighting", vector.getX(), vector.getY(), vector.getZ());
             } else {
-                context.getSource().sendFeedback(msg("current_profile", RuntimeConfig.lightingProfile.getFriendlyName()));
+                Translate.commandFeedback(context, "current_profile");
             }
             return 0;
         }).then(argument("x", FloatArgumentType.floatArg()).then(argument("y", FloatArgumentType.floatArg()).then(argument("z", FloatArgumentType.floatArg()).executes(context -> {
-            RuntimeConfig.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(FloatArgumentType.getFloat(context, "x"), FloatArgumentType.getFloat(context, "y"), FloatArgumentType.getFloat(context, "z"));
-            context.getSource().sendFeedback(msg("lighting_profile_updated"));
+
+            RuntimeConfig.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(
+                    FloatArgumentType.getFloat(context, "x"),
+                    FloatArgumentType.getFloat(context, "y"),
+                    FloatArgumentType.getFloat(context, "z")
+            );
+
+            Translate.commandFeedback(context, "lighting_profile_updated");
             return 0;
-        }))))).then(literal("namespace").then(argument("namespace", StringArgumentType.string()).suggests(NAMESPACE_PROVIDER).then(literal("batch").then(literal("items").executes(context -> {
-            String namespace = StringArgumentType.getString(context, "namespace");
-            IsometricRenderHelper.batchRenderNamespaceItems(namespace);
+        }))))).then(literal("namespace").then(NAMESPACE.toNode(StringArgumentType.string()).suggests(NAMESPACE_PROVIDER).then(literal("batch").then(literal("items").executes(context -> {
+            IsometricRenderHelper.batchRenderNamespaceItems(NAMESPACE.get(context));
             return 0;
         })).then(literal("blocks").executes(context -> {
-            String namespace = StringArgumentType.getString(context, "namespace");
-            IsometricRenderHelper.batchRenderNamespaceBlocks(namespace);
+            IsometricRenderHelper.batchRenderNamespaceBlocks(NAMESPACE.get(context));
             return 0;
         }))).then(literal("atlas").executes(context -> {
-            String namespace = StringArgumentType.getString(context, "namespace");
-            IsometricRenderHelper.renderNamespaceAtlas(namespace);
+            IsometricRenderHelper.renderNamespaceAtlas(NAMESPACE.get(context));
             return 0;
         })))));
     }
@@ -273,4 +270,28 @@ public class IsoRenderCommand {
 
         return 0;
     }
+
+    private static ItemGroup itemgroup(CommandContext<?> context) {
+        return context.getArgument("itemgroup", ItemGroup.class);
+    }
+
+    private static final class ArgKey<V> {
+
+        public final Class<V> clazz;
+        public final String name;
+
+        public ArgKey(Class<V> clazz, String name) {
+            this.clazz = clazz;
+            this.name = name;
+        }
+
+        public V get(CommandContext<?> context) {
+            return context.getArgument(this.name, this.clazz);
+        }
+
+        public RequiredArgumentBuilder<FabricClientCommandSource, V> toNode(ArgumentType<V> type) {
+            return argument(this.name, type);
+        }
+    }
+
 }
