@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.screen;
 
+import com.glisco.isometricrenders.mixin.MinecraftClientAccessor;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.glisco.isometricrenders.util.ImageExporter;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
+import static com.glisco.isometricrenders.util.Translator.gui;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class ItemAtlasRenderScreen extends RenderScreen {
@@ -33,7 +35,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             if (tempScale == atlasScale) return;
             scaleSlider.setValue(tempScale / 10);
         });
-        scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, Text.of("Scale"), 0.25, 0.025, atlasScale / 10, aDouble -> {
+        scaleSlider = new SliderWidgetImpl(50, 40, sliderWidth, gui("scale"), 0.25, 0.025, atlasScale / 10, aDouble -> {
             atlasScale = (float) (aDouble * 10);
             scaleField.setText(String.format(Locale.ENGLISH, "%.1f", atlasScale));
         });
@@ -46,7 +48,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             if (tempHeight == atlasHeight) return;
             heightSlider.setValue(1 - ((tempHeight + 335) / 900d));
         });
-        heightSlider = new SliderWidgetImpl(50, 70, sliderWidth, Text.of("Render Height"), 0.5, 0.05, 1 - ((atlasHeight + 335) / 900d), aDouble -> {
+        heightSlider = new SliderWidgetImpl(50, 70, sliderWidth, gui("render_height"), 0.5, 0.05, 1 - ((atlasHeight + 335) / 900d), aDouble -> {
             atlasHeight = 565 - (int) Math.round(aDouble * 900);
             heightField.setText(String.valueOf(115 - atlasHeight));
         });
@@ -59,7 +61,7 @@ public class ItemAtlasRenderScreen extends RenderScreen {
             if (tempShift == atlasShift) return;
             shiftSlider.setValue(1 - ((tempShift + 335) / 900d));
         });
-        shiftSlider = new SliderWidgetImpl(50, 100, sliderWidth, Text.of("Render Shift"), 0.5, 0.05, 1 - ((atlasShift + 335) / 900d), aDouble -> {
+        shiftSlider = new SliderWidgetImpl(50, 100, sliderWidth, gui("render_shift"), 0.5, 0.05, 1 - ((atlasShift + 335) / 900d), aDouble -> {
             atlasShift = 565 - (int) Math.round(aDouble * 900);
             shiftField.setText(String.valueOf(115 - atlasShift));
         });
@@ -85,8 +87,8 @@ public class ItemAtlasRenderScreen extends RenderScreen {
 
     @Override
     protected void drawGuiText(MatrixStack matrices) {
-        client.textRenderer.draw(matrices, "Atlas Options", 12, 20, 0xAAAAAA);
-        client.textRenderer.draw(matrices, "Columns", 52, 136, 0xFFFFFF);
+        client.textRenderer.draw(matrices, gui("atlas_options"), 12, 20, 0xAAAAAA);
+        client.textRenderer.draw(matrices, gui("columns"), 52, 136, 0xFFFFFF);
     }
 
     @Override

@@ -14,17 +14,15 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+
 
 @Environment(EnvType.CLIENT)
 public class IsometricRendersClient implements ClientModInitializer {
 
     public static final Logger LOGGER = LogManager.getLogger();
-    private static final String PREFIX = "§9[§aIsometric Renders§9]§7 ";
 
     private static final KeyBinding SELECT = new KeyBinding("key.isometric-renders.area_select", GLFW.GLFW_KEY_C, KeyBinding.MISC_CATEGORY);
 
@@ -56,9 +54,5 @@ public class IsometricRendersClient implements ClientModInitializer {
                 AreaSelectionHelper.select();
             }
         });
-    }
-
-    public static Text prefix(String text) {
-        return new LiteralText(PREFIX + text);
     }
 }

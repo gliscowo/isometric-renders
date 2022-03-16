@@ -1,0 +1,73 @@
+{
+  "key.isometric-renders.area_select": "[等轴渲染] 选择选区",
+
+  "gui.isometric-renders.animations": "动画效果",
+  "gui.isometric-renders.particles": "粒子效果（需要动画效果）",
+  "gui.isometric-renders.use_external_renderer": "使用外置渲染器",
+  "gui.isometric-renders.allow_multiple_export_jobs": "允许多个导出任务",
+  "gui.isometric-renders.dump_into_root": "直接导出到根目录",
+  "gui.isometric-renders.clear_queue": "清空队列",
+  "gui.isometric-renders.export": "导出",
+  "gui.isometric-renders.open_folder": "打开文件夹",
+
+  "gui.isometric-renders.scale": "比例",
+  "gui.isometric-renders.rotation": "旋转角",
+  "gui.isometric-renders.angle": "俯仰角",
+  "gui.isometric-renders.dimetric": "等轴测",
+  "gui.isometric-renders.isometric": "正二轴测",
+
+  "gui.isometric-renders.render_height": "渲染高度",
+  "gui.isometric-renders.render_shift": "渲染位移",
+  "gui.isometric-renders.atlas_options": "图集（Atlas）设置",
+  "gui.isometric-renders.columns": "列",
+
+  "gui.isometric-renders.transform_options": "变换设置",
+  "gui.isometric-renders.presets": "预设",
+  "gui.isometric-renders.lighting_profile": "光照设置",
+
+  "gui.isometric-renders.render_options": "渲染设置",
+  "gui.isometric-renders.background_color": "背景颜色",
+  "gui.isometric-renders.export_options": "导出设置",
+  "gui.isometric-renders.renderer_resolution": "渲染器分辨率",
+  "gui.isometric-renders.hotkeys": "F10: 工作室模式  F12: 导出",
+
+  "gui.isometric-renders.memory_warning1": "警告：如果你给Minecraft",
+  "gui.isometric-renders.memory_warning2": "分配的内存不足6GB，",
+  "gui.isometric-renders.memory_warning3": "还想要个能用的电脑的话",
+  "gui.isometric-renders.memory_warning4": "就切记不要使用8192x8192",
+  "gui.isometric-renders.memory_warning5": "以上的分辨率",
+
+  "gui.isometric-renders.lighting_profile.flat": "平面",
+  "gui.isometric-renders.lighting_profile.default": "默认",
+  "gui.isometric-renders.lighting_profile.custom": "自定义",
+
+  "gui.isometric-renders.mesh_status": "模型网格状态: ",
+  "gui.isometric-renders.mesh_building": "§c组建中 - %s%%",
+  "gui.isometric-renders.mesh_ready": "§a已就位",
+
+  "gui.isometric-renders.exporter.idle": "导出器闲置中",
+  "gui.isometric-renders.exporter.jobs": "还剩%s个导出任务",
+
+  "message.isometric-renders.prefix": "§9[§a等轴渲染§9]§7 ",
+  "message.isometric-renders.no_block": "你并没有对准一个方块",
+  "message.isometric-renders.no_entity": "你并没有对准一个实体",
+  "message.isometric-renders.incomplete_selection": "你还未完成你的选区！",
+
+  "message.isometric-renders.custom_lighting": "§a自定义光照设置：§7[§c%1$s §a%1$s §b%1$s§7]",
+  "message.isometric-renders.current_profile": "当前设置：%1$s",
+  "message.isometric-renders.lighting_profile_updated": "§a已更新光照设置",
+  "message.isometric-renders.insane_resolution_unlocked": "贼™大分辨率模式§c已解锁§7。机子原地升天了跟我半毛钱都没有",
+  "message.isometric-renders.insane_resolution_locked": "贼™大分辨率模式§a已锁定§7。你终于，又安全了。",
+
+  "message.isometric-renders.selection_cleared": "§7[§c已清除选区§7]",
+  "message.isometric-renders.selection_started": "§7[§a已开始选区§7]",
+  "message.isometric-renders.selection_finished": "§7[§a已完成选区§7]",
+  "message.isometric-renders.opacity": "透明度 §c(Beta)",
+
+  "message.isometric-renders.full_queue": "§c因导出队列已经满载，你的任务未能上传！",
+  "message.isometric-renders.threaded_export_system_initialized": "多线程导出系统已就位",
+  "message.isometric-renders.threaded_export_system_shutdown": "正在关闭多线程导出系统",
+  "message.isometric-renders.threaded_export_system_shutdown_with_job": "正在关闭多线程导出系统（还有%1$s个任务未完成）",
+  "message.isometric-renders.threaded_export_system_not_available": "§c多线程导出系统暂时不可用，请过几秒后再试。如果问题没有自行解决，请重启你的客户端",
+  "message.isometric-renders.resolution_not_supported": "§c暂不支持分辨率超过2048x2048的批量渲染。想冒险一下可以输入§6/isorender insanity"
+}

@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static com.glisco.isometricrenders.util.Translator.*;
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
@@ -68,27 +69,27 @@ public abstract class RenderScreen extends Screen {
             backgroundColor = Integer.parseInt(s.substring(1), 16);
         });
 
-        CheckboxWidget playAnimationsCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 68, Text.of("Animations"), playAnimations, aBoolean -> {
+        CheckboxWidget playAnimationsCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 68, gui("animations"), playAnimations, aBoolean -> {
             playAnimations = aBoolean;
         });
-        CheckboxWidget playParticlesCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 93, Text.of("Particles (requires animations)"), tickParticles, aBoolean -> {
+        CheckboxWidget playParticlesCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 93, gui("particles"), tickParticles, aBoolean -> {
             tickParticles = aBoolean;
         });
 
-        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, Text.of("Use External Renderer"), useExternalRenderer, aBoolean -> {
+        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, gui("use_external_renderer"), useExternalRenderer, aBoolean -> {
             useExternalRenderer = aBoolean;
         });
-        CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, Text.of("Allow Multiple Export Jobs"), allowMultipleNonThreadedJobs, aBoolean -> {
+        CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, gui("allow_multiple_export_jobs"), allowMultipleNonThreadedJobs, aBoolean -> {
             allowMultipleNonThreadedJobs = aBoolean;
         });
-        CheckboxWidget dumpIntoRootCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 233, Text.of("Dump into root"), dumpIntoRoot, aBoolean -> {
+        CheckboxWidget dumpIntoRootCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 233, gui("dump_into_root"), dumpIntoRoot, aBoolean -> {
             dumpIntoRoot = aBoolean;
         });
 
-        ButtonWidget clearQueueButton = new ButtonWidget(viewportEndX + 80, 260, 75, 20, Text.of("Clear Queue"), button -> {
+        ButtonWidget clearQueueButton = new ButtonWidget(viewportEndX + 80, 260, 75, 20, gui("clear_queue"), button -> {
             ImageExporter.clearQueue();
         });
-        exportButton = new ButtonWidget(viewportEndX + 10, 260, 65, 20, Text.of("Export"), button -> {
+        exportButton = new ButtonWidget(viewportEndX + 10, 260, 65, 20, gui("export"), button -> {
             if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs)) {
                 captureScheduled = true;
             }
@@ -110,7 +111,7 @@ public abstract class RenderScreen extends Screen {
             }
         });
 
-        ButtonWidget rendersFolderButton = new ButtonWidget(viewportEndX + 10, 285, 90, 20, Text.of("Open Folder"), button -> {
+        ButtonWidget rendersFolderButton = new ButtonWidget(viewportEndX + 10, 285, 90, 20, gui("open_folder"), button -> {
             Util.getOperatingSystem().open(FabricLoader.getInstance().getGameDir().resolve("renders").toFile());
         });
 
@@ -164,20 +165,20 @@ public abstract class RenderScreen extends Screen {
 
             drawGuiText(matrices);
 
-            client.textRenderer.draw(matrices, "Render Options", viewportEndX + 12, 20, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "Background Color", viewportEndX + 66, 43, 0xFFFFFF);
+            client.textRenderer.draw(matrices, gui("render_options"), viewportEndX + 12, 20, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("background_color"), viewportEndX + 66, 43, 0xFFFFFF);
             fill(matrices, viewportEndX + 160, 43, viewportEndX + 168, 51, RuntimeConfig.backgroundColor | 255 << 24);
 
-            client.textRenderer.draw(matrices, "Export Options", viewportEndX + 12, 135, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "Renderer Resolution", viewportEndX + 66, 160, 0xFFFFFF);
+            client.textRenderer.draw(matrices, gui("export_options"), viewportEndX + 12, 135, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("renderer_resolution"), viewportEndX + 66, 160, 0xFFFFFF);
 
-            client.textRenderer.draw(matrices, "F10: Studio Mode  F12: Export", viewportEndX + 12, height - 20, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("hotkeys"), viewportEndX + 12, height - 20, 0xAAAAAA);
 
-            client.textRenderer.draw(matrices, "Warning: Unless you have at least 6GB ", 10, height - 60, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "of memory available for Minecraft, ", 10, height - 50, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "resolutions over 8192x8192", 10, height - 40, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "are not recommended if you want", 10, height - 30, 0xAAAAAA);
-            client.textRenderer.draw(matrices, "your computer to survive", 10, height - 20, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("memory_warning1"), 10, height - 60, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("memory_warning2"),10, height - 50, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("memory_warning3"), 10, height - 40, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("memory_warning4"), 10, height - 30, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("memory_warning5"), 10, height - 20, 0xAAAAAA);
 
             client.textRenderer.draw(matrices, ImageExporter.getProgressBarText(), viewportEndX + 12, 350, 0xFFFFFF);
 
