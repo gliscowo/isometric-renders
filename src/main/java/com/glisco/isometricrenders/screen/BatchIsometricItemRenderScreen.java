@@ -20,7 +20,7 @@ public class BatchIsometricItemRenderScreen extends BatchIsometricRenderScreen<I
     protected void setupRender() {
         while (next.isEmpty()) {
             if (!renderObjects.hasNext()) {
-                onClose();
+                this.close();
                 return;
             }
             next = renderObjects.next();

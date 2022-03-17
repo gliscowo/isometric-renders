@@ -49,8 +49,8 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
+    public void close() {
+        super.close();
         ImageExporter.Threaded.finish();
     }
 
@@ -62,7 +62,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (invalid) {
-            onClose();
+            this.close();
             return;
         }
 

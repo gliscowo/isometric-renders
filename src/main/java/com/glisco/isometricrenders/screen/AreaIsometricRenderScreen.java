@@ -47,7 +47,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
             if (tempOpacity == areaRenderOpacity) return;
             opacitySlider.setValue(areaRenderOpacity / 100f);
         });
-        opacitySlider = new RenderScreen.SliderWidgetImpl(50, 275, sliderWidth, Translate.make("message.isometric-renders.opacity"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
+        opacitySlider = new RenderScreen.SliderWidgetImpl(50, 275, sliderWidth, Translate.make("opacity"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
             areaRenderOpacity = (int) Math.round(aDouble * 100);
             opacityField.setText(String.valueOf(areaRenderOpacity));
         });

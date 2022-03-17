@@ -194,13 +194,13 @@ public abstract class RenderScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
+    public void close() {
+        super.close();
         closedCallback.run();
         IsometricRenderHelper.allowParticles = true;
     }

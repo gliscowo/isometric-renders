@@ -17,7 +17,7 @@ public class BatchIsometricBlockRenderScreen extends BatchIsometricRenderScreen<
     @Override
     protected void setupRender() {
         if (!renderObjects.hasNext()) {
-            onClose();
+            this.close();
             return;
         }
 
