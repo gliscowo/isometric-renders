@@ -14,7 +14,7 @@ public class IsometricChannel extends ExoCommandChannel {
 
     public IsometricChannel() {
         addCommand("open-screen", (port, arguments) -> {
-            RenderSystem.recordRenderCall(() -> MinecraftClient.getInstance().setScreen(new IsometricRenderScreen()));
+            MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().setScreen(new IsometricRenderScreen()));
             return Exo.OK_RESPONSE;
         });
 
@@ -32,7 +32,6 @@ public class IsometricChannel extends ExoCommandChannel {
                     setupItem(client.getItemRenderer().getModel(stack, null, null, 0).hasDepth());
                     IsometricRenderPresets.setupItemStackRender(screen, stack);
 
-                    screen.setExportCallback(file -> send("exported#" + id + "#" + file.getAbsolutePath(), port));
                     screen.setExportCallback(file -> send(Exo.join("exported", id.toString(), file.getAbsolutePath()), port));
                     screen.scheduleCapture();
                     client.setScreen(screen);
