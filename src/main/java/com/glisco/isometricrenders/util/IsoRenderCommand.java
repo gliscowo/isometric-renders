@@ -14,11 +14,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.Entity;
@@ -27,7 +28,7 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
@@ -42,8 +43,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.glisco.isometricrenders.util.Translate.msg;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class IsoRenderCommand {
 
@@ -58,7 +59,7 @@ public class IsoRenderCommand {
 
     static {
         CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable),
-                builder, EntityType::getId, entityType -> new TranslatableText(Util.createTranslationKey("entity", EntityType.getId(entityType)))
+                builder, EntityType::getId, entityType -> Text.translatable(Util.createTranslationKey("entity", EntityType.getId(entityType)))
         );
 
         ITEM_GROUPS = (context, builder) ->
@@ -80,14 +81,14 @@ public class IsoRenderCommand {
         });
     }
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(literal("isorender").then(literal("block").executes(context -> executeBlockTarget(context.getSource())).then(argument("block", BlockStateArgumentType.blockState()).executes(context -> {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
+        dispatcher.register(literal("isorender").then(literal("block").executes(context -> executeBlockTarget(context.getSource())).then(argument("block", BlockStateArgumentType.blockState(access)).executes(context -> {
             final BlockStateArgument blockStateArgument = context.getArgument("block", BlockStateArgument.class);
             final BlockState blockState = blockStateArgument.getBlockState();
             return executeBlockState(context.getSource(), blockState, ((BlockStateArgumentAccessor) blockStateArgument).getData());
         }))).then(literal("item").executes(context -> {
             return executeItem(context.getSource(), context.getSource().getPlayer().getMainHandStack().copy());
-        }).then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
+        }).then(argument("item", ItemStackArgumentType.itemStack(access)).executes(context -> {
             final ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             return executeItem(context.getSource(), stack);
         }))).then(literal("entity").executes(context -> {

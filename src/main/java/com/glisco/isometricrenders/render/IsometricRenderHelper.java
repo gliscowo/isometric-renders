@@ -9,7 +9,7 @@ import com.glisco.isometricrenders.screen.BatchIsometricItemRenderScreen;
 import com.glisco.isometricrenders.screen.ItemAtlasRenderScreen;
 import com.glisco.isometricrenders.util.RuntimeConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;

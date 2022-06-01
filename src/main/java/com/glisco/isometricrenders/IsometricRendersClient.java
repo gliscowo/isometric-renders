@@ -7,13 +7,15 @@ import com.glisco.isometricrenders.util.IsoRenderCommand;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -28,8 +30,9 @@ public class IsometricRendersClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        final var registryAccess = new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get());
+        IsoRenderCommand.register(ClientCommandManager.DISPATCHER, registryAccess);
 
-        IsoRenderCommand.register(ClientCommandManager.DISPATCHER);
         ImageExporter.init();
 
         HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
