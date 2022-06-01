@@ -56,8 +56,8 @@ public class IsometricRenderPresets {
         });
     }
 
-    public static void setupAreaRender(IsometricRenderScreen screen, BlockPos origin, BlockPos end, boolean enableTranslucency) {
-        screen.setup(new AreaIsometricRenderScreen.AreaRenderCallback(origin, end, enableTranslucency), "areas/" + "area_render");
+    public static void setupAreaRender(IsometricRenderScreen screen, BlockPos origin, BlockPos end) {
+        screen.setup(new AreaIsometricRenderScreen.AreaRenderCallback(origin, end), "areas/" + "area_render");
     }
 
     public static void setupBlockEntityRender(IsometricRenderScreen screen, @NotNull BlockEntity entity) {

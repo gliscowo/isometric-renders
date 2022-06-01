@@ -265,8 +265,8 @@ public class IsoRenderCommand {
         BlockPos start = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
         BlockPos end = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
 
-        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen(enableTranslucency);
-        IsometricRenderPresets.setupAreaRender(screen, start, end, enableTranslucency);
+        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen();
+        IsometricRenderPresets.setupAreaRender(screen, start, end);
         IsometricRenderHelper.scheduleScreen(screen);
 
         return 0;

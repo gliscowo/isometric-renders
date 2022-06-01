@@ -72,8 +72,8 @@ public class AreaSelectionHelper {
     public static boolean tryOpenScreen() {
         if (pos1 == null || pos2 == null) return false;
 
-        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen(false);
-        IsometricRenderPresets.setupAreaRender(screen, pos1, pos2, false);
+        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen();
+        IsometricRenderPresets.setupAreaRender(screen, pos1, pos2);
         IsometricRenderHelper.scheduleScreen(screen);
         return true;
     }

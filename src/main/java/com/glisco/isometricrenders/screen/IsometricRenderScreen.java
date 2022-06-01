@@ -26,10 +26,12 @@ import static com.glisco.isometricrenders.util.Translate.gui;
 
 public class IsometricRenderScreen extends RenderScreen {
 
-    private SliderWidgetImpl scaleSlider;
-    private SliderWidgetImpl rotSlider;
-    private SliderWidgetImpl angleSlider;
-    private SliderWidgetImpl heightSlider;
+    protected TextFieldWidget heightField;
+
+    protected SliderWidgetImpl scaleSlider;
+    protected SliderWidgetImpl rotSlider;
+    protected SliderWidgetImpl angleSlider;
+    protected SliderWidgetImpl heightSlider;
 
     @Override
     protected void buildGuiElements() {
@@ -75,7 +77,7 @@ public class IsometricRenderScreen extends RenderScreen {
             angleField.setText(String.valueOf(angle));
         });
 
-        TextFieldWidget heightField = new TextFieldWidget(client.textRenderer, 10, 130, 35, 20, Text.of(String.valueOf(renderHeight)));
+        heightField = new TextFieldWidget(client.textRenderer, 10, 130, 35, 20, Text.of(String.valueOf(renderHeight)));
         heightField.setTextPredicate(s -> s.matches("-?[0-9]{0,4}"));
         heightField.setText(String.valueOf(renderHeight));
         heightField.setChangedListener(s -> {

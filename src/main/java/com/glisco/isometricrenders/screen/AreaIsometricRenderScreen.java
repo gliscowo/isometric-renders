@@ -5,26 +5,23 @@ import com.glisco.isometricrenders.util.Translate;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.worldmesher.WorldMesh;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
+import org.lwjgl.glfw.GLFW;
 
 import static com.glisco.isometricrenders.util.RuntimeConfig.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
-    private RenderScreen.SliderWidgetImpl opacitySlider;
-    private final boolean translucencyEnabled;
-
-    public AreaIsometricRenderScreen(boolean enableTranslucency) {
-        this.translucencyEnabled = enableTranslucency;
-    }
+    private double xOffset = 0;
+    private double yOffset = 0;
 
     @Override
     protected IsometricRenderHelper.RenderCallback getExternalExportCallback() {
@@ -35,25 +32,8 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
     @Override
     protected void buildGuiElements() {
         super.buildGuiElements();
-
-        if (!translucencyEnabled) return;
-
-        final int sliderWidth = viewportBeginX - 55;
-        TextFieldWidget opacityField = new TextFieldWidget(client.textRenderer, 10, 275, 35, 20, Text.of(String.valueOf(areaRenderOpacity)));
-        opacityField.setTextPredicate(s -> s.matches("[0-9]{0,3}"));
-        opacityField.setText(String.valueOf(areaRenderOpacity));
-        opacityField.setChangedListener(s -> {
-            int tempOpacity = s.length() > 0 && !s.equals("-") ? Integer.parseInt(s) : areaRenderOpacity;
-            if (tempOpacity == areaRenderOpacity) return;
-            opacitySlider.setValue(areaRenderOpacity / 100f);
-        });
-        opacitySlider = new RenderScreen.SliderWidgetImpl(50, 275, sliderWidth, Translate.make("opacity"), 1, 0.05, areaRenderOpacity / 100f, aDouble -> {
-            areaRenderOpacity = (int) Math.round(aDouble * 100);
-            opacityField.setText(String.valueOf(areaRenderOpacity));
-        });
-
-        addDrawableChild(opacityField);
-        addDrawableChild(opacitySlider);
+        this.remove(heightSlider);
+        this.remove(heightField);
     }
 
     @Override
@@ -61,6 +41,8 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         super.drawGuiText(matrices);
 
         final AreaRenderCallback renderCallback = (AreaRenderCallback) this.renderCallback;
+        renderCallback.setOffset(this.xOffset, this.yOffset);
+
         var meshStatus = Translate.gui("mesh_status");
         if (renderCallback.canRender()) {
             meshStatus.append(Translate.gui("mesh_ready").formatted(Formatting.GREEN));
@@ -70,6 +52,51 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
         }
 
         MinecraftClient.getInstance().textRenderer.draw(matrices, meshStatus, 12, 260, 0xAAAAAA);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (isInViewport(mouseX)) {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+                this.xOffset += deltaX * (450d / renderScale);
+                this.yOffset += deltaY * (450d / renderScale);
+                return true;
+            } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                rotation = (int) ((rotation + deltaX * 2) % 360);
+                if (rotation < 0) rotation += 360;
+
+                rotSlider.setValue(rotation / 360d);
+            } else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                angle = (int) MathHelper.clamp(angle + deltaY * 2, -90, 90);
+
+                angleSlider.setValue(.5 + angle / 180d);
+            }
+        }
+
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (isInViewport(mouseX)) {
+            renderScale = (int) MathHelper.clamp(renderScale + amount * Math.max(1, renderScale * 0.075), 1, 450);
+            scaleSlider.setValue((renderScale - 1d) / 449d);
+
+            return true;
+        }
+
+        return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (isInViewport(mouseX) && button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && Screen.hasControlDown()) {
+            this.xOffset = 0;
+            this.yOffset = 0;
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     public static class AreaRenderCallback implements IsometricRenderHelper.RenderCallback {
@@ -83,19 +110,11 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
         private boolean scaleFramebuffer = true;
 
-        public AreaRenderCallback(BlockPos origin, BlockPos end, boolean translucencyEnabled) {
+        private double xOffset = 0;
+        private double yOffset = 0;
+
+        public AreaRenderCallback(BlockPos origin, BlockPos end) {
             final WorldMesh.Builder builder = new WorldMesh.Builder(MinecraftClient.getInstance().world, origin, end);
-//            builder.enableBlockEntities();
-            if (translucencyEnabled) {
-                builder.renderActions(() -> {
-                    RenderSystem.enableBlend();
-                    RenderSystem.setShaderColor(1, 1, 1, areaRenderOpacity / 100f);
-                }, () -> {
-                    RenderSystem.setShaderColor(1, 1, 1, 1);
-                    RenderSystem.disableBlend();
-                });
-                builder.disableCulling();
-            }
             mesh = builder.build();
             xSize = 1 + Math.max(origin.getX(), end.getX()) - Math.min(origin.getX(), end.getX());
             ySize = 1 + Math.max(origin.getY(), end.getY()) - Math.min(origin.getY(), end.getY());
@@ -114,12 +133,19 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
             this.scaleFramebuffer = false;
         }
 
+        private void setOffset(double xOffset, double yOffset) {
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+        }
+
         @Override
         public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, float tickDelta) {
             if (!mesh.canRender()) {
                 mesh.scheduleRebuild();
             } else {
                 if (mesh.canRender()) {
+                    final var client = MinecraftClient.getInstance();
+
                     float windowScale = scaleFramebuffer ? window.getFramebufferHeight() / (float) window.getFramebufferWidth() : 1;
                     if (!scaleFramebuffer) scaleFramebuffer = true;
 
@@ -129,16 +155,49 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
                     final MatrixStack stack = new MatrixStack();
 
-                    stack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
-                    stack.multiply(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotation));
-                    stack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(180));
-
                     float scaledRenderScale = renderScale * (window.getScaledHeight() / 515f) * 0.001f;
                     stack.scale(scaledRenderScale, -scaledRenderScale, -scaledRenderScale);
 
-                    stack.translate(-xSize / 2f, renderHeight * -0.1 - ySize / 2f, -zSize / 2f);
+                    stack.translate(xOffset / 53.5, yOffset / 53.5, 0);
 
+                    stack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
+                    stack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-rotation));
+                    stack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(180));
+
+                    stack.translate(-xSize / 2f, renderHeight * -0.1 - ySize / 2f, -zSize / 2f);
                     mesh.render(stack);
+
+                    stack.push();
+                    final var blockEntities = mesh.getRenderInfo().getBlockEntities();
+                    blockEntities.forEach((blockPos, entity) -> {
+                        stack.loadIdentity();
+                        stack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                        client.getBlockEntityRenderDispatcher().render(entity, 0, stack, vertexConsumerProvider);
+                    });
+
+                    final var modelViewStack = RenderSystem.getModelViewStack();
+
+                    stack.pop();
+
+                    modelViewStack.push();
+                    modelViewStack.peek().getPositionMatrix().load(stack.peek().getPositionMatrix());
+                    RenderSystem.applyModelViewMatrix();
+                    client.getBufferBuilders().getEntityVertexConsumers().draw();
+                    modelViewStack.pop();
+
+                    final var entities = mesh.getRenderInfo().getEntities();
+                    entities.forEach((vec3d, entry) -> {
+                        stack.push();
+                        stack.loadIdentity();
+                        client.getEntityRenderDispatcher().render(entry.entity(), vec3d.x, vec3d.y, vec3d.z, 0, 0, stack, vertexConsumerProvider, entry.light());
+                        stack.pop();
+
+                        modelViewStack.push();
+                        modelViewStack.peek().getPositionMatrix().load(stack.peek().getPositionMatrix());
+                        RenderSystem.applyModelViewMatrix();
+                        client.getBufferBuilders().getEntityVertexConsumers().draw();
+                        modelViewStack.pop();
+                    });
 
                     RenderSystem.restoreProjectionMatrix();
                 }

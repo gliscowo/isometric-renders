@@ -19,7 +19,6 @@ public class RuntimeConfig {
 
     //Render Options
     public static int backgroundColor = 0x0000ff;
-    public static int areaRenderOpacity = 100;
     public static LightingProfile lightingProfile = DefaultLightingProfiles.FLAT;
 
     //Export Options

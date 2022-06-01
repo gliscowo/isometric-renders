@@ -62,7 +62,6 @@
   "message.isometric-renders.selection_cleared": "§7[§cSelection cleared§7]",
   "message.isometric-renders.selection_started": "§7[§aSelection started§7]",
   "message.isometric-renders.selection_finished": "§7[§aSelection finished§7]",
-  "message.isometric-renders.opacity": "Opacity §c(Beta)",
 
   "message.isometric-renders.full_queue": "§cYour job could not be submitted because the export queue is full!",
   "message.isometric-renders.threaded_export_system_initialized": "Threaded export system initialized",

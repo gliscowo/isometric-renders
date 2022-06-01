@@ -69,24 +69,24 @@ public abstract class RenderScreen extends Screen {
             backgroundColor = Integer.parseInt(s.substring(1), 16);
         });
 
-        CheckboxWidget playAnimationsCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 68, gui("animations"), playAnimations, aBoolean -> {
+        var playAnimationsCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 68, gui("animations"), playAnimations, aBoolean -> {
             playAnimations = aBoolean;
         });
-        CheckboxWidget playParticlesCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 93, gui("particles"), tickParticles, aBoolean -> {
+        var playParticlesCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 93, gui("particles"), tickParticles, aBoolean -> {
             tickParticles = aBoolean;
         });
 
-        CheckboxWidget doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, gui("use_external_renderer"), useExternalRenderer, aBoolean -> {
+        var doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, gui("use_external_renderer"), useExternalRenderer, aBoolean -> {
             useExternalRenderer = aBoolean;
         });
-        CheckboxWidget allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, gui("allow_multiple_export_jobs"), allowMultipleNonThreadedJobs, aBoolean -> {
+        var allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, gui("allow_multiple_export_jobs"), allowMultipleNonThreadedJobs, aBoolean -> {
             allowMultipleNonThreadedJobs = aBoolean;
         });
-        CheckboxWidget dumpIntoRootCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 233, gui("dump_into_root"), dumpIntoRoot, aBoolean -> {
+        var dumpIntoRootCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 233, gui("dump_into_root"), dumpIntoRoot, aBoolean -> {
             dumpIntoRoot = aBoolean;
         });
 
-        ButtonWidget clearQueueButton = new ButtonWidget(viewportEndX + 80, 260, 75, 20, gui("clear_queue"), button -> {
+        var clearQueueButton = new ButtonWidget(viewportEndX + 80, 260, 75, 20, gui("clear_queue"), button -> {
             ImageExporter.clearQueue();
         });
         exportButton = new ButtonWidget(viewportEndX + 10, 260, 65, 20, gui("export"), button -> {
@@ -248,6 +248,10 @@ public abstract class RenderScreen extends Screen {
         fill(matrices, viewportEndX, 0, width, height, 0x90000000);
     }
 
+    protected boolean isInViewport(double mouseX) {
+        return mouseX > viewportBeginX && mouseX < viewportEndX;
+    }
+
     public static void drawExportProgressBar(MatrixStack matrices, int x, int y, int drawWidth, int barWidth, double speed) {
         final int color = ImageExporter.currentlyExporting() ? 0xFF00FF00 : 0xFFFF8800;
         int end = x + drawWidth + barWidth;
@@ -302,9 +306,7 @@ public abstract class RenderScreen extends Screen {
         }
 
         @Override
-        protected void updateMessage() {
-
-        }
+        protected void updateMessage() {}
 
         public void allowRollover() {
             allowRollover = true;
@@ -331,7 +333,6 @@ public abstract class RenderScreen extends Screen {
 
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-
             if (!isHovered()) return false;
 
             double newValue = value + amount * scrollIncrement;
