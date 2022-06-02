@@ -7,6 +7,7 @@ import com.glisco.isometricrenders.render.IsometricRenderHelper;
 import com.glisco.isometricrenders.render.IsometricRenderPresets;
 import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
 import com.glisco.isometricrenders.screen.IsometricRenderScreen;
+import com.glisco.isometricrenders.setting.Settings;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -100,7 +101,7 @@ public class IsoRenderCommand {
             Identifier id = context.getArgument("entity", Identifier.class);
             return executeEntity(context.getSource(), EntitySummonArgumentTypeAccessor.invokeValidate(id), context.getArgument("nbt", NbtCompound.class));
         })))).then(literal("insanity").executes(context -> {
-            Translate.commandFeedback(context, RuntimeConfig.toggleInsaneResolutions() ? "insane_resolution_unlocked" : "insane_resolution_locked");
+            Translate.commandFeedback(context, Settings.toggleInsaneResolutions() ? "insane_resolution_unlocked" : "insane_resolution_locked");
             return 0;
         })).then(literal("area").executes(context -> {
             if (AreaSelectionHelper.tryOpenScreen()) return 0;
@@ -120,7 +121,7 @@ public class IsoRenderCommand {
             IsometricRenderHelper.renderItemGroupAtlas(ITEMGROUP.get(context));
             return 0;
         })))).then(literal("lighting").executes(context -> {
-            if (RuntimeConfig.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
+            if (Settings.lightingProfile instanceof DefaultLightingProfiles.UserLightingProfile profile) {
                 final var vector = profile.getVector();
                 Translate.commandFeedback(context, "custom_lighting", vector.getX(), vector.getY(), vector.getZ());
             } else {
@@ -129,7 +130,7 @@ public class IsoRenderCommand {
             return 0;
         }).then(argument("x", FloatArgumentType.floatArg()).then(argument("y", FloatArgumentType.floatArg()).then(argument("z", FloatArgumentType.floatArg()).executes(context -> {
 
-            RuntimeConfig.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(
+            Settings.lightingProfile = new DefaultLightingProfiles.UserLightingProfile(
                     FloatArgumentType.getFloat(context, "x"),
                     FloatArgumentType.getFloat(context, "y"),
                     FloatArgumentType.getFloat(context, "z")

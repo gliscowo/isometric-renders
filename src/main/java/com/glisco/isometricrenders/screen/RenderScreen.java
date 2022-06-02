@@ -1,17 +1,20 @@
 package com.glisco.isometricrenders.screen;
 
 import com.glisco.isometricrenders.mixin.access.ParticleManagerAccessor;
-import com.glisco.isometricrenders.mixin.access.SliderWidgetInvoker;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.setting.IntSetting;
+import com.glisco.isometricrenders.setting.Setting;
+import com.glisco.isometricrenders.setting.Settings;
 import com.glisco.isometricrenders.util.ImageExporter;
-import com.glisco.isometricrenders.util.RuntimeConfig;
+import com.glisco.isometricrenders.util.Translate;
+import com.glisco.isometricrenders.widget.SettingCheckbox;
+import com.glisco.isometricrenders.widget.SettingSliderWidget;
+import com.glisco.isometricrenders.widget.SettingTextField;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
@@ -20,14 +23,19 @@ import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static com.glisco.isometricrenders.util.RuntimeConfig.*;
+import static com.glisco.isometricrenders.setting.Settings.*;
 import static com.glisco.isometricrenders.util.Translate.gui;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 public abstract class RenderScreen extends Screen {
+
+    private Map<IntSetting, SettingParameters> settings = new LinkedHashMap<>();
 
     private ButtonWidget exportButton;
 
@@ -36,11 +44,12 @@ public abstract class RenderScreen extends Screen {
     protected Runnable closedCallback = () -> {};
     protected Consumer<File> exportCallback = (file) -> {};
 
-    public boolean playAnimations = false;
+    public Setting<Boolean> playAnimations = Setting.of(false);
+    protected Setting<Boolean> tickParticles = Setting.of(true);
+
     protected boolean studioMode = false;
-    protected boolean captureScheduled = false;
     protected boolean drawBackground = false;
-    protected boolean tickParticles = true;
+    protected boolean captureScheduled = false;
 
     protected int viewportBeginX;
     protected int viewportEndX;
@@ -52,14 +61,23 @@ public abstract class RenderScreen extends Screen {
 
     @Override
     protected void init() {
-        super.init();
         viewportBeginX = (int) ((this.width - this.height) * 0.5);
         viewportEndX = (int) (this.width - (this.width - this.height) * 0.5) + 1;
+        final int sliderWidth = viewportBeginX - 55;
 
         ((ParticleManagerAccessor) client.particleManager).getParticles().clear();
         com.glisco.isometricrenders.render.IsometricRenderHelper.allowParticles = false;
 
         buildGuiElements();
+
+        int y = 40;
+        for (var setting : this.settings.keySet()) {
+            final var params = this.settings.get(setting);
+
+            this.addDrawableChild(new SettingTextField(10, y, setting));
+            this.addDrawableChild(new SettingSliderWidget(50, y, sliderWidth, Translate.gui(params.translationKey()), params.step(), setting));
+            y += 30;
+        }
 
         TextFieldWidget colorField = new TextFieldWidget(client.textRenderer, viewportEndX + 10, 38, 50, 20, Text.of("#0000ff"));
         colorField.setTextPredicate(s -> s.matches("^#([A-Fa-f0-9]{0,6})$"));
@@ -69,31 +87,22 @@ public abstract class RenderScreen extends Screen {
             backgroundColor = Integer.parseInt(s.substring(1), 16);
         });
 
-        var playAnimationsCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 68, gui("animations"), playAnimations, aBoolean -> {
-            playAnimations = aBoolean;
-        });
-        var playParticlesCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 93, gui("particles"), tickParticles, aBoolean -> {
-            tickParticles = aBoolean;
-        });
+        var playAnimationsCheckbox = new SettingCheckbox(viewportEndX + 10, 68, gui("animations"), playAnimations);
+        var playParticlesCheckbox = new SettingCheckbox(viewportEndX + 10, 93, gui("particles"), tickParticles);
 
-        var doHiResCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 183, gui("use_external_renderer"), useExternalRenderer, aBoolean -> {
-            useExternalRenderer = aBoolean;
-        });
-        var allowMultipleRendersCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 208, gui("allow_multiple_export_jobs"), allowMultipleNonThreadedJobs, aBoolean -> {
-            allowMultipleNonThreadedJobs = aBoolean;
-        });
-        var dumpIntoRootCheckbox = new CallbackCheckboxWidget(viewportEndX + 10, 233, gui("dump_into_root"), dumpIntoRoot, aBoolean -> {
-            dumpIntoRoot = aBoolean;
-        });
+        var doHiResCheckbox = new SettingCheckbox(viewportEndX + 10, 183, gui("use_external_renderer"), useExternalRenderer);
+        var allowMultipleRendersCheckbox = new SettingCheckbox(viewportEndX + 10, 208, gui("allow_multiple_export_jobs"), allowMultipleNonThreadedJobs);
+        var dumpIntoRootCheckbox = new SettingCheckbox(viewportEndX + 10, 233, gui("dump_into_root"), dumpIntoRoot);
 
         var clearQueueButton = new ButtonWidget(viewportEndX + 80, 260, 75, 20, gui("clear_queue"), button -> {
             ImageExporter.clearQueue();
         });
         exportButton = new ButtonWidget(viewportEndX + 10, 260, 65, 20, gui("export"), button -> {
-            if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs)) {
+            if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs.get())) {
                 captureScheduled = true;
             }
         });
+
         TextFieldWidget resolutionField = new TextFieldWidget(client.textRenderer, viewportEndX + 10, 153, 50, 20, Text.of("2048"));
         resolutionField.setEditableColor(0x00FF00);
         resolutionField.setText(String.valueOf(exportResolution));
@@ -101,7 +110,7 @@ public abstract class RenderScreen extends Screen {
         resolutionField.setChangedListener(s -> {
             if (s.length() < 1) return;
             int resolution = Integer.parseInt(s);
-            if (((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || resolution > 16384) && !allowInsaneResolutions) {
+            if (((resolution != 0) && ((resolution & (resolution - 1)) != 0) || resolution < 16 || resolution > 16384) && !allowInsaneResolutions.get()) {
                 resolutionField.setEditableColor(0xFF0000);
                 exportButton.active = false;
             } else {
@@ -129,15 +138,23 @@ public abstract class RenderScreen extends Screen {
         addDrawableChild(rendersFolderButton);
     }
 
+    protected void addSetting(IntSetting setting, String translationKey, int step) {
+        this.settings.put(setting, new SettingParameters(translationKey, step));
+    }
+
+    protected void removeSetting(IntSetting setting) {
+        this.settings.remove(setting);
+    }
+
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        final boolean drawOnlyBackground = ((captureScheduled && !useExternalRenderer) || studioMode) && !this.drawBackground;
+        final boolean drawOnlyBackground = ((captureScheduled && !useExternalRenderer.get()) || studioMode) && !this.drawBackground;
 
         matrices.push();
         matrices.translate(0, 0, -760);
 
         if (this.drawBackground || drawOnlyBackground) {
-            fill(matrices, 0, 0, this.width, this.height, RuntimeConfig.backgroundColor | 255 << 24);
+            fill(matrices, 0, 0, this.width, this.height, Settings.backgroundColor | 255 << 24);
         } else {
             renderBackground(matrices);
         }
@@ -167,7 +184,7 @@ public abstract class RenderScreen extends Screen {
 
             client.textRenderer.draw(matrices, gui("render_options"), viewportEndX + 12, 20, 0xAAAAAA);
             client.textRenderer.draw(matrices, gui("background_color"), viewportEndX + 66, 43, 0xFFFFFF);
-            fill(matrices, viewportEndX + 160, 43, viewportEndX + 168, 51, RuntimeConfig.backgroundColor | 255 << 24);
+            fill(matrices, viewportEndX + 160, 43, viewportEndX + 168, 51, Settings.backgroundColor | 255 << 24);
 
             client.textRenderer.draw(matrices, gui("export_options"), viewportEndX + 12, 135, 0xAAAAAA);
             client.textRenderer.draw(matrices, gui("renderer_resolution"), viewportEndX + 66, 160, 0xFFFFFF);
@@ -175,7 +192,7 @@ public abstract class RenderScreen extends Screen {
             client.textRenderer.draw(matrices, gui("hotkeys"), viewportEndX + 12, height - 20, 0xAAAAAA);
 
             client.textRenderer.draw(matrices, gui("memory_warning1"), 10, height - 60, 0xAAAAAA);
-            client.textRenderer.draw(matrices, gui("memory_warning2"),10, height - 50, 0xAAAAAA);
+            client.textRenderer.draw(matrices, gui("memory_warning2"), 10, height - 50, 0xAAAAAA);
             client.textRenderer.draw(matrices, gui("memory_warning3"), 10, height - 40, 0xAAAAAA);
             client.textRenderer.draw(matrices, gui("memory_warning4"), 10, height - 30, 0xAAAAAA);
             client.textRenderer.draw(matrices, gui("memory_warning5"), 10, height - 20, 0xAAAAAA);
@@ -207,8 +224,8 @@ public abstract class RenderScreen extends Screen {
 
     @Override
     public void tick() {
-        if (tickParticles) IsometricRenderHelper.allowParticles = true;
-        if (playAnimations) tickCallback.run();
+        if (tickParticles.get()) IsometricRenderHelper.allowParticles = true;
+        if (playAnimations.get()) tickCallback.run();
         IsometricRenderHelper.allowParticles = false;
     }
 
@@ -219,7 +236,7 @@ public abstract class RenderScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_F12) {
-            if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs) && exportButton.active) {
+            if ((ImageExporter.getJobCount() < 1 || allowMultipleNonThreadedJobs.get()) && exportButton.active) {
                 captureScheduled = true;
             }
         } else if (keyCode == GLFW.GLFW_KEY_F10) {
@@ -229,7 +246,7 @@ public abstract class RenderScreen extends Screen {
     }
 
     protected CompletableFuture<File> capture() {
-        if (useExternalRenderer) {
+        if (useExternalRenderer.get()) {
             return addImageToExportQueue(IsometricRenderHelper.renderIntoImage(exportResolution, getExternalExportCallback(), lightingProfile));
         } else {
             return addImageToExportQueue(IsometricRenderHelper.takeSnapshot(MinecraftClient.getInstance().getFramebuffer(), backgroundColor, true, true));
@@ -291,76 +308,5 @@ public abstract class RenderScreen extends Screen {
 
     protected abstract CompletableFuture<File> addImageToExportQueue(NativeImage image);
 
-    protected static class SliderWidgetImpl extends SliderWidget {
-
-        private final Consumer<Double> changeListener;
-        private final double defaultValue;
-        private final double scrollIncrement;
-        private boolean allowRollover = false;
-
-        public SliderWidgetImpl(int x, int y, int width, Text text, double defaultValue, double scrollIncrement, double initialValue, Consumer<Double> changeListener) {
-            super(x, y, width, 20, text, initialValue);
-            this.changeListener = changeListener;
-            this.defaultValue = defaultValue;
-            this.scrollIncrement = scrollIncrement;
-        }
-
-        @Override
-        protected void updateMessage() {}
-
-        public void allowRollover() {
-            allowRollover = true;
-        }
-
-        @Override
-        protected void applyValue() {
-            changeListener.accept(value);
-        }
-
-        public void setValue(double value) {
-            ((SliderWidgetInvoker) this).invokeSetValue(value);
-        }
-
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 2 && this.clicked(mouseX, mouseY)) {
-                setValue(defaultValue);
-                return true;
-            } else {
-                return super.mouseClicked(mouseX, mouseY, button);
-            }
-        }
-
-        @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-            if (!isHovered()) return false;
-
-            double newValue = value + amount * scrollIncrement;
-
-            if (!allowRollover && (newValue < 0 || newValue > 1)) return false;
-
-            if (newValue < 0) newValue += 1;
-            if (newValue > 1) newValue -= 1;
-
-            setValue(newValue);
-
-            return true;
-        }
-    }
-
-    protected static class CallbackCheckboxWidget extends CheckboxWidget {
-
-        private final Consumer<Boolean> changeCallback;
-
-        public CallbackCheckboxWidget(int x, int y, Text message, boolean checked, Consumer<Boolean> changeCallback) {
-            super(x, y, 20, 20, message, checked);
-            this.changeCallback = changeCallback;
-        }
-
-        @Override
-        public void onPress() {
-            super.onPress();
-            changeCallback.accept(isChecked());
-        }
-    }
+    private record SettingParameters(String translationKey, int step){}
 }

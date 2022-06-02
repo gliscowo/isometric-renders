@@ -7,7 +7,7 @@ import com.glisco.isometricrenders.mixin.access.NativeImageAccessor;
 import com.glisco.isometricrenders.screen.BatchIsometricBlockRenderScreen;
 import com.glisco.isometricrenders.screen.BatchIsometricItemRenderScreen;
 import com.glisco.isometricrenders.screen.ItemAtlasRenderScreen;
-import com.glisco.isometricrenders.util.RuntimeConfig;
+import com.glisco.isometricrenders.setting.Settings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.BlockState;
@@ -104,13 +104,13 @@ public class IsometricRenderHelper {
             matrices.translate(-0.88 + 0.05, 0.925 - 0.05, 0);
             matrices.scale(0.125f, 0.125f, 1);
 
-            int rows = (int) Math.ceil(stacks.size() / (double) RuntimeConfig.atlasColumns);
+            int rows = (int) Math.ceil(stacks.size() / (double) Settings.atlasColumns.get());
             for (int i = 0; i < rows; i++) {
                 matrices.push();
                 matrices.translate(0, -1.2 * i, 0);
 
-                for (int j = 0; j < RuntimeConfig.atlasColumns; j++) {
-                    int index = i * RuntimeConfig.atlasColumns + j;
+                for (int j = 0; j < Settings.atlasColumns.get(); j++) {
+                    int index = i * Settings.atlasColumns.get() + j;
                     if (index > stacks.size() - 1) continue;
 
                     ItemStack stack = stacks.get(index);
@@ -177,7 +177,7 @@ public class IsometricRenderHelper {
 
         framebuffer.endWrite();
 
-        return takeSnapshot(framebuffer, RuntimeConfig.backgroundColor, false, false);
+        return takeSnapshot(framebuffer, Settings.backgroundColor, false, false);
     }
 
     public static NativeImage takeSnapshot(Framebuffer framebuffer, int backgroundColor, boolean crop, boolean key) {
@@ -268,7 +268,7 @@ public class IsometricRenderHelper {
 
     public static Camera getParticleCamera() {
         Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
-        ((CameraInvoker) camera).invokeSetRotation(RuntimeConfig.rotation + 180, RuntimeConfig.angle);
+        ((CameraInvoker) camera).invokeSetRotation(Settings.rotation.get() + 180, Settings.angle.get());
         return camera;
     }
 

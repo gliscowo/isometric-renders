@@ -11,12 +11,11 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
 import org.lwjgl.glfw.GLFW;
 
-import static com.glisco.isometricrenders.util.RuntimeConfig.*;
+import static com.glisco.isometricrenders.setting.Settings.*;
 
 public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
@@ -32,8 +31,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
     @Override
     protected void buildGuiElements() {
         super.buildGuiElements();
-        this.remove(heightSlider);
-        this.remove(heightField);
+        this.removeSetting(renderHeight);
     }
 
     @Override
@@ -58,18 +56,15 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (isInViewport(mouseX)) {
             if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
-                this.xOffset += deltaX * (450d / renderScale);
-                this.yOffset += deltaY * (450d / renderScale);
+                this.xOffset += deltaX * (450d / renderScale.get());
+                this.yOffset += deltaY * (450d / renderScale.get());
                 return true;
             } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-                rotation = (int) ((rotation + deltaX * 2) % 360);
-                if (rotation < 0) rotation += 360;
-
-                rotSlider.setValue(rotation / 360d);
+                rotation.modify((int) (deltaX * 2));
+                return true;
             } else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-                angle = (int) MathHelper.clamp(angle + deltaY * 2, -90, 90);
-
-                angleSlider.setValue(.5 + angle / 180d);
+                angle.modify((int) (deltaY * 2));
+                return true;
             }
         }
 
@@ -79,9 +74,7 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (isInViewport(mouseX)) {
-            renderScale = (int) MathHelper.clamp(renderScale + amount * Math.max(1, renderScale * 0.075), 1, 450);
-            scaleSlider.setValue((renderScale - 1d) / 449d);
-
+            renderScale.modify((int) (amount * Math.max(1, renderScale.get() * 0.075)));
             return true;
         }
 
@@ -155,16 +148,16 @@ public class AreaIsometricRenderScreen extends IsometricRenderScreen {
 
                     final MatrixStack stack = new MatrixStack();
 
-                    float scaledRenderScale = renderScale * (window.getScaledHeight() / 515f) * 0.001f;
+                    float scaledRenderScale = renderScale.get() * (window.getScaledHeight() / 515f) * 0.001f;
                     stack.scale(scaledRenderScale, -scaledRenderScale, -scaledRenderScale);
 
                     stack.translate(xOffset / 53.5, yOffset / 53.5, 0);
 
-                    stack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(angle));
-                    stack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-rotation));
+                    stack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(angle.get()));
+                    stack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-rotation.get()));
                     stack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(180));
 
-                    stack.translate(-xSize / 2f, renderHeight * -0.1 - ySize / 2f, -zSize / 2f);
+                    stack.translate(-xSize / 2f, renderHeight.get() * -0.1 - ySize / 2f, -zSize / 2f);
                     mesh.render(stack);
 
                     stack.push();

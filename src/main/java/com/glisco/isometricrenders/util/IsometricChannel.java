@@ -2,7 +2,7 @@ package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.render.IsometricRenderPresets;
 import com.glisco.isometricrenders.screen.IsometricRenderScreen;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.glisco.isometricrenders.setting.Settings;
 import io.wispforest.exo.api.Exo;
 import io.wispforest.exo.api.ExoCommandChannel;
 import net.minecraft.client.MinecraftClient;
@@ -44,12 +44,12 @@ public class IsometricChannel extends ExoCommandChannel {
     }
 
     private static void setupItem(boolean depth) {
-        RuntimeConfig.angle = depth ? 30 : 0;
-        RuntimeConfig.rotation = depth ? 225 : 0;
+        Settings.angle.set(depth ? 30 : 0);
+        Settings.rotation.set(depth ? 225 : 0);
 
-        RuntimeConfig.renderScale = depth ? 310 : 235;
-        RuntimeConfig.exportResolution = 32;
-        RuntimeConfig.dumpIntoRoot = true;
+        Settings.renderScale.set(depth ? 310 : 235);
+        Settings.exportResolution = 32;
+        Settings.dumpIntoRoot.set(true);
     }
 
     @Override

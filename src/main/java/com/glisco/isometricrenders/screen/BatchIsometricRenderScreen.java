@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.screen;
 
 import com.glisco.isometricrenders.util.ImageExporter;
-import com.glisco.isometricrenders.util.RuntimeConfig;
+import com.glisco.isometricrenders.setting.Settings;
 import com.glisco.isometricrenders.util.Translate;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.texture.NativeImage;
@@ -11,8 +11,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
-import static com.glisco.isometricrenders.util.RuntimeConfig.exportResolution;
-import static com.glisco.isometricrenders.util.RuntimeConfig.useExternalRenderer;
+import static com.glisco.isometricrenders.setting.Settings.exportResolution;
+import static com.glisco.isometricrenders.setting.Settings.useExternalRenderer;
 
 public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScreen {
 
@@ -34,7 +34,7 @@ public abstract class BatchIsometricRenderScreen<T> extends IsometricRenderScree
 
         ImageExporter.Threaded.init();
 
-        if (useExternalRenderer && exportResolution > 2048 && !RuntimeConfig.allowInsaneResolutions) {
+        if (useExternalRenderer.get() && exportResolution > 2048 && !Settings.allowInsaneResolutions.get()) {
             Translate.chat("resolution_not_supported");
             invalid = true;
         }

@@ -2,6 +2,7 @@ package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.IsometricRendersClient;
 import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.setting.Settings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.texture.NativeImage;
@@ -96,7 +97,7 @@ public class ImageExporter extends Thread {
     private static void exportImage(Job job) {
         final File renderDir = FabricLoader.getInstance().getGameDir().resolve("renders").toFile();
         File file;
-        if (RuntimeConfig.dumpIntoRoot) {
+        if (Settings.dumpIntoRoot.get()) {
             file = IsometricRenderHelper.getNextFile(renderDir, IsometricRenderHelper.getLastFile(job.name()));
         } else {
             file = IsometricRenderHelper.getNextFile(renderDir, job.name());
