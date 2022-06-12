@@ -17,7 +17,7 @@
   "accessWidener": "isometricrenders.accesswidener",
   "entrypoints": {
     "client": [
-      "com.glisco.isometricrenders.IsometricRendersClient"
+      "com.glisco.isometricrenders.IsometricRenders"
     ],
     "exo": [
       "com.glisco.isometricrenders.util.IsometricChannel"

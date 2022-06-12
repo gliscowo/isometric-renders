@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.mixin;
 
-import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.IsometricRenders;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,6 +13,6 @@ public class ParticleManagerMixin {
 
     @Inject(method = "addParticle(Lnet/minecraft/client/particle/Particle;)V", at = @At("HEAD"), cancellable = true)
     public void stopParticles(Particle particle, CallbackInfo ci) {
-        if (!IsometricRenderHelper.allowParticles) ci.cancel();
+        if (!IsometricRenders.allowParticles) ci.cancel();
     }
 }

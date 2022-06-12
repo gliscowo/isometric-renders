@@ -1,15 +1,15 @@
 package com.glisco.isometricrenders.widget;
 
-import com.glisco.isometricrenders.setting.IntSetting;
+import com.glisco.isometricrenders.property.IntProperty;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
 
-public class SettingSliderWidget extends SliderWidget {
+public class PropertySliderWidget extends SliderWidget {
 
-    private final IntSetting setting;
+    private final IntProperty setting;
     private final int scrollIncrement;
 
-    public SettingSliderWidget(int x, int y, int width, Text text, int scrollIncrement, IntSetting setting) {
+    public PropertySliderWidget(int x, int y, int width, Text text, int scrollIncrement, IntProperty setting) {
         super(x, y, width, 20, text, setting.progress());
         this.setting = setting;
         this.scrollIncrement = scrollIncrement;

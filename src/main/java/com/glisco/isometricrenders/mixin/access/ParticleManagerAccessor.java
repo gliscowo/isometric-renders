@@ -12,7 +12,7 @@ import java.util.Queue;
 @Mixin(ParticleManager.class)
 public interface ParticleManagerAccessor {
 
-    @Accessor
-    Map<ParticleTextureSheet, Queue<Particle>> getParticles();
+    @Accessor("particles")
+    Map<ParticleTextureSheet, Queue<Particle>> isometric$getParticles();
 
 }

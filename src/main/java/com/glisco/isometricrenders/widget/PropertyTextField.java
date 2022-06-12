@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.widget;
 
-import com.glisco.isometricrenders.setting.IntSetting;
+import com.glisco.isometricrenders.property.IntProperty;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
@@ -8,12 +8,12 @@ import net.minecraft.text.Text;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class SettingTextField extends TextFieldWidget {
+public class PropertyTextField extends TextFieldWidget {
 
-    private final IntSetting setting;
+    private final IntProperty setting;
     private String content = "";
 
-    public SettingTextField(int x, int y, IntSetting setting) {
+    public PropertyTextField(int x, int y, IntProperty setting) {
         super(MinecraftClient.getInstance().textRenderer, x, y, 35, 20, Text.empty());
         this.setting = setting;
 
@@ -25,7 +25,7 @@ public class SettingTextField extends TextFieldWidget {
         });
 
         this.setChangedListener(s -> {
-            if (Objects.equals(s, content) || s.length() < 1) {
+            if (Objects.equals(s, content) || s.length() < 1 || s.equals("-")) {
                 return;
             }
 
@@ -45,5 +45,4 @@ public class SettingTextField extends TextFieldWidget {
         final var regex = builder.toString();
         return s -> s.matches(regex);
     }
-
 }

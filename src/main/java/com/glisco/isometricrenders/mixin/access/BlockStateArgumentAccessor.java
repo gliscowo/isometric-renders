@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BlockStateArgument.class)
 public interface BlockStateArgumentAccessor {
 
-    @Accessor
-    NbtCompound getData();
+    @Accessor("data")
+    NbtCompound isometric$getData();
 
 }

@@ -1,8 +1,8 @@
 package com.glisco.isometricrenders.util;
 
-import com.glisco.isometricrenders.render.IsometricRenderHelper;
-import com.glisco.isometricrenders.render.IsometricRenderPresets;
-import com.glisco.isometricrenders.screen.AreaIsometricRenderScreen;
+import com.glisco.isometricrenders.render.AreaRenderable;
+import com.glisco.isometricrenders.render.ScreenScheduler;
+import com.glisco.isometricrenders.screen.RenderScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Camera;
@@ -72,9 +72,9 @@ public class AreaSelectionHelper {
     public static boolean tryOpenScreen() {
         if (pos1 == null || pos2 == null) return false;
 
-        AreaIsometricRenderScreen screen = new AreaIsometricRenderScreen();
-        IsometricRenderPresets.setupAreaRender(screen, pos1, pos2);
-        IsometricRenderHelper.scheduleScreen(screen);
+        ScreenScheduler.schedule(new RenderScreen(
+                AreaRenderable.of(pos1, pos2)
+        ));
         return true;
     }
 }

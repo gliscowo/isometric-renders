@@ -9,12 +9,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface DefaultPosArgumentAccessor {
 
     @Accessor("x")
-    CoordinateArgument getX();
+    CoordinateArgument isometric$getX();
 
     @Accessor("y")
-    CoordinateArgument getY();
+    CoordinateArgument isometric$getY();
 
     @Accessor("z")
-    CoordinateArgument getZ();
+    CoordinateArgument isometric$getZ();
 
 }

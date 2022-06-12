@@ -6,10 +6,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(EntitySummonArgumentType.class)
-public interface EntitySummonArgumentTypeAccessor {
+public interface EntitySummonArgumentTypeInvoker {
 
-    @Invoker
-    static Identifier invokeValidate(Identifier identifier) {
+    @Invoker("validate")
+    static Identifier isometric$validate(Identifier identifier) {
         throw new AssertionError();
     }
 

@@ -11,6 +11,7 @@ group = project.maven_group
 
 repositories {
     maven { url "https://maven.wispforest.io"}
+    mavenLocal()
 }
 
 loom {

@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.mixin;
 
-import com.glisco.isometricrenders.render.IsometricRenderHelper;
+import com.glisco.isometricrenders.render.ScreenScheduler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,9 +13,9 @@ public class MinecraftClientMixin {
 
     @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
     public void openScheduled(Screen screen, CallbackInfo ci) {
-        if (screen != null || !IsometricRenderHelper.isScreenScheduled()) return;
+        if (screen != null || !ScreenScheduler.hasScheduled()) return;
 
-        IsometricRenderHelper.openScheduledScreen();
+        ScreenScheduler.open();
         ci.cancel();
     }
 

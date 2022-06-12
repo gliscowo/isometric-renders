@@ -1,8 +1,8 @@
-package com.glisco.isometricrenders.setting;
+package com.glisco.isometricrenders.property;
 
 import net.minecraft.util.math.MathHelper;
 
-public class IntSetting extends Setting<Integer> {
+public class IntProperty extends Property<Integer> {
 
     private final int max;
     private final int min;
@@ -10,7 +10,7 @@ public class IntSetting extends Setting<Integer> {
 
     private boolean allowRollover = false;
 
-    private IntSetting(int defaultValue, int min, int max) {
+    private IntProperty(int defaultValue, int min, int max) {
         super(defaultValue);
 
         this.min = min;
@@ -19,15 +19,15 @@ public class IntSetting extends Setting<Integer> {
         this.span = this.max - this.min;
     }
 
-    public static IntSetting of(int defaultValue, int min, int max) {
+    public static IntProperty of(int defaultValue, int min, int max) {
         if (min >= max) {
             throw new IllegalArgumentException("'min' must be less than 'max'");
         }
 
-        return new IntSetting(defaultValue, min, max);
+        return new IntProperty(defaultValue, min, max);
     }
 
-    public IntSetting withRollover() {
+    public IntProperty withRollover() {
         this.allowRollover = true;
         return this;
     }
