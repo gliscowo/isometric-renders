@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.screen;
 
 import com.glisco.isometricrenders.IsometricRenders;
+import com.glisco.isometricrenders.mixin.access.ParticleManagerAccessor;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.GlobalProperties;
 import com.glisco.isometricrenders.property.Property;
@@ -92,7 +93,9 @@ public class RenderScreen extends Screen {
         this.viewportBeginX = (int) ((this.width - this.height) * 0.5);
         this.viewportEndX = (int) (this.width - (this.width - this.height) * 0.5) + 1;
 
-        IsometricRenders.clearAndDisableParticles();
+        ((ParticleManagerAccessor) MinecraftClient.getInstance().particleManager).isometric$getParticles().clear();
+        IsometricRenders.particleRestriction = this.renderable.particleRestriction();
+
         this.client.options.setPerspective(Perspective.FIRST_PERSON);
 
         final var leftBuilder = new WidgetColumnBuilder(this::addDrawableChild, 20, 0, viewportBeginX);
@@ -113,12 +116,15 @@ public class RenderScreen extends Screen {
         });
 
         rightBuilder.propertyCheckbox(playAnimations, "animations");
+        rightBuilder.move(-5);
         rightBuilder.propertyCheckbox(tickParticles, "particles");
 
         rightBuilder.move(10);
         rightBuilder.label("export_options");
 
         rightBuilder.propertyCheckbox(saveIntoRoot, "dump_into_root");
+        rightBuilder.move(-5);
+        rightBuilder.propertyCheckbox(overwriteLatest, "overwrite_latest");
         rightBuilder.move(-5);
 
         final var exportButton = rightBuilder.button("export", 0, 75, button -> captureScheduled = true);
@@ -133,7 +139,7 @@ public class RenderScreen extends Screen {
 
                 this.notificationStack.add(Translate.gui("copied_to_clipboard"));
 
-                try (var image = RenderableDispatcher.drawIntoImage(this.renderable, exportResolution)) {
+                try (var image = RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)) {
                     final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(image.getBytes())));
                     Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, transferable);
                 } catch (IOException e) {
@@ -249,10 +255,11 @@ public class RenderScreen extends Screen {
         }
 
         final var window = client.getWindow();
+        final var effectiveTickDelta = playAnimations.get() ? client.getTickDelta() : 0;
         RenderableDispatcher.drawIntoActiveFramebuffer(
                 this.renderable,
                 window.getFramebufferWidth() / (float) window.getFramebufferHeight(),
-                playAnimations.get() ? client.getTickDelta() : 0
+                effectiveTickDelta
         );
 
         if (!this.drawOnlyBackground) {
@@ -284,11 +291,11 @@ public class RenderScreen extends Screen {
         }
 
         if (this.captureScheduled) {
-            this.save(RenderableDispatcher.drawIntoImage(this.renderable, exportResolution), false)
+            this.save(RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution), false)
                     .whenComplete((file, throwable) -> {
                         exportCallback.accept(file);
                         this.notificationStack.add(
-                                () -> Util.getOperatingSystem().open(file.getParentFile()),
+                                () -> Util.getOperatingSystem().open(file),
                                 Translate.gui("exported_as"),
                                 Text.literal(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
                         );
@@ -298,12 +305,15 @@ public class RenderScreen extends Screen {
         }
 
         if (this.remainingAnimationFrames > 0) {
-            this.renderedFrames.add(RenderableDispatcher.drawIntoTexture(this.renderable, exportResolution));
+            this.renderedFrames.add(RenderableDispatcher.drawIntoTexture(this.renderable, effectiveTickDelta, exportResolution));
 
             IsometricRenders.skipNextWorldRender();
 
             if (--this.remainingAnimationFrames == 0) {
                 this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
+
+                final var overwriteValue = overwriteLatest.get();
+                overwriteLatest.set(false);
 
                 CompletableFuture<File> exportFuture = null;
 
@@ -315,6 +325,7 @@ public class RenderScreen extends Screen {
                 this.renderedFrames.clear();
 
                 exportFuture.whenComplete((file, throwable) -> {
+                    overwriteLatest.set(overwriteValue);
                     if (throwable != null) return;
 
                     this.exportAnimationButton.setMessage(Translate.gui("converting"));
@@ -329,7 +340,7 @@ public class RenderScreen extends Screen {
                         this.exportAnimationButton.setMessage(Translate.gui("export_animation"));
 
                         this.notificationStack.add(
-                                () -> Util.getOperatingSystem().open(animationFile.getParentFile()),
+                                () -> Util.getOperatingSystem().open(animationFile),
                                 Translate.gui("animation_saved"),
                                 Text.literal(ExportPathSpec.exportRoot().relativize(animationFile.toPath()).toString())
                         );
@@ -363,9 +374,9 @@ public class RenderScreen extends Screen {
 
         if (!(this.renderable instanceof TickingRenderable tickable)) return;
 
-        if (tickParticles.get()) IsometricRenders.allowParticles = true;
+        IsometricRenders.beginRenderableTick();
         if (playAnimations.get()) tickable.tick();
-        IsometricRenders.allowParticles = false;
+        IsometricRenders.endRenderableTick();
     }
 
     private boolean isInViewport(double mouseX) {
@@ -450,7 +461,7 @@ public class RenderScreen extends Screen {
     public void removed() {
         this.renderable.dispose();
         this.client.keyboard.setRepeatEvents(false);
-        IsometricRenders.allowParticles = true;
+        IsometricRenders.particleRestriction = ParticleRestriction.always();
         this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
     }
 

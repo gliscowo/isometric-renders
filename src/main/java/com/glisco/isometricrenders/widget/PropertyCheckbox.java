@@ -8,7 +8,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class PropertyCheckbox extends CheckboxWidget {
-    private static final Identifier TEXTURE = new Identifier("textures/gui/checkbox.png");
 
     private final Property<Boolean> property;
 

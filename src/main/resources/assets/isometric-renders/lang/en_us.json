@@ -5,6 +5,7 @@
   "gui.isometric-renders.particles": "Show Particles (requires ticking)",
   "gui.isometric-renders.use_external_renderer": "Use External Renderer",
   "gui.isometric-renders.dump_into_root": "Dump into root",
+  "gui.isometric-renders.overwrite_latest": "Overwrite latest file",
   "gui.isometric-renders.export": "Export",
   "gui.isometric-renders.export_to_clipboard": "Clipboard",
   "gui.isometric-renders.open_folder": "Open Folder",
@@ -17,6 +18,7 @@
   "gui.isometric-renders.rotation": "Rotation",
   "gui.isometric-renders.slant": "Slant",
   "gui.isometric-renders.light_angle": "Light Angle",
+  "gui.isometric-renders.rotation_speed": "Rotation Speed",
   "gui.isometric-renders.dimetric": "Dimetric",
   "gui.isometric-renders.isometric": "Isometric",
 

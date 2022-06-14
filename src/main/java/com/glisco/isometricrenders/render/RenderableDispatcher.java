@@ -65,8 +65,8 @@ public class RenderableDispatcher {
      * @param size       The resolution to render at
      * @return The created image
      */
-    public static NativeImage drawIntoImage(Renderable<?> renderable, int size) {
-        return copyFramebufferIntoImage(drawIntoTexture(renderable, size));
+    public static NativeImage drawIntoImage(Renderable<?> renderable, float tickDelta, int size) {
+        return copyFramebufferIntoImage(drawIntoTexture(renderable, tickDelta, size));
     }
 
     /**
@@ -78,7 +78,7 @@ public class RenderableDispatcher {
      * @return The framebuffer object holding the pointer to the color attachment
      */
     @SuppressWarnings("ConstantConditions")
-    public static Framebuffer drawIntoTexture(Renderable<?> renderable, int size) {
+    public static Framebuffer drawIntoTexture(Renderable<?> renderable, float tickDelta, int size) {
         final var framebuffer = new SimpleFramebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
 
         RenderSystem.enableBlend();
@@ -88,7 +88,7 @@ public class RenderableDispatcher {
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
 
         framebuffer.beginWrite(true);
-        drawIntoActiveFramebuffer(renderable, 1, 0);
+        drawIntoActiveFramebuffer(renderable, 1, tickDelta);
         framebuffer.endWrite();
 
         // Release depth attachment and FBO to save on VRAM - we only need

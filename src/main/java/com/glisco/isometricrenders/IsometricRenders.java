@@ -1,11 +1,11 @@
 package com.glisco.isometricrenders;
 
 import com.glisco.isometricrenders.command.IsorenderCommand;
-import com.glisco.isometricrenders.mixin.access.ParticleManagerAccessor;
 import com.glisco.isometricrenders.render.TooltipRenderable;
 import com.glisco.isometricrenders.screen.RenderScreen;
 import com.glisco.isometricrenders.util.AreaSelectionHelper;
 import com.glisco.isometricrenders.util.ImageIO;
+import com.glisco.isometricrenders.util.ParticleRestriction;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -28,7 +28,9 @@ public class IsometricRenders implements ClientModInitializer {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String VERSION = FabricLoader.getInstance().getModContainer("isometric-renders").get().getMetadata().getVersion().getFriendlyString();
 
-    public static boolean allowParticles = true;
+    public static ParticleRestriction<?> particleRestriction = ParticleRestriction.always();
+
+    public static boolean inRenderableTick = false;
     public static boolean skipWorldRender = false;
     public static boolean centerNextTooltip = false;
 
@@ -69,8 +71,11 @@ public class IsometricRenders implements ClientModInitializer {
         skipWorldRender = true;
     }
 
-    public static void clearAndDisableParticles() {
-        ((ParticleManagerAccessor) MinecraftClient.getInstance().particleManager).isometric$getParticles().clear();
-        allowParticles = false;
+    public static void beginRenderableTick() {
+        inRenderableTick = true;
+    }
+
+    public static void endRenderableTick() {
+        inRenderableTick = false;
     }
 }

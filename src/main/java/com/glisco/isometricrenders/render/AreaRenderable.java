@@ -3,6 +3,7 @@ package com.glisco.isometricrenders.render;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.Property;
 import com.glisco.isometricrenders.util.ExportPathSpec;
+import com.glisco.isometricrenders.util.ParticleRestriction;
 import com.glisco.isometricrenders.util.Translate;
 import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,9 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.*;
 
 public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropertyBundle> {
 
@@ -72,6 +71,16 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
             client.getEntityRenderDispatcher().render(entry.entity(), vec3d.x, vec3d.y, vec3d.z, entry.entity().getYaw(effectiveDelta), effectiveDelta, matrices, vertexConsumers, entry.light());
             super.draw(RenderSystem.getModelViewMatrix());
         });
+
+        var diff = Vec3d.of(mesh.startPos()).subtract(client.player.getPos());
+        matrices.translate(-diff.x, -diff.y + 1.65, -diff.z);
+
+        client.particleManager.renderParticles(matrices,
+                (VertexConsumerProvider.Immediate) vertexConsumers,
+                client.gameRenderer.getLightmapTextureManager(),
+                getParticleCamera(),
+                tickDelta
+        );
     }
 
     @Override
@@ -89,6 +98,19 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
     @Override
     public AreaPropertyBundle properties() {
         return AreaPropertyBundle.INSTANCE;
+    }
+
+    @Override
+    public ParticleRestriction<?> particleRestriction() {
+        final var dimensions = this.mesh.dimensions();
+        return ParticleRestriction.inArea(new Box(
+                dimensions.minX,
+                dimensions.minY,
+                dimensions.minZ,
+                dimensions.maxX + 1,
+                dimensions.maxY + 1,
+                dimensions.maxZ + 1
+        ));
     }
 
     @Override
@@ -142,6 +164,8 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
 
             modelViewStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(this.slant.get()));
             modelViewStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(this.rotation.get()));
+
+            this.updateAndApplyRotationOffset(modelViewStack);
         }
     }
 }

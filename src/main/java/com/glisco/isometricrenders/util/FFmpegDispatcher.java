@@ -65,6 +65,7 @@ public class FFmpegDispatcher {
 
         final var defaultArgs = new ArrayList<>(List.of(new String[]{
                 "ffmpeg",
+                "-y",
                 "-f", "image2",
                 "-framerate", String.valueOf(GlobalProperties.exportFramerate),
                 "-i", "seq_%d.png",

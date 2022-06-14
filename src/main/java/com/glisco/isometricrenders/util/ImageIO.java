@@ -2,6 +2,7 @@
 package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.IsometricRenders;
+import com.glisco.isometricrenders.property.GlobalProperties;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.text.Text;
 
@@ -56,11 +57,14 @@ public class ImageIO {
         final var path = input.getParent();
 
         var currentPath = path.resolve(String.join(".", file));
+        var lastPath = currentPath;
+
         for (int i = 1; Files.exists(currentPath); i++) {
+            lastPath = currentPath;
             currentPath = path.resolve(String.join("_" + i + ".", file));
         }
 
-        return currentPath;
+        return GlobalProperties.overwriteLatest.get() ? lastPath : currentPath;
     }
 
 }

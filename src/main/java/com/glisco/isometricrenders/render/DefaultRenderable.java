@@ -28,7 +28,7 @@ public abstract class DefaultRenderable<P extends DefaultPropertyBundle> impleme
 
     protected Camera getParticleCamera() {
         Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
-        ((CameraInvoker) camera).isometric$setRotation(this.properties().rotation.get() + 180, this.properties().slant.get());
+        ((CameraInvoker) camera).isometric$setRotation(this.properties().rotation.get() + 180 + this.properties().rotationOffset(), this.properties().slant.get());
         return camera;
     }
 

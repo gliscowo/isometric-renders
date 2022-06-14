@@ -2,6 +2,7 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.property.PropertyBundle;
 import com.glisco.isometricrenders.util.ExportPathSpec;
+import com.glisco.isometricrenders.util.ParticleRestriction;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
@@ -19,6 +20,10 @@ public interface Renderable<P extends PropertyBundle> {
     default void cleanUp() {}
 
     default void dispose() {}
+
+    default ParticleRestriction<?> particleRestriction() {
+        return ParticleRestriction.never();
+    }
 
     P properties();
 

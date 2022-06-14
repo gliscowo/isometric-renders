@@ -2,6 +2,7 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.util.ExportPathSpec;
+import com.glisco.isometricrenders.util.ParticleRestriction;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -87,6 +88,11 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
     @Override
     public DefaultPropertyBundle properties() {
         return DefaultPropertyBundle.get();
+    }
+
+    @Override
+    public ParticleRestriction<?> particleRestriction() {
+        return ParticleRestriction.duringTick();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.glisco.isometricrenders.render;
 import com.glisco.isometricrenders.mixin.access.BlockEntityAccessor;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.util.ExportPathSpec;
+import com.glisco.isometricrenders.util.ParticleRestriction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
@@ -107,6 +108,11 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
     @Override
     public DefaultPropertyBundle properties() {
         return DefaultPropertyBundle.get();
+    }
+
+    @Override
+    public ParticleRestriction<?> particleRestriction() {
+        return ParticleRestriction.duringTick();
     }
 
     @Override

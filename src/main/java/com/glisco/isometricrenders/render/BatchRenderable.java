@@ -51,7 +51,7 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
         this.currentDelegate.emitVertices(matrices, vertexConsumers, tickDelta);
 
         if (this.batchActive && this.currentIndex < this.delegates.size() && System.currentTimeMillis() - this.lastRenderTime > this.renderDelay && ImageIO.taskCount() <= 5) {
-            final var image = RenderableDispatcher.drawIntoImage(this.currentDelegate, GlobalProperties.exportResolution);
+            final var image = RenderableDispatcher.drawIntoImage(this.currentDelegate, 0, GlobalProperties.exportResolution);
             ImageIO.save(image, this.exportPath());
 
             this.currentIndex++;
