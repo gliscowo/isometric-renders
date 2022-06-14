@@ -22,7 +22,6 @@ import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.Perspective;
-import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -291,15 +290,17 @@ public class RenderScreen extends Screen {
         }
 
         if (this.captureScheduled) {
-            this.save(RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution), false)
-                    .whenComplete((file, throwable) -> {
-                        exportCallback.accept(file);
-                        this.notificationStack.add(
-                                () -> Util.getOperatingSystem().open(file),
-                                Translate.gui("exported_as"),
-                                Text.literal(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
-                        );
-                    });
+            ImageIO.save(
+                    RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution),
+                    this.renderable.exportPath()
+            ).whenComplete((file, throwable) -> {
+                exportCallback.accept(file);
+                this.notificationStack.add(
+                        () -> Util.getOperatingSystem().open(file),
+                        Translate.gui("exported_as"),
+                        Text.literal(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
+                );
+            });
 
             this.captureScheduled = false;
         }
@@ -317,9 +318,12 @@ public class RenderScreen extends Screen {
 
                 CompletableFuture<File> exportFuture = null;
 
-                for (var frame : this.renderedFrames) {
-                    exportFuture = this.save(RenderableDispatcher.copyFramebufferIntoImage(frame), true);
-                    frame.delete();
+                for (int i = 0; i < this.renderedFrames.size(); i++) {
+                    exportFuture = ImageIO.save(
+                            RenderableDispatcher.copyFramebufferIntoImage(this.renderedFrames.get(i)),
+                            ExportPathSpec.forced("sequence", "seq_" + i)
+                    );
+                    this.renderedFrames.get(i).delete();
                 }
 
                 this.renderedFrames.clear();
@@ -463,15 +467,6 @@ public class RenderScreen extends Screen {
         this.client.keyboard.setRepeatEvents(false);
         IsometricRenders.particleRestriction = ParticleRestriction.always();
         this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
-    }
-
-    private CompletableFuture<File> save(NativeImage image, boolean sequence) {
-        return ImageIO.save(
-                image,
-                sequence ?
-                        ExportPathSpec.forced("sequence", "seq")
-                        : this.renderable.exportPath()
-        );
     }
 
     public void scheduleCapture() {

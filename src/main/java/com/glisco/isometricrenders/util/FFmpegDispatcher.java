@@ -57,10 +57,6 @@ public class FFmpegDispatcher {
 
     @SuppressWarnings("resource")
     public static CompletableFuture<File> assemble(ExportPathSpec target, Path sourcePath, Format format) {
-        if (!sourcePath.resolve("seq.png").toFile().renameTo(sourcePath.resolve("seq_0.png").toFile())) {
-            IsometricRenders.LOGGER.warn("Could not rename first image sequence element - first frame will be missing");
-        }
-
         target.resolveOffset().toFile().mkdirs();
 
         final var defaultArgs = new ArrayList<>(List.of(new String[]{

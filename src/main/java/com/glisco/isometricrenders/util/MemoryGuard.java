@@ -23,8 +23,10 @@ public class MemoryGuard {
 
     public void update() {
         var data = new int[4];
-        GL11.glGetIntegerv(ATIMeminfo.GL_TEXTURE_FREE_MEMORY_ATI, data);
-        GL11.glGetIntegerv(NVXGPUMemoryInfo.GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, data);
+        var caps = GL.getCapabilities();
+
+        if (caps.GL_ATI_meminfo) GL11.glGetIntegerv(ATIMeminfo.GL_TEXTURE_FREE_MEMORY_ATI, data);
+        if (caps.GL_NVX_gpu_memory_info) GL11.glGetIntegerv(NVXGPUMemoryInfo.GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, data);
         GL11.glGetError();
 
         this.availableVramMB = data[0] / 1024;
