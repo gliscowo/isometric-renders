@@ -372,11 +372,11 @@ public class RenderScreen extends Screen {
             this.memoryGuard.update();
         }
 
-        if (!(this.renderable instanceof TickingRenderable tickable)) return;
-
-        IsometricRenders.beginRenderableTick();
-        if (playAnimations.get()) tickable.tick();
-        IsometricRenders.endRenderableTick();
+        if (playAnimations.get() && this.renderable instanceof TickingRenderable tickable) {
+            IsometricRenders.beginRenderableTick();
+            tickable.tick();
+            IsometricRenders.endRenderableTick();
+        }
     }
 
     private boolean isInViewport(double mouseX) {

@@ -23,9 +23,6 @@ public class RenderableDispatcher {
      * @param tickDelta   The tick delta to use
      */
     public static void drawIntoActiveFramebuffer(Renderable<?> renderable, float aspectRatio, float tickDelta) {
-        final var client = MinecraftClient.getInstance();
-        final var window = client.getWindow();
-
         RenderSystem.backupProjectionMatrix();
         Matrix4f projectionMatrix = Matrix4f.projectionMatrix(-aspectRatio, aspectRatio, 1, -1, -1000, 3000);
         RenderSystem.setProjectionMatrix(projectionMatrix);

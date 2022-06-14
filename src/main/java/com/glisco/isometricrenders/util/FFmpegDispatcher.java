@@ -68,8 +68,7 @@ public class FFmpegDispatcher {
                 "-y",
                 "-f", "image2",
                 "-framerate", String.valueOf(GlobalProperties.exportFramerate),
-                "-i", "seq_%d.png",
-                "-plays", "0"}));
+                "-i", "seq_%d.png"}));
 
         if (format.arguments.length != 0) {
             defaultArgs.addAll(Arrays.asList(format.arguments));
@@ -109,8 +108,8 @@ public class FFmpegDispatcher {
 
     public enum Format {
         APNG("apng", new String[]{"-plays", "0"}),
-        GIF("gif", new String[]{"-plays", "0"}),
-        MP4("mp4", new String[]{"-preset", "slow", "-crf", "20"});
+        GIF("gif", new String[]{"-plays", "0", "-pix_fmt", "yuv420p"}),
+        MP4("mp4", new String[]{"-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p"});
 
         public final String extension;
         public final String[] arguments;
