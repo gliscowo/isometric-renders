@@ -1,19 +1,27 @@
 package com.glisco.isometricrenders.screen;
 
 import com.glisco.isometricrenders.IsometricRenders;
+import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.GlobalProperties;
 import com.glisco.isometricrenders.property.Property;
-import com.glisco.isometricrenders.render.*;
+import com.glisco.isometricrenders.render.DefaultRenderable;
+import com.glisco.isometricrenders.render.Renderable;
+import com.glisco.isometricrenders.render.RenderableDispatcher;
+import com.glisco.isometricrenders.render.TickingRenderable;
 import com.glisco.isometricrenders.util.*;
+import com.glisco.isometricrenders.widget.NotificationStack;
 import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.Perspective;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -24,6 +32,8 @@ import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -49,11 +59,16 @@ public class RenderScreen extends Screen {
         KEYBOARD_CONTROLS.put(GLFW.GLFW_KEY_SLASH, properties -> properties.scale.modify(-10));
     }
 
+    private final MemoryGuard memoryGuard = new MemoryGuard(0.75f);
+
     private final Renderable<?> renderable;
     private Consumer<File> exportCallback = (file) -> {};
 
     public final Property<Boolean> playAnimations = Property.of(false);
     public final Property<Boolean> tickParticles = Property.of(true);
+
+    private final NotificationStack notificationStack = new NotificationStack();
+    private ButtonWidget exportAnimationButton;
 
     private boolean drawOnlyBackground = false;
     private boolean captureScheduled = false;
@@ -62,12 +77,13 @@ public class RenderScreen extends Screen {
     private int viewportBeginX;
     private int viewportEndX;
 
-    private ButtonWidget exportAnimationButton;
+    private final List<Framebuffer> renderedFrames = new ArrayList<>();
     private int remainingAnimationFrames;
 
     public RenderScreen(Renderable<?> renderable) {
         super(Text.of(""));
         this.renderable = renderable;
+        this.memoryGuard.update();
     }
 
     @Override
@@ -114,6 +130,8 @@ public class RenderScreen extends Screen {
         if (!GraphicsEnvironment.isHeadless()) {
             rightBuilder.move(-5);
             rightBuilder.button("export_to_clipboard", 0, 75, button -> {
+
+                this.notificationStack.add(Translate.gui("copied_to_clipboard"));
 
                 try (var image = RenderableDispatcher.drawIntoImage(this.renderable, exportResolution)) {
                     final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(image.getBytes())));
@@ -170,14 +188,16 @@ public class RenderScreen extends Screen {
                 });
 
                 this.exportAnimationButton = rightBuilder.button("export_animation", 0, 100, button -> {
-                    this.remainingAnimationFrames = exportFrames;
+                    if (this.memoryGuard.canFit(this.estimateMemoryUsage(exportFrames)) || Screen.hasShiftDown()) {
+                        this.remainingAnimationFrames = exportFrames;
 
-                    this.client.getWindow().setFramerateLimit(Integer.parseInt(framerateField.getText()));
-                    IsometricRenders.skipNextWorldRender();
+                        this.client.getWindow().setFramerateLimit(Integer.parseInt(framerateField.getText()));
+                        IsometricRenders.skipNextWorldRender();
 
-                    button.active = false;
-                    button.setMessage(Translate.gui("exporting"));
-                });
+                        button.active = false;
+                        button.setMessage(Translate.gui("exporting"));
+                    }
+                }).withTooltip(this, () -> this.memoryGuard.getStatusTooltip(this.estimateMemoryUsage(exportFrames)));
 
                 rightBuilder.button("format." + animationFormat.extension, 105, 35, button -> {
                     animationFormat = animationFormat.next();
@@ -210,6 +230,9 @@ public class RenderScreen extends Screen {
                     ? Text.empty()
                     : Translate.gui("export_remaining_frames", this.remainingAnimationFrames);
         });
+
+        this.notificationStack.setPosition(viewportEndX - 10, height - 10);
+        this.addDrawableChild(this.notificationStack);
     }
 
     @Override
@@ -249,41 +272,75 @@ public class RenderScreen extends Screen {
             client.textRenderer.draw(matrices, gui("memory_warning4"), 10, height - 30, 0xAAAAAA);
             client.textRenderer.draw(matrices, gui("memory_warning5"), 10, height - 20, 0xAAAAAA);
 
-            client.textRenderer.draw(matrices, ImageIO.progressText(), viewportEndX + 12, 425, 0xFFFFFF);
+            if (ImageIO.taskCount() > 1) {
+                int exportRootX = viewportBeginX + 10;
+                int exportRootY = height - 50;
 
-            if (ImageIO.taskCount() > 0) {
-                drawExportProgressBar(matrices, viewportEndX + 12, 437, width - viewportEndX - 30, 150, 5);
+                DrawableHelper.fill(matrices, exportRootX, exportRootY, exportRootX + 120, exportRootY + 40, 0x90000000);
+                client.textRenderer.draw(matrices, ImageIO.progressText(), exportRootX + 10, exportRootY + 10, 0xFFFFFF);
+
+                RenderScreen.drawExportProgressBar(matrices, exportRootX + 10, exportRootY + 25, 100, 50, 10);
             }
         }
 
         if (this.captureScheduled) {
-            this.capture(false).whenComplete((file, throwable) -> exportCallback.accept(file));
+            this.save(RenderableDispatcher.drawIntoImage(this.renderable, exportResolution), false)
+                    .whenComplete((file, throwable) -> {
+                        exportCallback.accept(file);
+                        this.notificationStack.add(
+                                () -> Util.getOperatingSystem().open(file.getParentFile()),
+                                Translate.gui("exported_as"),
+                                Text.literal(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
+                        );
+                    });
+
             this.captureScheduled = false;
         }
 
         if (this.remainingAnimationFrames > 0) {
-            var exportFuture = this.capture(true);
+            this.renderedFrames.add(RenderableDispatcher.drawIntoTexture(this.renderable, exportResolution));
+
             IsometricRenders.skipNextWorldRender();
 
             if (--this.remainingAnimationFrames == 0) {
                 this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
 
+                CompletableFuture<File> exportFuture = null;
+
+                for (var frame : this.renderedFrames) {
+                    exportFuture = this.save(RenderableDispatcher.copyFramebufferIntoImage(frame), true);
+                    frame.delete();
+                }
+
+                this.renderedFrames.clear();
+
                 exportFuture.whenComplete((file, throwable) -> {
                     if (throwable != null) return;
 
                     this.exportAnimationButton.setMessage(Translate.gui("converting"));
+                    this.notificationStack.add(Translate.gui("converting_image_sequence"));
 
                     FFmpegDispatcher.assemble(
                             this.renderable.exportPath(),
                             ExportPathSpec.exportRoot().resolve("sequence/"),
                             animationFormat
-                    ).whenComplete((aBoolean, anotherThrowable) -> {
+                    ).whenComplete((animationFile, animationThrowable) -> {
                         this.exportAnimationButton.active = true;
                         this.exportAnimationButton.setMessage(Translate.gui("export_animation"));
+
+                        this.notificationStack.add(
+                                () -> Util.getOperatingSystem().open(animationFile.getParentFile()),
+                                Translate.gui("animation_saved"),
+                                Text.literal(ExportPathSpec.exportRoot().relativize(animationFile.toPath()).toString())
+                        );
                     });
                 });
             }
         }
+    }
+
+    private int estimateMemoryUsage(int frames) {
+        return (int) ((exportResolution * exportResolution * 4L * frames) / 1024L / 1024L);
     }
 
     private void drawFramingHint(MatrixStack matrices) {
@@ -300,6 +357,10 @@ public class RenderScreen extends Screen {
 
     @Override
     public void tick() {
+        if (this.client.world.getTime() % 40 == 0) {
+            this.memoryGuard.update();
+        }
+
         if (!(this.renderable instanceof TickingRenderable tickable)) return;
 
         if (tickParticles.get()) IsometricRenders.allowParticles = true;
@@ -393,9 +454,9 @@ public class RenderScreen extends Screen {
         this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
     }
 
-    private CompletableFuture<File> capture(boolean sequence) {
+    private CompletableFuture<File> save(NativeImage image, boolean sequence) {
         return ImageIO.save(
-                RenderableDispatcher.drawIntoImage(this.renderable, exportResolution),
+                image,
                 sequence ?
                         ExportPathSpec.forced("sequence", "seq")
                         : this.renderable.exportPath()

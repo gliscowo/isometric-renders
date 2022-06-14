@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.Property;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.Translate;

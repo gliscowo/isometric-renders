@@ -1,7 +1,6 @@
-package com.glisco.isometricrenders.render;
+package com.glisco.isometricrenders.property;
 
-import com.glisco.isometricrenders.property.IntProperty;
-import com.glisco.isometricrenders.property.PropertyBundle;
+import com.glisco.isometricrenders.render.Renderable;
 import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3f;

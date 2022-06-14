@@ -8,13 +8,16 @@
     "HandledScreenMixin",
     "MinecraftClientMixin",
     "ParticleManagerMixin",
+    "ScreenMixin",
     "TextureManagerMixin",
     "WorldRendererMixin",
     "access.BlockEntityAccessor",
     "access.BlockStateArgumentAccessor",
+    "access.ButtonWidgetAccessor",
     "access.CameraInvoker",
     "access.DefaultPosArgumentAccessor",
     "access.EntitySummonArgumentTypeInvoker",
+    "access.FramebufferAccessor",
     "access.ParticleManagerAccessor"
   ],
   "injectors": {

@@ -1,7 +1,7 @@
-package com.glisco.isometricrenders.util;
+package com.glisco.isometricrenders.render;
 
-import com.glisco.isometricrenders.render.*;
 import com.glisco.isometricrenders.screen.RenderScreen;
+import com.glisco.isometricrenders.screen.ScreenScheduler;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 

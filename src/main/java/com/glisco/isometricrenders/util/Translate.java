@@ -6,10 +6,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 
 public class Translate {
 
-    private static final String MESSAGE_PREFIX = "message.isometric-renders.prefix";
+    private static final Text PREFIX = generatePrefix("Isometric Renders", 190, 155);
 
     public static MutableText make(String key, Object... args) {
         return Text.translatable("message.isometric-renders." + key, args);
@@ -20,7 +21,7 @@ public class Translate {
     }
 
     public static MutableText msg(String key, Object... args) {
-        return Text.translatable(MESSAGE_PREFIX).append(make(key, args).formatted(Formatting.GRAY));
+        return prefixed(make(key, args).formatted(Formatting.GRAY));
     }
 
     public static void commandFeedback(CommandContext<FabricClientCommandSource> context, String key, Object... args) {
@@ -31,8 +32,28 @@ public class Translate {
         context.getSource().sendError(msg(key, args));
     }
 
-    public static void chat(String key, Object... args) {
-        MinecraftClient.getInstance().player.sendMessage(msg(key, args), false);
+    public static MutableText prefixed(Text text) {
+        return Text.empty()
+                .append(PREFIX)
+                .append(Text.literal(" > ").formatted(Formatting.DARK_GRAY))
+                .append(text);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static Text generatePrefix(String text, int startHue, int endHue) {
+        int hueSpan = endHue - startHue;
+        char[] chars = text.toCharArray();
+
+        var prefixText = Text.empty();
+
+        for (int i = 0; i < chars.length; i++) {
+            float index = i;
+            prefixText.append(Text.literal(String.valueOf(chars[i])).styled(style ->
+                    style.withColor(MathHelper.hsvToRgb((startHue + (index / chars.length) * hueSpan) / 360, 1, 0.96f))
+            ));
+        }
+
+        return prefixText;
     }
 
     public static void actionBar(String key, Object... args) {

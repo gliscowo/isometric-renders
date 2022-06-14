@@ -1,5 +1,8 @@
 package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.mixin.access.FramebufferAccessor;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -10,6 +13,15 @@ import net.minecraft.util.math.Matrix4f;
 
 public class RenderableDispatcher {
 
+    /**
+     * Renders the given renderable into the current framebuffer,
+     * with the projection matrix adjusted to compensate for the buffer's
+     * aspect ratio
+     *
+     * @param renderable  The renderable to draw
+     * @param aspectRatio The aspect ratio of the current framebuffer
+     * @param tickDelta   The tick delta to use
+     */
     public static void drawIntoActiveFramebuffer(Renderable<?> renderable, float aspectRatio, float tickDelta) {
         final var client = MinecraftClient.getInstance();
         final var window = client.getWindow();
@@ -45,8 +57,29 @@ public class RenderableDispatcher {
         RenderSystem.restoreProjectionMatrix();
     }
 
+    /**
+     * Directly draws the given renderable into a {@link NativeImage} at the given resolution.
+     * This method is essentially just a shorthand for {@code copyFramebufferIntoImage(drawIntoTexture(renderable, size))}
+     *
+     * @param renderable The renderable to draw
+     * @param size       The resolution to render at
+     * @return The created image
+     */
     public static NativeImage drawIntoImage(Renderable<?> renderable, int size) {
-        Framebuffer framebuffer = new SimpleFramebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
+        return copyFramebufferIntoImage(drawIntoTexture(renderable, size));
+    }
+
+    /**
+     * Draws the given renderable into a new framebuffer. The FBO and depth attachment
+     * are deleted afterwards to save video memory, only the color attachment remains
+     *
+     * @param renderable The renderable to render
+     * @param size       The resolution to render aat
+     * @return The framebuffer object holding the pointer to the color attachment
+     */
+    @SuppressWarnings("ConstantConditions")
+    public static Framebuffer drawIntoTexture(Renderable<?> renderable, int size) {
+        final var framebuffer = new SimpleFramebuffer(size, size, true, MinecraftClient.IS_SYSTEM_MAC);
 
         RenderSystem.enableBlend();
         RenderSystem.clear(16640, MinecraftClient.IS_SYSTEM_MAC);
@@ -58,8 +91,32 @@ public class RenderableDispatcher {
         drawIntoActiveFramebuffer(renderable, 1, 0);
         framebuffer.endWrite();
 
+        // Release depth attachment and FBO to save on VRAM - we only need
+        // the color attachment texture to later turn into an image
+        final var accessor = (FramebufferAccessor) framebuffer;
+        TextureUtil.releaseTextureId(framebuffer.getDepthAttachment());
+        accessor.isometric$setDepthAttachment(-1);
+
+        GlStateManager._glDeleteFramebuffers(accessor.isometric$getFbo());
+        accessor.isometric$setFbo(-1);
+
+        return framebuffer;
+    }
+
+    /**
+     * Copies the given framebuffer's color attachment from video
+     * memory in to system memory, wrapped in a {@link NativeImage}
+     *
+     * @param framebuffer The framebuffer to copy
+     * @return The created image
+     */
+    public static NativeImage copyFramebufferIntoImage(Framebuffer framebuffer) {
         final NativeImage img = new NativeImage(framebuffer.textureWidth, framebuffer.textureHeight, false);
-        RenderSystem.bindTexture(framebuffer.getColorAttachment());
+
+        // This call internally binds the buffer's color attachment texture
+        framebuffer.beginRead();
+
+        // This method gets the pixels from the currently bound texture
         img.loadFromTextureImage(0, false);
         img.mirrorVertically();
 
@@ -67,5 +124,4 @@ public class RenderableDispatcher {
 
         return img;
     }
-
 }

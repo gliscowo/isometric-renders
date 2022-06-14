@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.mixin;
 
-import com.glisco.isometricrenders.render.ScreenScheduler;
+import com.glisco.isometricrenders.screen.ScreenScheduler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Mixin;

@@ -4,6 +4,7 @@ import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.property.GlobalProperties;
 import net.minecraft.util.Util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,7 +56,7 @@ public class FFmpegDispatcher {
     }
 
     @SuppressWarnings("resource")
-    public static CompletableFuture<Boolean> assemble(ExportPathSpec target, Path sourcePath, Format format) {
+    public static CompletableFuture<File> assemble(ExportPathSpec target, Path sourcePath, Format format) {
         if (!sourcePath.resolve("seq.png").toFile().renameTo(sourcePath.resolve("seq_0.png").toFile())) {
             IsometricRenders.LOGGER.warn("Could not rename first image sequence element - first frame will be missing");
         }
@@ -73,7 +74,8 @@ public class FFmpegDispatcher {
             defaultArgs.addAll(Arrays.asList(format.arguments));
         }
 
-        defaultArgs.add(target.resolveFile(format.extension).getAbsolutePath());
+        final var animationFile = target.resolveFile(format.extension);
+        defaultArgs.add(animationFile.getAbsolutePath());
 
         final var process = new ProcessBuilder(defaultArgs)
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
@@ -96,7 +98,7 @@ public class FFmpegDispatcher {
                     IsometricRenders.LOGGER.warn("Could not clean up sequence directory", e);
                 }
 
-                return exited.exitValue() == 0;
+                return animationFile;
             });
         } catch (IOException e) {
             IsometricRenders.LOGGER.error("Could not launch ffmpeg", e);

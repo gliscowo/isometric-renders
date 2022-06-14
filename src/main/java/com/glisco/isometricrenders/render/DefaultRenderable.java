@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.mixin.access.CameraInvoker;
+import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;

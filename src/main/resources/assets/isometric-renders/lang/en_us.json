@@ -4,12 +4,14 @@
   "gui.isometric-renders.animations": "Run Animations (Tick)",
   "gui.isometric-renders.particles": "Show Particles (requires ticking)",
   "gui.isometric-renders.use_external_renderer": "Use External Renderer",
-  "gui.isometric-renders.allow_multiple_export_jobs": "Allow Multiple Export Jobs",
   "gui.isometric-renders.dump_into_root": "Dump into root",
-  "gui.isometric-renders.clear_queue": "Clear Queue",
   "gui.isometric-renders.export": "Export",
   "gui.isometric-renders.export_to_clipboard": "Clipboard",
   "gui.isometric-renders.open_folder": "Open Folder",
+  "gui.isometric-renders.copied_to_clipboard": "Exported to Clipboard",
+  "gui.isometric-renders.exported_as": "Exported as: ",
+  "gui.isometric-renders.animation_saved": "Animation saved to: ",
+  "gui.isometric-renders.converting_image_sequence": "Converting image sequence to target format",
 
   "gui.isometric-renders.scale": "Scale",
   "gui.isometric-renders.rotation": "Rotation",
@@ -18,8 +20,6 @@
   "gui.isometric-renders.dimetric": "Dimetric",
   "gui.isometric-renders.isometric": "Isometric",
 
-  "gui.isometric-renders.render_height": "Render Height",
-  "gui.isometric-renders.render_shift": "Render Shift",
   "gui.isometric-renders.atlas_options": "Atlas Options",
   "gui.isometric-renders.columns": "Columns",
 
@@ -41,6 +41,10 @@
   "gui.isometric-renders.no_ffmpeg_1": "FFmpeg was not detected",
   "gui.isometric-renders.no_ffmpeg_2": "Please download it from",
   "gui.isometric-renders.no_ffmpeg_3": "https://ffmpeg.org/download.html",
+  "gui.isometric-renders.vram": "Estimated VRAM usage: %s/%smb (%s)",
+  "gui.isometric-renders.ram": "Estimated RAM usage: %s/%smb (%s)",
+  "gui.isometric-renders.vram_ignore": "Shift-click to ignore",
+  "gui.isometric-renders.no_vram_info_warning": "Available VRAM could not be determined",
 
   "gui.isometric-renders.transform_options": "Transform Options",
   "gui.isometric-renders.presets": "Presets",
@@ -60,8 +64,8 @@
 
   "gui.isometric-renders.mesh_controls": "Mesh Controls",
   "gui.isometric-renders.mesh_status": "Status: ",
-  "gui.isometric-renders.mesh_building": "Building - %.1f%%",
-  "gui.isometric-renders.mesh_rebuilding": "Rebuilding - %.1f%%",
+  "gui.isometric-renders.mesh_building": "Building - %d%%",
+  "gui.isometric-renders.mesh_rebuilding": "Rebuilding - %d%%",
   "gui.isometric-renders.mesh_ready": "Ready",
   "gui.isometric-renders.freeze_entities": "Freeze Entities",
   "gui.isometric-renders.rebuild_mesh": "Rebuild Mesh",
@@ -74,10 +78,9 @@
   "gui.isometric-renders.batch.reset": "Reset",
   "gui.isometric-renders.batch.controls": "Batch Controls",
 
-  "message.isometric-renders.prefix": "§9[§aIsometric Renders§9] ",
   "message.isometric-renders.no_block": "You're not looking at a block",
   "message.isometric-renders.no_entity": "You're not looking at an entity",
-  "message.isometric-renders.incomplete_selection": "Your selection is not complete!",
+  "message.isometric-renders.incomplete_selection": "Your do not have a completed area",
   "message.isometric-renders.no_such_namespace": "Unknown namespace",
 
   "message.isometric-renders.custom_lighting": "§aCustom Lighting: §7[§c%1$s §a%1$s §b%1$s§7]",
@@ -86,14 +89,10 @@
   "message.isometric-renders.unsafe_enabled": "Unsafe mode §cenabled§7. Tread lightly",
   "message.isometric-renders.unsafe_disabled": "Unsafe mode §adisabled§7",
 
+  "message.isometric-renders.version": "Running Isometric Renders v%s",
+  "message.isometric-renders.command_hint": "Hint: Check the wiki to see the subcommands and what they do",
+
   "message.isometric-renders.selection_cleared": "§7[§cSelection cleared§7]",
   "message.isometric-renders.selection_started": "§7[§aSelection started§7]",
-  "message.isometric-renders.selection_finished": "§7[§aSelection finished§7]",
-
-  "message.isometric-renders.full_queue": "§cYour job could not be submitted because the export queue is full!",
-  "message.isometric-renders.threaded_export_system_initialized": "Threaded export system initialized",
-  "message.isometric-renders.threaded_export_system_shutdown": "Threaded export system shutting down",
-  "message.isometric-renders.threaded_export_system_shutdown_with_job": "Threaded export system shutting down with %1$s tasks remaining",
-  "message.isometric-renders.threaded_export_system_not_available": "§cThe threaded export system is not available, try again in a few seconds. If this doesn't fix itself, restart your client",
-  "message.isometric-renders.resolution_not_supported": "§cResolutions over 2048x2048 are not supported for batch-rendering. If you want to risk it, use §6/isorender insanity"
+  "message.isometric-renders.selection_finished": "§7[§aSelection finished§7]"
 }

@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.mixin.access.BlockEntityAccessor;
+import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;

@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.command;
 
-import com.glisco.isometricrenders.util.RenderTask;
+import com.glisco.isometricrenders.render.RenderTask;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -41,7 +41,7 @@ public class RenderTaskArgumentType implements ArgumentType<RenderTask> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         final var input = builder.getRemaining();
 
-        if (input.codePoints().filter(value -> value == ' ').count() > 0) {
+        if (input.codePoints().filter(value -> value == ' ').count() > 0 && input.contains("batch")) {
             return CommandSource.suggestMatching(new String[]{"items", "blocks"}, builder.createOffset(builder.getStart() + input.length()));
         } else {
             return CommandSource.suggestMatching(new String[]{"atlas", "batch"}, builder);

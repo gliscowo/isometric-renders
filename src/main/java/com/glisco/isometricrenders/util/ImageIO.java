@@ -2,7 +2,6 @@
 package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.IsometricRenders;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.text.Text;
 
@@ -11,20 +10,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImageIO {
 
-    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("image-io-worker-%d").build());
     private static final AtomicInteger TASK_COUNT = new AtomicInteger(0);
 
     public static CompletableFuture<File> save(NativeImage image, ExportPathSpec path) {
         final var future = new CompletableFuture<File>();
 
-        EXECUTOR.submit(() -> {
-            TASK_COUNT.incrementAndGet();
+        TASK_COUNT.incrementAndGet();
+        ForkJoinPool.commonPool().submit(() -> {
             final var imageFile = path.resolveFile("png");
 
             imageFile.getParentFile().mkdirs();

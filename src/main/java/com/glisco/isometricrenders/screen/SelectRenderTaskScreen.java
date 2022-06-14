@@ -1,6 +1,6 @@
 package com.glisco.isometricrenders.screen;
 
-import com.glisco.isometricrenders.util.RenderTask;
+import com.glisco.isometricrenders.render.RenderTask;
 import com.glisco.isometricrenders.util.Translate;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;

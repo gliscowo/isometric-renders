@@ -1,11 +1,13 @@
 package com.glisco.isometricrenders.command;
 
+import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.mixin.access.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.access.DefaultPosArgumentAccessor;
 import com.glisco.isometricrenders.mixin.access.EntitySummonArgumentTypeInvoker;
 import com.glisco.isometricrenders.property.GlobalProperties;
 import com.glisco.isometricrenders.render.*;
 import com.glisco.isometricrenders.screen.RenderScreen;
+import com.glisco.isometricrenders.screen.ScreenScheduler;
 import com.glisco.isometricrenders.util.AreaSelectionHelper;
 import com.glisco.isometricrenders.util.Translate;
 import com.mojang.brigadier.CommandDispatcher;
@@ -20,7 +22,9 @@ import net.minecraft.command.argument.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
@@ -46,6 +50,7 @@ public class IsorenderCommand {
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         dispatcher.register(literal("isorender")
+                .executes(IsorenderCommand::showRootNodeHelp)
                 .then(literal("area")
                         .executes(IsorenderCommand::renderAreaSelection)
                         .then(argument("start", BlockPosArgumentType.blockPos())
@@ -66,6 +71,10 @@ public class IsorenderCommand {
                         .executes(IsorenderCommand::renderHeldItem)
                         .then(argument("item", ItemStackArgumentType.itemStack(access))
                                 .executes(IsorenderCommand::renderItemWithArgument)))
+                .then(literal("tooltip")
+                        .executes(IsorenderCommand::renderHeldItemTooltip)
+                        .then(argument("item", ItemStackArgumentType.itemStack(access))
+                                .executes(IsorenderCommand::renderItemTooltipWithArgument)))
                 .then(literal("namespace")
                         .then(argument("namespace", NamespaceArgumentType.namespace())
                                 .then(argument("task", new RenderTaskArgumentType())
@@ -83,6 +92,19 @@ public class IsorenderCommand {
                                 .executes(IsorenderCommand::enableUnsafe))
                         .then(literal("disable")
                                 .executes(IsorenderCommand::disableUnsafe))));
+    }
+
+    private static int showRootNodeHelp(CommandContext<FabricClientCommandSource> context) {
+        final var source = context.getSource();
+
+        source.sendFeedback(Translate.prefixed(Translate.make("version", Text.literal(IsometricRenders.VERSION).formatted(Formatting.DARK_GRAY)).formatted(Formatting.GRAY)));
+        source.sendFeedback(Translate.prefixed(Translate.make("command_hint").styled(
+                style -> style
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.wispforest.io/isometric-renders/slash_isorender/"))
+                        .withFormatting(Formatting.UNDERLINE)
+                        .withFormatting(Formatting.GRAY)
+        )));
+        return 0;
     }
 
     private static int disableUnsafe(CommandContext<FabricClientCommandSource> context) {
@@ -127,13 +149,26 @@ public class IsorenderCommand {
         ScreenScheduler.schedule(new RenderScreen(
                 new ItemRenderable(ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false))
         ));
-
         return 0;
     }
 
     private static int renderHeldItem(CommandContext<FabricClientCommandSource> context) {
         ScreenScheduler.schedule(new RenderScreen(
                 new ItemRenderable(MinecraftClient.getInstance().player.getMainHandStack())
+        ));
+        return 0;
+    }
+
+    private static int renderItemTooltipWithArgument(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
+        ScreenScheduler.schedule(new RenderScreen(
+                new TooltipRenderable(ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false))
+        ));
+        return 0;
+    }
+
+    private static int renderHeldItemTooltip(CommandContext<FabricClientCommandSource> context) {
+        ScreenScheduler.schedule(new RenderScreen(
+                new TooltipRenderable(MinecraftClient.getInstance().player.getMainHandStack())
         ));
         return 0;
     }

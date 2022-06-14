@@ -1,7 +1,7 @@
 package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.render.AreaRenderable;
-import com.glisco.isometricrenders.render.ScreenScheduler;
+import com.glisco.isometricrenders.screen.ScreenScheduler;
 import com.glisco.isometricrenders.screen.RenderScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;

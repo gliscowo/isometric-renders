@@ -46,8 +46,8 @@ public class WidgetColumnBuilder {
         return label;
     }
 
-    public ButtonWidget button(String messageKey, int xOffset, int width, ButtonWidget.PressAction onPress) {
-        return this.add(new ButtonWidget(baseX + xOffset, this.currentY(), width, 20, Translate.gui(messageKey), onPress), 20);
+    public IsometricButtonWidget button(String messageKey, int xOffset, int width, ButtonWidget.PressAction onPress) {
+        return this.add(new IsometricButtonWidget(baseX + xOffset, this.currentY(), width, 20, Translate.gui(messageKey), onPress), 20);
     }
 
     public TextFieldWidget labeledTextField(String content, int width, String labelKey) {
