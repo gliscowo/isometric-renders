@@ -15,7 +15,7 @@ public class SelectRenderTaskScreen extends Screen {
     private final Collection<ItemStack> items;
 
     public SelectRenderTaskScreen(Collection<ItemStack> items) {
-        super(Text.empty());
+        super(Text.of(""));
         this.items = items;
     }
 

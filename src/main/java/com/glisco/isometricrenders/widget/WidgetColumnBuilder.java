@@ -58,7 +58,7 @@ public class WidgetColumnBuilder {
                         this.currentY(),
                         width,
                         20,
-                        Text.empty()
+                        Text.of("")
                 ),
                 20
         );

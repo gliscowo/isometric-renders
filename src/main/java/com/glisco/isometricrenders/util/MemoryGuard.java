@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.util;
 
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -44,7 +45,7 @@ public class MemoryGuard {
         tooltip.add(this.usageText("ram", memoryMB, this.availableRamMB(), this.canFitInRam(memoryMB)));
 
         if (!this.isSupported()) {
-            tooltip.add(Text.empty());
+            tooltip.add(Text.of(" "));
             tooltip.add(Translate.gui("no_vram_info_warning").formatted(Formatting.YELLOW));
         }
 
@@ -59,16 +60,16 @@ public class MemoryGuard {
         if (fits) {
             return Translate.gui(
                     key,
-                    Text.literal(usage + "").formatted(Formatting.GRAY),
-                    Text.literal(available + "").formatted(Formatting.GRAY),
-                    Text.literal(usage * 100 / available + "%").formatted(Formatting.GRAY)
+                    new LiteralText(usage + "").formatted(Formatting.GRAY),
+                    new LiteralText(available + "").formatted(Formatting.GRAY),
+                    new LiteralText(usage * 100 / available + "%").formatted(Formatting.GRAY)
             );
         } else {
             return Translate.gui(
                     key,
-                    Text.literal(usage + "").formatted(Formatting.RED),
-                    Text.literal(available + "").formatted(Formatting.GRAY),
-                    Text.literal(usage * 100 / available + "%").formatted(Formatting.RED)
+                    new LiteralText(usage + "").formatted(Formatting.RED),
+                    new LiteralText(available + "").formatted(Formatting.GRAY),
+                    new LiteralText(usage * 100 / available + "%").formatted(Formatting.RED)
             );
         }
     }

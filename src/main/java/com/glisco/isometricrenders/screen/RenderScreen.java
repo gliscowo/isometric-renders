@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
@@ -232,7 +233,7 @@ public class RenderScreen extends Screen {
 
         rightBuilder.dynamicLabel(() -> {
             return this.remainingAnimationFrames == 0
-                    ? Text.empty()
+                    ? Text.of("")
                     : Translate.gui("export_remaining_frames", this.remainingAnimationFrames);
         });
 
@@ -243,7 +244,9 @@ public class RenderScreen extends Screen {
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (this.guiRebuildScheduled) {
-            this.clearAndInit();
+            this.clearChildren();
+            this.setFocused(null);
+            this.init();
             this.guiRebuildScheduled = false;
         }
 
@@ -298,7 +301,7 @@ public class RenderScreen extends Screen {
                 this.notificationStack.add(
                         () -> Util.getOperatingSystem().open(file),
                         Translate.gui("exported_as"),
-                        Text.literal(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
+                        new LiteralText(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
                 );
             });
 
@@ -311,7 +314,7 @@ public class RenderScreen extends Screen {
             IsometricRenders.skipNextWorldRender();
 
             if (--this.remainingAnimationFrames == 0) {
-                this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
+                this.client.getWindow().setFramerateLimit(this.client.options.maxFps);
 
                 final var overwriteValue = overwriteLatest.get();
                 overwriteLatest.set(false);
@@ -346,7 +349,7 @@ public class RenderScreen extends Screen {
                         this.notificationStack.add(
                                 () -> Util.getOperatingSystem().open(animationFile),
                                 Translate.gui("animation_saved"),
-                                Text.literal(ExportPathSpec.exportRoot().relativize(animationFile.toPath()).toString())
+                                new LiteralText(ExportPathSpec.exportRoot().relativize(animationFile.toPath()).toString())
                         );
                     });
                 });
@@ -466,7 +469,7 @@ public class RenderScreen extends Screen {
         this.renderable.dispose();
         this.client.keyboard.setRepeatEvents(false);
         IsometricRenders.particleRestriction = ParticleRestriction.always();
-        this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
+        this.client.getWindow().setFramerateLimit(this.client.options.maxFps);
     }
 
     public void scheduleCapture() {

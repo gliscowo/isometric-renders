@@ -14,7 +14,7 @@ public class PropertyTextField extends TextFieldWidget {
     private String content = "";
 
     public PropertyTextField(int x, int y, IntProperty setting) {
-        super(MinecraftClient.getInstance().textRenderer, x, y, 35, 20, Text.empty());
+        super(MinecraftClient.getInstance().textRenderer, x, y, 35, 20, Text.of(""));
         this.setting = setting;
 
         this.setText(String.valueOf(setting.get()));

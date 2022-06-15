@@ -61,7 +61,7 @@ public class TooltipRenderable extends DefaultRenderable<TooltipRenderable.Toolt
         public static final TooltipScreen INSTANCE = new TooltipScreen();
 
         private TooltipScreen() {
-            super(Text.empty());
+            super(Text.of(""));
         }
 
         @Override

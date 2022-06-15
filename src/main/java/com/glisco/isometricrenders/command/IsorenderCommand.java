@@ -14,16 +14,16 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -39,16 +39,16 @@ import net.minecraft.util.registry.RegistryEntry;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
 
 public class IsorenderCommand {
 
     private static final SuggestionProvider<FabricClientCommandSource> CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable),
-            builder, EntityType::getId, entityType -> Text.translatable(Util.createTranslationKey("entity", EntityType.getId(entityType)))
+            builder, EntityType::getId, entityType -> new TranslatableText(Util.createTranslationKey("entity", EntityType.getId(entityType)))
     );
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("isorender")
                 .executes(IsorenderCommand::showRootNodeHelp)
                 .then(literal("area")
@@ -58,7 +58,7 @@ public class IsorenderCommand {
                                         .executes(IsorenderCommand::renderAreaWithArguments))))
                 .then(literal("block")
                         .executes(IsorenderCommand::renderTargetedBlock)
-                        .then(argument("block", BlockStateArgumentType.blockState(access))
+                        .then(argument("block", BlockStateArgumentType.blockState())
                                 .executes(IsorenderCommand::renderBlockWithArgument)))
                 .then(literal("entity")
                         .executes(IsorenderCommand::renderTargetedEntity)
@@ -69,11 +69,11 @@ public class IsorenderCommand {
                                         .executes(IsorenderCommand::renderEntityWithNbt))))
                 .then(literal("item")
                         .executes(IsorenderCommand::renderHeldItem)
-                        .then(argument("item", ItemStackArgumentType.itemStack(access))
+                        .then(argument("item", ItemStackArgumentType.itemStack())
                                 .executes(IsorenderCommand::renderItemWithArgument)))
                 .then(literal("tooltip")
                         .executes(IsorenderCommand::renderHeldItemTooltip)
-                        .then(argument("item", ItemStackArgumentType.itemStack(access))
+                        .then(argument("item", ItemStackArgumentType.itemStack())
                                 .executes(IsorenderCommand::renderItemTooltipWithArgument)))
                 .then(literal("namespace")
                         .then(argument("namespace", NamespaceArgumentType.namespace())
@@ -84,7 +84,7 @@ public class IsorenderCommand {
                                 .then(argument("task", new RenderTaskArgumentType())
                                         .executes(IsorenderCommand::renderCreativeTab))))
                 .then(literal("tag")
-                        .then(argument("tag", new TagArgumentType(access))
+                        .then(argument("tag", new TagArgumentType())
                                 .then(argument("task", new RenderTaskArgumentType())
                                         .executes(IsorenderCommand::renderTagContents))))
                 .then(literal("unsafe")
@@ -97,7 +97,7 @@ public class IsorenderCommand {
     private static int showRootNodeHelp(CommandContext<FabricClientCommandSource> context) {
         final var source = context.getSource();
 
-        source.sendFeedback(Translate.prefixed(Translate.make("version", Text.literal(IsometricRenders.VERSION).formatted(Formatting.DARK_GRAY)).formatted(Formatting.GRAY)));
+        source.sendFeedback(Translate.prefixed(Translate.make("version", new LiteralText(IsometricRenders.VERSION).formatted(Formatting.DARK_GRAY)).formatted(Formatting.GRAY)));
         source.sendFeedback(Translate.prefixed(Translate.make("command_hint").styled(
                 style -> style
                         .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.wispforest.io/isometric-renders/slash_isorender/"))
