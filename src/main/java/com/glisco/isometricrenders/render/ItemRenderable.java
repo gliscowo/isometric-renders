@@ -18,7 +18,7 @@ public class ItemRenderable extends DefaultRenderable<DefaultPropertyBundle> {
 
     static {
         PROPERTIES.slant.setDefaultValue(0).setToDefault();
-        PROPERTIES.rotation.setDefaultValue(180).setToDefault();
+        PROPERTIES.rotation.setDefaultValue(0).setToDefault();
     }
 
     private final ItemStack stack;
@@ -42,6 +42,8 @@ public class ItemRenderable extends DefaultRenderable<DefaultPropertyBundle> {
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-this.properties().rotation.get()));
             matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(30));
             matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(this.properties().rotation.get() + 135));
+        } else {
+            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
         }
 
         itemRenderer.renderItem(this.stack, ModelTransformation.Mode.FIXED, LightmapTextureManager.MAX_LIGHT_COORDINATE,
