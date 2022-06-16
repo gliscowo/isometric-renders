@@ -57,6 +57,8 @@ public class MemoryGuard {
     }
 
     private MutableText usageText(String key, int usage, int available, boolean fits) {
+        if (available == 0) available = 1;
+
         if (fits) {
             return Translate.gui(
                     key,
