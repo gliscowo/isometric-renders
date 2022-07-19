@@ -122,7 +122,7 @@ public class IsorenderCommand {
     private static int renderTagContents(CommandContext<FabricClientCommandSource> context) {
         final var tag = TagArgumentType.getTag("tag", context);
         RenderTaskArgumentType.getTask("task", context).action.accept(
-                "tag_" + tag.id(),
+                "tag_" + tag.id().getNamespace() + "/" + tag.id().getPath(),
                 tag.entries().stream()
                         .map(RegistryEntry::value)
                         .map(Item::getDefaultStack)
