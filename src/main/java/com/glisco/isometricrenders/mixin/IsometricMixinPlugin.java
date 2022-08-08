@@ -6,16 +6,19 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class IsometricMixinPlugin implements IMixinConfigPlugin {
 
     static {
-        // We force-initialize AWT here so that we can copy images
-        // into the clipboard later. MC specifically enables AWT
-        // headless mode which would prevent that
-        if (!GraphicsEnvironment.isHeadless()) {
-            Toolkit.getDefaultToolkit().getSystemClipboard();
+        if (!System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac") && !Boolean.getBoolean("isometric-renders.disableClipboard")) {
+            // We force-initialize AWT here so that we can copy images
+            // into the clipboard later. MC specifically enables AWT
+            // headless mode which would prevent that
+            if (!GraphicsEnvironment.isHeadless()) {
+                Toolkit.getDefaultToolkit().getSystemClipboard();
+            }
         }
     }
 
