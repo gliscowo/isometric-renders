@@ -5,13 +5,11 @@ plugins {
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
 }
 
-// fix mc dep in fmj
 version = "${project.mod_version}+${project.minecraft_base_version}"
 group = project.maven_group
 
 repositories {
-    maven { url "https://maven.wispforest.io"}
-    mavenLocal()
+    maven { url "https://maven.wispforest.io" }
 }
 
 loom {
