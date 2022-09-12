@@ -2,8 +2,9 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.IntProperty;
+import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
-import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
+import io.wispforest.owo.ui.container.FlowLayout;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -76,11 +77,11 @@ public class ItemAtlasRenderable extends DefaultRenderable<ItemAtlasRenderable.I
         private final IntProperty columns = IntProperty.of(20, 1, 500);
 
         @Override
-        public void buildGuiControls(Renderable<?> renderable, WidgetColumnBuilder builder) {
-            builder.label("transform_options");
+        public void buildGuiControls(Renderable<?> renderable, FlowLayout container) {
+            IsometricUI.sectionHeader(container, "transform_options", false);
 
-            this.appendIntControls(builder, this.scale, "scale", 10);
-            this.appendIntControls(builder, this.columns, "columns", 1);
+            IsometricUI.intControl(container, this.scale, "scale", 10);
+            IsometricUI.intControl(container, this.columns, "columns", 1);
         }
 
         @Override

@@ -1,8 +1,13 @@
 package com.glisco.isometricrenders.property;
 
 import com.glisco.isometricrenders.render.Renderable;
+import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ClientRenderCallback;
-import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
+import com.glisco.isometricrenders.util.Translate;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3f;
@@ -30,29 +35,30 @@ public class DefaultPropertyBundle implements PropertyBundle {
     }
 
     @Override
-    public void buildGuiControls(Renderable<?> renderable, WidgetColumnBuilder builder) {
-        builder.label("transform_options");
+    public void buildGuiControls(Renderable<?> renderable, FlowLayout container) {
+        IsometricUI.sectionHeader(container, "transform_options", false);
 
-        this.appendIntControls(builder, scale, "scale", 10);
-        this.appendIntControls(builder, rotation, "rotation", 45);
-        this.appendIntControls(builder, slant, "slant", 30);
-        this.appendIntControls(builder, lightAngle, "light_angle", 15);
-        this.appendIntControls(builder, rotationSpeed, "rotation_speed", 5);
+        IsometricUI.intControl(container, scale, "scale", 10);
+        IsometricUI.intControl(container, rotation, "rotation", 45);
+        IsometricUI.intControl(container, slant, "slant", 30);
+        IsometricUI.intControl(container, lightAngle, "light_angle", 15);
+        IsometricUI.intControl(container, rotationSpeed, "rotation_speed", 5);
 
         // -------
 
-        builder.move(10);
-        builder.label("presets");
+        IsometricUI.sectionHeader(container, "presets", true);
 
-        builder.button("dimetric", 0, 60, button -> {
-            this.rotation.setToDefault();
-            this.slant.set(30);
-        });
-        builder.button("isometric", 65, 60, button -> {
-            this.rotation.setToDefault();
-            this.slant.set(36);
-        });
-        builder.nextRow();
+        try (var builder = IsometricUI.row(container)) {
+            builder.row.child(Components.button(Translate.gui("dimetric"), button -> {
+                this.rotation.setToDefault();
+                this.slant.set(30);
+            }).horizontalSizing(Sizing.fixed(60)).margins(Insets.right(5)));
+
+            builder.row.child(Components.button(Translate.gui("isometric"), button -> {
+                this.rotation.setToDefault();
+                this.slant.set(36);
+            }).horizontalSizing(Sizing.fixed(60)));
+        }
     }
 
     @Override

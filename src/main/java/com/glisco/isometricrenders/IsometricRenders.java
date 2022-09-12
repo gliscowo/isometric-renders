@@ -2,10 +2,16 @@ package com.glisco.isometricrenders;
 
 import com.glisco.isometricrenders.command.IsorenderCommand;
 import com.glisco.isometricrenders.render.TooltipRenderable;
-import com.glisco.isometricrenders.screen.RenderScreen;
 import com.glisco.isometricrenders.util.AreaSelectionHelper;
 import com.glisco.isometricrenders.util.ImageIO;
 import com.glisco.isometricrenders.util.ParticleRestriction;
+import com.glisco.isometricrenders.widget.AreaSelectionComponent;
+import com.glisco.isometricrenders.widget.IOStateComponent;
+import io.wispforest.owo.ui.container.Containers;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Positioning;
+import io.wispforest.owo.ui.core.Sizing;
+import io.wispforest.owo.ui.hud.Hud;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,8 +22,8 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -44,25 +50,45 @@ public class IsometricRenders implements ClientModInitializer {
             TooltipRenderable.TooltipScreen.INSTANCE.init(newClient, 10000, 10000);
         });
 
-        HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
-            final MinecraftClient client = MinecraftClient.getInstance();
-            if (ImageIO.taskCount() < 1 || client.currentScreen != null) return;
-
-            DrawableHelper.fill(matrixStack, 20, 20, 140, 60, 0x90000000);
-            client.textRenderer.draw(matrixStack, ImageIO.progressText(), 30, 30, 0xFFFFFF);
-
-            RenderScreen.drawExportProgressBar(matrixStack, 30, 45, 100, 50, 10);
-        });
-
         KeyBindingHelper.registerKeyBinding(SELECT);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!SELECT.wasPressed()) return;
 
-            if (client.player.isSneaking()) {
-                AreaSelectionHelper.clear();
-            } else {
-                AreaSelectionHelper.select();
+        final var ioStateId = "io-state";
+        final var areaSelectionHintId = "area-selection-hint";
+
+        var hudId = new Identifier("isometric-renders", "hud");
+        Hud.add(hudId, () -> Containers.verticalFlow(Sizing.content(), Sizing.content()).positioning(Positioning.absolute(20, 20)));
+
+        HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
+            var client = MinecraftClient.getInstance();
+            var isometricHud = (FlowLayout) Hud.getComponent(hudId);
+
+            final var ioState = isometricHud.childById(IOStateComponent.class, ioStateId);
+            if ((ioState == null) == (ImageIO.taskCount() > 0 && client.currentScreen == null)) {
+                if (ImageIO.taskCount() > 0 && client.currentScreen == null) {
+                    isometricHud.child(new IOStateComponent().positioning(Positioning.absolute(20, 20)).id(ioStateId));
+                } else {
+                    isometricHud.removeChild(ioState);
+                }
+            }
+
+            final var selectionHint = isometricHud.childById(AreaSelectionComponent.class, areaSelectionHintId);
+            if ((selectionHint == null) == AreaSelectionHelper.shouldDraw()) {
+                if (AreaSelectionHelper.shouldDraw()) {
+                    isometricHud.child(new AreaSelectionComponent().id(areaSelectionHintId));
+                } else {
+                    isometricHud.removeChild(selectionHint);
+                }
+            }
+        });
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (SELECT.wasPressed()) {
+                if (client.player.isSneaking()) {
+                    AreaSelectionHelper.clear();
+                } else {
+                    AreaSelectionHelper.select();
+                }
             }
         });
     }

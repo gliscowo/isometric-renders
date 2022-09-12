@@ -5,14 +5,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
-public class PropertyCheckbox extends CheckboxWidget {
+public class PropertyCheckboxComponent extends CheckboxWidget {
 
     private final Property<Boolean> property;
 
-    public PropertyCheckbox(int x, int y, Text message, Property<Boolean> property) {
-        super(x, y, 20, 20, message, property.get(), false);
+    public PropertyCheckboxComponent(Text message, Property<Boolean> property) {
+        super(0, 0, 20, 20, message, property.get(), false);
         this.property = property;
     }
 

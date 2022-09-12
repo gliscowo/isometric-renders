@@ -53,18 +53,31 @@ public class ImageIO {
     }
 
     public static Path next(Path input) {
-        final var file = input.getFileName().toString().split("\\.");
+        final var filename = input.getFileName().toString();
+
+        var separatorIndex = filename.lastIndexOf('.');
+        if (separatorIndex == -1) separatorIndex = filename.length();
+
+        final var name = filename.substring(0, separatorIndex);
+        final var extension = filename.substring(separatorIndex);
+
         final var path = input.getParent();
 
-        var currentPath = path.resolve(String.join(".", file));
+        var currentPath = path.resolve(join(name, extension, 0));
         var lastPath = currentPath;
 
         for (int i = 1; Files.exists(currentPath); i++) {
             lastPath = currentPath;
-            currentPath = path.resolve(String.join("_" + i + ".", file));
+            currentPath = path.resolve(join(name, extension, i));
         }
 
         return GlobalProperties.overwriteLatest.get() ? lastPath : currentPath;
+    }
+
+    private static String join(String filename, String extension, int index) {
+        return index == 0
+                ? filename + extension
+                : filename + "_" + index + (extension.isEmpty() ? "" : "_" + extension);
     }
 
 }

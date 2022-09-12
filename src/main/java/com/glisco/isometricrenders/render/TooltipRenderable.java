@@ -2,8 +2,9 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
+import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
-import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
+import io.wispforest.owo.ui.container.FlowLayout;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -40,9 +41,9 @@ public class TooltipRenderable extends DefaultRenderable<TooltipRenderable.Toolt
         public static final TooltipPropertyBundle INSTANCE = new TooltipPropertyBundle();
 
         @Override
-        public void buildGuiControls(Renderable<?> renderable, WidgetColumnBuilder builder) {
-            builder.label("transform_options");
-            this.appendIntControls(builder, this.scale, "scale", 10);
+        public void buildGuiControls(Renderable<?> renderable, FlowLayout container) {
+            IsometricUI.sectionHeader(container, "transform_options", false);
+            IsometricUI.intControl(container, this.scale, "scale", 10);
         }
 
         @Override

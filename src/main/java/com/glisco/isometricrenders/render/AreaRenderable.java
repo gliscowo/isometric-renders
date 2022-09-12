@@ -2,11 +2,15 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.Property;
+import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.ParticleRestriction;
 import com.glisco.isometricrenders.util.Translate;
-import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.worldmesher.WorldMesh;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -125,14 +129,13 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
         public final Property<Boolean> freezeEntities = Property.of(true);
 
         @Override
-        public void buildGuiControls(Renderable<?> renderable, WidgetColumnBuilder builder) {
-            super.buildGuiControls(renderable, builder);
+        public void buildGuiControls(Renderable<?> renderable, FlowLayout container) {
+            super.buildGuiControls(renderable, container);
             final var mesh = ((AreaRenderable) renderable).mesh;
 
-            builder.move(10);
-            builder.label("mesh_controls");
+            IsometricUI.sectionHeader(container, "mesh_controls", true);
 
-            builder.dynamicLabel(() -> {
+            IsometricUI.dynamicLabel(container, () -> {
                 var meshStatus = Translate.gui("mesh_status");
                 if (!mesh.getState().isBuildStage) {
                     meshStatus.append(Translate.gui("mesh_ready").formatted(Formatting.GREEN));
@@ -145,14 +148,14 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
                 return meshStatus;
             });
 
-            builder.propertyCheckbox(this.freezeEntities, "freeze_entities");
+            IsometricUI.booleanControl(container, this.freezeEntities, "freeze_entities");
             this.freezeEntities.listen((booleanProperty, aBoolean) -> {
                 mesh.setFreezeEntities(aBoolean);
             });
 
-            builder.button("rebuild_mesh", 0, 80, button -> {
-                mesh.scheduleRebuild();
-            });
+            container.child(Components.button(Translate.gui("rebuild_mesh"), button -> mesh.scheduleRebuild())
+                    .horizontalSizing(Sizing.fixed(80))
+                    .margins(Insets.top(5)));
         }
 
         @Override

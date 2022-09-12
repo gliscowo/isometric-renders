@@ -3,10 +3,14 @@ package com.glisco.isometricrenders.render;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.property.GlobalProperties;
 import com.glisco.isometricrenders.property.PropertyBundle;
+import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.ImageIO;
 import com.glisco.isometricrenders.util.Translate;
-import com.glisco.isometricrenders.widget.WidgetColumnBuilder;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Insets;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
@@ -117,25 +121,25 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
         }
 
         @Override
-        public void buildGuiControls(Renderable<?> renderable, WidgetColumnBuilder builder) {
+        public void buildGuiControls(Renderable<?> renderable, FlowLayout container) {
             final BatchRenderable<?> batchRenderable = (BatchRenderable<?>) renderable;
 
-            this.delegate.buildGuiControls(batchRenderable.currentDelegate, builder);
+            this.delegate.buildGuiControls(batchRenderable.currentDelegate, container);
 
-            builder.move(10);
-            builder.label("batch.controls");
+            IsometricUI.sectionHeader(container, "batch.controls", true);
+            try (var builder = IsometricUI.row(container)) {
+                final var startButton = Components.button(Translate.gui("batch.start"), button -> {
+                    batchRenderable.start();
+                    button.active = false;
+                });
+                builder.row.child(startButton.horizontalSizing(Sizing.fixed(60)).margins(Insets.right(5)));
+                builder.row.child(Components.button(Translate.gui("batch.reset"), button -> {
+                    batchRenderable.reset();
+                    startButton.active = true;
+                }));
+            }
 
-            final var startButton = builder.button("batch.start", 0, 60, button -> {
-                batchRenderable.start();
-                button.active = false;
-            });
-            builder.button("batch.reset", 65, 60, button -> {
-                batchRenderable.reset();
-                startButton.active = true;
-            });
-            builder.nextRow();
-
-            builder.dynamicLabel(() -> Translate.gui(
+            IsometricUI.dynamicLabel(container, () -> Translate.gui(
                     "batch.remaining",
                     Math.max(0, batchRenderable.delegates.size() - batchRenderable.currentIndex - 1),
                     batchRenderable.delegates.size()

@@ -11,6 +11,8 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 
+import java.util.function.Consumer;
+
 public class RenderableDispatcher {
 
     /**
@@ -22,7 +24,7 @@ public class RenderableDispatcher {
      * @param aspectRatio The aspect ratio of the current framebuffer
      * @param tickDelta   The tick delta to use
      */
-    public static void drawIntoActiveFramebuffer(Renderable<?> renderable, float aspectRatio, float tickDelta) {
+    public static void drawIntoActiveFramebuffer(Renderable<?> renderable, float aspectRatio, float tickDelta, Consumer<MatrixStack> transformer) {
         RenderSystem.backupProjectionMatrix();
         Matrix4f projectionMatrix = Matrix4f.projectionMatrix(-aspectRatio, aspectRatio, 1, -1, -1000, 3000);
         RenderSystem.setProjectionMatrix(projectionMatrix);
@@ -33,6 +35,8 @@ public class RenderableDispatcher {
         final var modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.push();
         modelViewStack.loadIdentity();
+
+        transformer.accept(modelViewStack);
 
         renderable.properties().applyToViewMatrix(modelViewStack);
         RenderSystem.applyModelViewMatrix();
@@ -85,7 +89,7 @@ public class RenderableDispatcher {
         framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
 
         framebuffer.beginWrite(true);
-        drawIntoActiveFramebuffer(renderable, 1, tickDelta);
+        drawIntoActiveFramebuffer(renderable, 1, tickDelta, matrixStack -> {});
         framebuffer.endWrite();
 
         // Release depth attachment and FBO to save on VRAM - we only need

@@ -10,7 +10,7 @@ import net.minecraft.util.math.MathHelper;
 
 public class Translate {
 
-    private static final Text PREFIX = generatePrefix("Isometric Renders", 190, 155);
+    public static final Text PREFIX = generatePrefix("Isometric Renders", 190, 155);
 
     public static MutableText make(String key, Object... args) {
         return Text.translatable("message.isometric-renders." + key, args);

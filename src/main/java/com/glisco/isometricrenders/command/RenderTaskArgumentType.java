@@ -42,7 +42,7 @@ public class RenderTaskArgumentType implements ArgumentType<RenderTask> {
         final var input = builder.getRemaining();
 
         if (input.codePoints().filter(value -> value == ' ').count() > 0 && input.contains("batch")) {
-            return CommandSource.suggestMatching(new String[]{"items", "blocks"}, builder.createOffset(builder.getStart() + input.length()));
+            return CommandSource.suggestMatching(new String[]{"items", "blocks"}, builder.createOffset(builder.getStart() + 6));
         } else {
             return CommandSource.suggestMatching(new String[]{"atlas", "batch"}, builder);
         }

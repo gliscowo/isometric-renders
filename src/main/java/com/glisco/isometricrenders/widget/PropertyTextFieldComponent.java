@@ -1,6 +1,7 @@
 package com.glisco.isometricrenders.widget;
 
 import com.glisco.isometricrenders.property.IntProperty;
+import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
@@ -8,14 +9,16 @@ import net.minecraft.text.Text;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class PropertyTextField extends TextFieldWidget {
+public class PropertyTextFieldComponent extends TextFieldWidget {
 
     private final IntProperty setting;
     private String content = "";
 
-    public PropertyTextField(int x, int y, IntProperty setting) {
-        super(MinecraftClient.getInstance().textRenderer, x, y, 35, 20, Text.empty());
+    public PropertyTextFieldComponent(Sizing horizontalSizing, IntProperty setting) {
+        super(MinecraftClient.getInstance().textRenderer, 0, 0, 35, 20, Text.empty());
         this.setting = setting;
+
+        this.horizontalSizing(horizontalSizing);
 
         this.setText(String.valueOf(setting.get()));
         this.setTextPredicate(makeMatcher());
