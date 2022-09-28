@@ -105,6 +105,8 @@
   "message.isometric-renders.no_block": "You're not looking at a block",
   "message.isometric-renders.no_entity": "You're not looking at an entity",
   "message.isometric-renders.incomplete_selection": "Your do not have a completed area",
+  "message.isometric-renders.no_litematica_selection": "No area selected",
+  "message.isometric-renders.invalid_selection": "Invalid selection",
   "message.isometric-renders.no_such_namespace": "Unknown namespace",
 
   "message.isometric-renders.custom_lighting": "§aCustom Lighting: §7[§c%1$s §a%1$s §b%1$s§7]",

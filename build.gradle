@@ -10,6 +10,8 @@ group = project.maven_group
 
 repositories {
     maven { url "https://maven.wispforest.io" }
+    maven { url "https://cursemaven.com" }
+    maven { url 'https://masa.dy.fi/maven' }
     mavenLocal()
 }
 
@@ -35,6 +37,9 @@ dependencies {
 
     modImplementation "io.wispforest:owo-lib:${project.owo_version}"
     include "io.wispforest:owo-sentinel:${project.owo_version}"
+
+    modImplementation "curse.maven:litematica-308892:${project.litematica_file}"
+    modImplementation "fi.dy.masa.malilib:malilib-fabric-${project.minecraft_version_full}:${project.malilib_version}"
 }
 
 processResources {

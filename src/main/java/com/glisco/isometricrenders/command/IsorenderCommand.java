@@ -11,10 +11,15 @@ import com.glisco.isometricrenders.screen.ScreenScheduler;
 import com.glisco.isometricrenders.util.AreaSelectionHelper;
 import com.glisco.isometricrenders.util.Translate;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import fi.dy.masa.litematica.data.DataManager;
+import fi.dy.masa.litematica.selection.AreaSelection;
+import fi.dy.masa.litematica.selection.Box;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -49,7 +54,7 @@ public class IsorenderCommand {
     );
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
-        dispatcher.register(literal("isorender")
+        var isorender = literal("isorender")
                 .executes(IsorenderCommand::showRootNodeHelp)
                 .then(literal("area")
                         .executes(IsorenderCommand::renderAreaSelection)
@@ -91,7 +96,13 @@ public class IsorenderCommand {
                         .then(literal("enable")
                                 .executes(IsorenderCommand::enableUnsafe))
                         .then(literal("disable")
-                                .executes(IsorenderCommand::disableUnsafe))));
+                                .executes(IsorenderCommand::disableUnsafe)));
+
+        if (FabricLoader.getInstance().isModLoaded("litematica")) {
+            isorender.then(literal("selection").executes(IsorenderCommand::renderLitematicaSelection));
+        }
+
+        dispatcher.register(isorender);
     }
 
     private static int showRootNodeHelp(CommandContext<FabricClientCommandSource> context) {
@@ -259,6 +270,24 @@ public class IsorenderCommand {
         if (!AreaSelectionHelper.tryOpenScreen()) {
             Translate.commandError(context, "incomplete_selection");
         }
+
+        return 0;
+    }
+
+    private static int renderLitematicaSelection(CommandContext<FabricClientCommandSource> context) {
+        var selection = DataManager.getSelectionManager().getCurrentSelection();
+        if (selection == null) {
+            Translate.commandError(context, "no_litematica_selection");
+            return 0;
+        }
+        var box = selection.getSelectedSubRegionBox();
+        if (box == null) {
+            Translate.commandError(context, "invalid_selection");
+            return 0;
+        }
+        ScreenScheduler.schedule(new RenderScreen(
+                AreaRenderable.of(box.getPos1(), box.getPos2())
+        ));
 
         return 0;
     }
