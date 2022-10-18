@@ -65,24 +65,24 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
         matrices.translate(-0.5, -0.5, -0.5);
 
         if (this.state.getRenderType() != BlockRenderType.ENTITYBLOCK_ANIMATED) {
-            client.getBlockRenderManager().renderBlockAsEntity(this.state, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+            this.client.getBlockRenderManager().renderBlockAsEntity(this.state, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
         }
 
-        if (this.entity != null && client.getBlockEntityRenderDispatcher().get(this.entity) != null) {
-            client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+        if (this.entity != null && this.client.getBlockEntityRenderDispatcher().get(this.entity) != null) {
+            this.client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
         }
 
-        double xOffset = client.player.getX() % 1d;
-        double zOffset = client.player.getZ() % 1d;
+        double xOffset = this.client.player.getX() % 1d;
+        double zOffset = this.client.player.getZ() % 1d;
 
         if (xOffset < 0) xOffset += 1;
         if (zOffset < 0) zOffset += 1;
 
-        matrices.translate(xOffset, 1.65 + client.player.getY() % 1d, zOffset);
+        matrices.translate(xOffset, 1.65 + this.client.player.getY() % 1d, zOffset);
 
-        client.particleManager.renderParticles(matrices,
+        this.client.particleManager.renderParticles(matrices,
                 (VertexConsumerProvider.Immediate) vertexConsumers,
-                client.gameRenderer.getLightmapTextureManager(),
+                this.client.gameRenderer.getLightmapTextureManager(),
                 getParticleCamera(),
                 tickDelta
         );

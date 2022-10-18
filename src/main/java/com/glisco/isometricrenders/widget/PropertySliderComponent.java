@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.widget;
 
+import com.glisco.isometricrenders.mixin.SliderWidgetInvoker;
 import com.glisco.isometricrenders.property.IntProperty;
 import io.wispforest.owo.ui.component.SliderComponent;
 import io.wispforest.owo.ui.core.Sizing;
@@ -18,7 +19,7 @@ public class PropertySliderComponent extends SliderComponent {
         this.message(s -> text);
 
         this.onChanged(this.setting::setFromProgress);
-        setting.listen((intSetting, integer) -> this.setValue(setting.progress()));
+        setting.listen((intSetting, integer) -> ((SliderWidgetInvoker) this).isometric$setValue(setting.progress()));
     }
 
     @Override

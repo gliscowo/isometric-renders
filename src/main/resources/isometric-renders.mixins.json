@@ -9,6 +9,7 @@
     "MinecraftClientMixin",
     "ParticleManagerMixin",
     "ScreenMixin",
+    "SliderWidgetInvoker",
     "TextureManagerMixin",
     "WorldRendererMixin",
     "access.BlockEntityAccessor",
