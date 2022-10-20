@@ -366,11 +366,11 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                     this.renderable.exportPath()
             ).whenComplete((file, throwable) -> {
                 exportCallback.accept(file);
-                this.notify(
+                this.client.execute(() -> this.notify(
                         () -> Util.getOperatingSystem().open(file),
                         Translate.gui("exported_as"),
                         Text.literal(ExportPathSpec.exportRoot().relativize(file.toPath()).toString())
-                );
+                ));
             });
 
             this.captureScheduled = false;
@@ -404,7 +404,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                     if (throwable != null) return;
 
                     this.exportAnimationButton.setMessage(Translate.gui("converting"));
-                    this.notify(Translate.gui("converting_image_sequence"));
+                    this.client.execute(() -> this.notify(Translate.gui("converting_image_sequence")));
 
                     FFmpegDispatcher.assemble(
                             this.renderable.exportPath(),
@@ -414,11 +414,11 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                         this.exportAnimationButton.active = true;
                         this.exportAnimationButton.setMessage(Translate.gui("export_animation"));
 
-                        this.notify(
+                        this.client.execute(() -> this.notify(
                                 () -> Util.getOperatingSystem().open(animationFile),
                                 Translate.gui("animation_saved"),
                                 Text.literal(ExportPathSpec.exportRoot().relativize(animationFile.toPath()).toString())
-                        );
+                        ));
                     });
                 });
             }
