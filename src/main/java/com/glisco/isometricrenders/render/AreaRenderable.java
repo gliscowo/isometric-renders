@@ -7,6 +7,7 @@ import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.ParticleRestriction;
 import com.glisco.isometricrenders.util.Translate;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
@@ -153,7 +154,7 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
                 mesh.setFreezeEntities(aBoolean);
             });
 
-            container.child(Components.button(Translate.gui("rebuild_mesh"), button -> mesh.scheduleRebuild())
+            container.child(Components.button(Translate.gui("rebuild_mesh"), (ButtonComponent button) -> mesh.scheduleRebuild())
                     .horizontalSizing(Sizing.fixed(80))
                     .margins(Insets.top(5)));
         }

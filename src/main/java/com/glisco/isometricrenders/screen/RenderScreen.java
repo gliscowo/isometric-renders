@@ -14,6 +14,7 @@ import com.glisco.isometricrenders.widget.IOStateComponent;
 import com.glisco.isometricrenders.widget.NotificationComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -137,9 +138,8 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
             this.leftAnchor.horizontalSizing(Sizing.fixed(viewportBeginX)).verticalSizing(Sizing.fixed(this.height));
             this.rightAnchor.positioning(Positioning.absolute(viewportEndX, 0)).horizontalSizing(Sizing.fixed(viewportBeginX)).verticalSizing(Sizing.fixed(this.height));
 
-            // TODO remove this padding once 0.8.3 is a thing
-            this.leftAnchor.child(Containers.verticalScroll(Sizing.fill(100), Sizing.fill(100), this.leftColumn).padding(Insets.top(20)));
-            this.rightAnchor.child(Containers.verticalScroll(Sizing.fill(100), Sizing.fill(100), this.rightColumn).padding(Insets.top(20)));
+            this.leftAnchor.child(Containers.verticalScroll(Sizing.fill(100), Sizing.fill(100), this.leftColumn));
+            this.rightAnchor.child(Containers.verticalScroll(Sizing.fill(100), Sizing.fill(100), this.rightColumn));
         }
 
         this.notificationArea.positioning(Positioning.absolute(this.viewportBeginX + 5, 5)).sizing(Sizing.fixed(this.height - 10));
@@ -191,16 +191,16 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
 
         final ButtonWidget exportButton;
         try (var builder = IsometricUI.row(rightColumn)) {
-            exportButton = Components.button(Translate.gui("export"), button -> this.captureScheduled = true);
+            exportButton = Components.button(Translate.gui("export"), (ButtonComponent button) -> this.captureScheduled = true);
             builder.row.child(exportButton.horizontalSizing(Sizing.fixed(75)));
 
-            builder.row.child(Components.button(Translate.gui("open_folder"), button -> {
+            builder.row.child(Components.button(Translate.gui("open_folder"), (ButtonComponent button) -> {
                 Util.getOperatingSystem().open(this.renderable.exportPath().resolveOffset().toFile());
             }).horizontalSizing(Sizing.fixed(75)).margins(Insets.left(5)));
         }
 
         if (!GraphicsEnvironment.isHeadless()) {
-            rightColumn.child(Components.button(Translate.gui("export_to_clipboard"), button -> {
+            rightColumn.child(Components.button(Translate.gui("export_to_clipboard"), (ButtonComponent button) -> {
 
                 this.notify(Translate.gui("copied_to_clipboard"));
 
@@ -254,7 +254,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                 });
 
                 try (var builder = IsometricUI.row(rightColumn)) {
-                    this.exportAnimationButton = Components.button(Translate.gui("export_animation"), button -> {
+                    this.exportAnimationButton = Components.button(Translate.gui("export_animation"), (ButtonComponent button) -> {
                         if (this.memoryGuard.canFit(this.estimateMemoryUsage(exportFrames)) || Screen.hasShiftDown()) {
                             this.remainingAnimationFrames = exportFrames;
 
@@ -267,7 +267,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                     });
                     builder.row.child(this.exportAnimationButton.horizontalSizing(Sizing.fixed(100)).margins(Insets.right(5)));
 
-                    builder.row.child(Components.button(Translate.gui("format." + animationFormat.extension), button -> {
+                    builder.row.child(Components.button(Translate.gui("format." + animationFormat.extension), (ButtonComponent button) -> {
                         animationFormat = animationFormat.next();
                         button.setMessage(Translate.gui("format." + animationFormat.extension));
                     }).horizontalSizing(Sizing.fixed(35)));
@@ -354,9 +354,11 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
 //            client.textRenderer.draw(matrices, Translate.gui("memory_warning5"), 10, height - 20, 0xAAAAAA);
 
             if (ImageIO.taskCount() > 0) {
-                this.ioStateComponent.horizontalSizing(Sizing.content());
-            } else {
-                this.ioStateComponent.horizontalSizing(Sizing.fixed(0));
+                if (!this.ioStateComponent.hasParent()) {
+                    this.notificationArea.child(this.ioStateComponent);
+                }
+            } else if (this.ioStateComponent.hasParent()) {
+                this.notificationArea.removeChild(this.ioStateComponent);
             }
         }
 

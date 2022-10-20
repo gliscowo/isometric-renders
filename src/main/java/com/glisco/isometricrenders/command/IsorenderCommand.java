@@ -11,17 +11,21 @@ import com.glisco.isometricrenders.screen.ScreenScheduler;
 import com.glisco.isometricrenders.util.AreaSelectionHelper;
 import com.glisco.isometricrenders.util.Translate;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import io.wispforest.owo.ui.component.EntityComponent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -67,6 +71,12 @@ public class IsorenderCommand {
                                 .executes(IsorenderCommand::renderEntityWithoutNbt)
                                 .then(argument("nbt", NbtCompoundArgumentType.nbtCompound())
                                         .executes(IsorenderCommand::renderEntityWithNbt))))
+                .then(literal("player")
+                        .executes(IsorenderCommand::renderSelf)
+                        .then(argument("player", StringArgumentType.string())
+                                .executes(IsorenderCommand::renderPlayerWithoutNbt)
+                                .then(argument("nbt", NbtCompoundArgumentType.nbtCompound())
+                                        .executes(IsorenderCommand::renderPlayerWithNbt))))
                 .then(literal("item")
                         .executes(IsorenderCommand::renderHeldItem)
                         .then(argument("item", ItemStackArgumentType.itemStack(access))
@@ -116,6 +126,64 @@ public class IsorenderCommand {
     private static int enableUnsafe(CommandContext<FabricClientCommandSource> context) {
         GlobalProperties.unsafe.set(true);
         Translate.commandFeedback(context, "unsafe_enabled");
+        return 0;
+    }
+
+    private static int renderPlayerWithNbt(CommandContext<FabricClientCommandSource> context) {
+        final var server = MinecraftClient.getInstance().getServer();
+        if (server == null) {
+            Translate.commandError(context, "player_rendering_in_multiplayer");
+            return 0;
+        }
+
+        final var gameProfile = server.getUserCache().findByName(StringArgumentType.getString(context, "player"));
+        if (gameProfile.isEmpty()) {
+            Translate.commandError(context, "no_such_player");
+            return 0;
+        }
+
+        final var playerNbt = NbtCompoundArgumentType.getNbtCompound(context, "nbt");
+        final var player = EntityComponent.createRenderablePlayer(gameProfile.get());
+        ((ClientPlayerEntity) player).readNbt(
+                playerNbt
+        );
+
+        ScreenScheduler.schedule(new RenderScreen(
+                new EntityRenderable(player)
+        ));
+
+        return 0;
+    }
+
+    private static int renderPlayerWithoutNbt(CommandContext<FabricClientCommandSource> context) {
+        final var server = MinecraftClient.getInstance().getServer();
+        if (server == null) {
+            Translate.commandError(context, "player_rendering_in_multiplayer");
+            return 0;
+        }
+
+        final var gameProfile = server.getUserCache().findByName(StringArgumentType.getString(context, "player"));
+        if (gameProfile.isEmpty()) {
+            Translate.commandError(context, "no_such_player");
+            return 0;
+        }
+
+        ScreenScheduler.schedule(new RenderScreen(
+                new EntityRenderable(EntityComponent.createRenderablePlayer(gameProfile.get()))
+        ));
+
+        return 0;
+    }
+
+    private static int renderSelf(CommandContext<FabricClientCommandSource> context) {
+        final var player = EntityComponent.createRenderablePlayer(MinecraftClient.getInstance().player.getGameProfile());
+        ((ClientPlayerEntity) player).readNbt(
+                MinecraftClient.getInstance().player.writeNbt(new NbtCompound())
+        );
+
+        ScreenScheduler.schedule(new RenderScreen(
+                new EntityRenderable(player)
+        ));
         return 0;
     }
 

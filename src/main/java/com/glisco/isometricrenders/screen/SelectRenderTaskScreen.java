@@ -3,6 +3,7 @@ package com.glisco.isometricrenders.screen;
 import com.glisco.isometricrenders.render.RenderTask;
 import com.glisco.isometricrenders.util.Translate;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -42,15 +43,15 @@ public class SelectRenderTaskScreen extends BaseOwoScreen<FlowLayout> {
         contentPanel.verticalAlignment(VerticalAlignment.CENTER);
 
         contentPanel.child(Containers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(Components.button(Translate.gui("select_item_batch"), button -> {
+                .child(Components.button(Translate.gui("select_item_batch"), (ButtonComponent button) -> {
                     RenderTask.BATCH_ITEM.action.accept("inventory", this.items);
                     this.close();
                 }).horizontalSizing(Sizing.fixed(80)).margins(Insets.bottom(5)))
-                .child(Components.button(Translate.gui("select_block_batch"), button -> {
+                .child(Components.button(Translate.gui("select_block_batch"), (ButtonComponent button) -> {
                     RenderTask.BATCH_BLOCK.action.accept("inventory", this.items);
                     this.close();
                 }).horizontalSizing(Sizing.fixed(80)).margins(Insets.bottom(5)))
-                .child(Components.button(Translate.gui("select_atlas"), button -> {
+                .child(Components.button(Translate.gui("select_atlas"), (ButtonComponent button) -> {
                     RenderTask.ATLAS.action.accept("inventory", this.items);
                     this.close();
                 }).horizontalSizing(Sizing.fixed(80)))

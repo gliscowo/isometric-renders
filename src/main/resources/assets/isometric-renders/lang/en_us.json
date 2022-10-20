@@ -1,5 +1,13 @@
 {
-  "key.isometric-renders.area_select": "[ISO] Select Area",
+  "key.isometric-renders.area_select": [
+    "",
+    { "text": "[", "color": "dark_gray" },
+    { "text": "I", "color": "#00c9f1" },
+    { "text": "S", "color": "#00f1c7" },
+    { "text": "O", "color": "#00f195" },
+    { "text": "]", "color": "dark_gray" },
+     " Select Area"
+  ],
 
   "gui.isometric-renders.animations": "Run Animations (Tick)",
   "gui.isometric-renders.particles": "Show Particles (requires ticking)",
@@ -55,10 +63,14 @@
   "gui.isometric-renders.presets": "Presets",
   "gui.isometric-renders.lighting_profile": "Lighting Profile",
 
+  "gui.isometric-renders.entity_pose": "Entity Pose",
+  "gui.isometric-renders.entity_pose.yaw": "Yaw",
+  "gui.isometric-renders.entity_pose.pitch": "Pitch",
+
   "gui.isometric-renders.render_options": "Render Options",
   "gui.isometric-renders.background_color": "Background Color",
   "gui.isometric-renders.export_options": "Export Options",
-  "gui.isometric-renders.renderer_resolution": "Renderer Resolution",
+  "gui.isometric-renders.renderer_resolution": "Export Resolution",
   "gui.isometric-renders.hotkeys": "F10: Toggle UI  F12: Export",
 
   "gui.isometric-renders.memory_warning1": "Warning: Unless you have at least 6GB ",
@@ -106,6 +118,8 @@
   "message.isometric-renders.no_entity": "You're not looking at an entity",
   "message.isometric-renders.incomplete_selection": "Your do not have a completed area",
   "message.isometric-renders.no_such_namespace": "Unknown namespace",
+
+  "message.isometric-renders.player_rendering_in_multiplayer": "Rendering players by names is only supported in Singleplayer",
 
   "message.isometric-renders.custom_lighting": "§aCustom Lighting: §7[§c%1$s §a%1$s §b%1$s§7]",
   "message.isometric-renders.current_profile": "Current Profile: %1$s",

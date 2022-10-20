@@ -1,14 +1,19 @@
 package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
+import com.glisco.isometricrenders.property.IntProperty;
+import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.ParticleRestriction;
+import io.wispforest.owo.ui.container.FlowLayout;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
@@ -58,6 +63,14 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
         matrices.translate(0, 0.1 + this.entity.getHeight() * -0.5d, 0);
         matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
 
+        var properties = this.properties();
+        this.entity.setHeadYaw(properties.yaw.get());
+        if (entity instanceof LivingEntity living) living.prevHeadYaw = properties.yaw.get();
+        this.entity.prevYaw = properties.yaw.get();
+
+        this.entity.setPitch(properties.pitch.get());
+        this.entity.prevPitch = properties.pitch.get();
+
         final MutableFloat y = new MutableFloat();
 
         applyToEntityAndPassengers(this.entity, entity -> {
@@ -86,8 +99,8 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
     }
 
     @Override
-    public DefaultPropertyBundle properties() {
-        return DefaultPropertyBundle.get();
+    public EntityPropertyBundle properties() {
+        return EntityPropertyBundle.INSTANCE;
     }
 
     @Override
@@ -105,12 +118,35 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
 
     @Override
     public void tick() {
-        applyToEntityAndPassengers(this.entity, entity -> client.world.tickEntity(entity));
+        applyToEntityAndPassengers(this.entity, entity -> {
+            if (entity instanceof PlayerEntity) return;
+            client.world.tickEntity(entity);
+        });
     }
 
     private static void applyToEntityAndPassengers(Entity entity, Consumer<Entity> action) {
         action.accept(entity);
         if (entity.getPassengerList().isEmpty()) return;
         for (Entity e : entity.getPassengerList()) applyToEntityAndPassengers(e, action);
+    }
+
+    public static class EntityPropertyBundle extends DefaultPropertyBundle {
+
+        public static final EntityPropertyBundle INSTANCE = new EntityPropertyBundle();
+
+        public final IntProperty yaw = IntProperty.of(0, -180, 180).withRollover();
+        public final IntProperty pitch = IntProperty.of(0, -90, 90).withRollover();
+
+        private EntityPropertyBundle() {}
+
+        @Override
+        public void buildGuiControls(Renderable<?> renderable, FlowLayout container) {
+            super.buildGuiControls(renderable, container);
+
+            IsometricUI.sectionHeader(container, "entity_pose", true);
+
+            IsometricUI.intControl(container, yaw, "entity_pose.yaw", 15);
+            IsometricUI.intControl(container, pitch, "entity_pose.pitch", 5);
+        }
     }
 }

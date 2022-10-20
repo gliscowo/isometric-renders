@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.mixin.access.FramebufferAccessor;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
@@ -41,6 +42,8 @@ public class RenderableDispatcher {
         renderable.properties().applyToViewMatrix(modelViewStack);
         RenderSystem.applyModelViewMatrix();
 
+        IsometricRenders.beginRenderableDraw();
+
         // Emit untransformed vertices
         renderable.emitVertices(
                 new MatrixStack(),
@@ -50,6 +53,8 @@ public class RenderableDispatcher {
 
         // --> Draw
         renderable.draw(modelViewStack.peek().getPositionMatrix());
+
+        IsometricRenders.endRenderableDraw();
 
         modelViewStack.pop();
         RenderSystem.applyModelViewMatrix();

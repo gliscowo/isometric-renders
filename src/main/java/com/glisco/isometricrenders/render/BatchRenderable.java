@@ -7,6 +7,7 @@ import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.ImageIO;
 import com.glisco.isometricrenders.util.Translate;
+import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
@@ -128,12 +129,12 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
 
             IsometricUI.sectionHeader(container, "batch.controls", true);
             try (var builder = IsometricUI.row(container)) {
-                final var startButton = Components.button(Translate.gui("batch.start"), button -> {
+                final var startButton = Components.button(Translate.gui("batch.start"), (ButtonComponent button) -> {
                     batchRenderable.start();
                     button.active = false;
                 });
                 builder.row.child(startButton.horizontalSizing(Sizing.fixed(60)).margins(Insets.right(5)));
-                builder.row.child(Components.button(Translate.gui("batch.reset"), button -> {
+                builder.row.child(Components.button(Translate.gui("batch.reset"), (ButtonComponent button) -> {
                     batchRenderable.reset();
                     startButton.active = true;
                 }));

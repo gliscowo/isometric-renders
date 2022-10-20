@@ -36,6 +36,7 @@ public class IsometricRenders implements ClientModInitializer {
 
     public static ParticleRestriction<?> particleRestriction = ParticleRestriction.always();
 
+    public static boolean inRenderableDraw = false;
     public static boolean inRenderableTick = false;
     public static boolean skipWorldRender = false;
     public static boolean centerNextTooltip = false;
@@ -95,6 +96,14 @@ public class IsometricRenders implements ClientModInitializer {
 
     public static void skipNextWorldRender() {
         skipWorldRender = true;
+    }
+
+    public static void beginRenderableDraw(){
+        inRenderableDraw = true;
+    }
+
+    public static void endRenderableDraw(){
+        inRenderableDraw = false;
     }
 
     public static void beginRenderableTick() {
