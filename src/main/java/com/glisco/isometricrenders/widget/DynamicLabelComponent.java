@@ -33,14 +33,12 @@ public class DynamicLabelComponent extends BaseComponent {
 
     @Override
     protected int determineHorizontalContentSize(Sizing sizing) {
-        this.width = 100;
         return 100;
     }
 
     @Override
     protected int determineVerticalContentSize(Sizing sizing) {
-        this.height = this.textRenderer.fontHeight;
-        return this.height;
+        return this.textRenderer.fontHeight;
     }
 
     @Override
