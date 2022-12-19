@@ -16,8 +16,8 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,7 +118,7 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
     @Override
     public ExportPathSpec exportPath() {
         return ExportPathSpec.ofIdentified(
-                Registry.BLOCK.getId(this.state.getBlock()),
+                Registries.BLOCK.getId(this.state.getBlock()),
                 "block"
         );
     }

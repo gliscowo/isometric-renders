@@ -9,8 +9,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public class ItemGroupArgumentType implements ArgumentType<ItemGroup> {
@@ -29,12 +30,12 @@ public class ItemGroupArgumentType implements ArgumentType<ItemGroup> {
 
     @Override
     public ItemGroup parse(StringReader reader) throws CommandSyntaxException {
-        String name = reader.readString();
-        return Arrays.stream(ItemGroup.GROUPS).filter(itemGroup -> itemGroup.getName().equals(name)).findAny().orElseThrow(() -> NO_ITEMGROUP.create(name));
+        var id = Identifier.fromCommandInput(reader);
+        return ItemGroups.getGroups().stream().filter(itemGroup -> itemGroup.getId().equals(id)).findAny().orElseThrow(() -> NO_ITEMGROUP.create(id));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(Arrays.stream(ItemGroup.GROUPS).map(ItemGroup::getName), builder);
+        return CommandSource.suggestIdentifiers(ItemGroups.getGroups().stream().map(ItemGroup::getId), builder);
     }
 }

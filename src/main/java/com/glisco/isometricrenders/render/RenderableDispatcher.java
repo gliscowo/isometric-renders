@@ -10,7 +10,7 @@ import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
+import org.joml.Matrix4f;
 
 import java.util.function.Consumer;
 
@@ -27,7 +27,7 @@ public class RenderableDispatcher {
      */
     public static void drawIntoActiveFramebuffer(Renderable<?> renderable, float aspectRatio, float tickDelta, Consumer<MatrixStack> transformer) {
         RenderSystem.backupProjectionMatrix();
-        Matrix4f projectionMatrix = Matrix4f.projectionMatrix(-aspectRatio, aspectRatio, 1, -1, -1000, 3000);
+        Matrix4f projectionMatrix = new Matrix4f().setOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 3000);
         RenderSystem.setProjectionMatrix(projectionMatrix);
 
         renderable.prepare();

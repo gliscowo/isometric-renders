@@ -15,8 +15,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.math.RotationAxis;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +61,7 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
         matrices.push();
 
         matrices.translate(0, 0.1 + this.entity.getHeight() * -0.5d, 0);
-        matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
 
         var properties = this.properties();
         this.entity.setHeadYaw(properties.yaw.get());
@@ -80,7 +80,7 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
             client.getEntityRenderDispatcher().render(entity, 0, y.floatValue(), 0, 0, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
         });
 
-        matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-180));
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-180));
         matrices.translate(0, 1.65, 0);
 
         client.particleManager.renderParticles(matrices,
@@ -111,7 +111,7 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
     @Override
     public ExportPathSpec exportPath() {
         return ExportPathSpec.ofIdentified(
-                Registry.ENTITY_TYPE.getId(this.entity.getType()),
+                Registries.ENTITY_TYPE.getId(this.entity.getType()),
                 "entity"
         );
     }

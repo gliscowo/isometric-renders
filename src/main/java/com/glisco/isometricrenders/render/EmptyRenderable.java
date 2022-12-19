@@ -5,7 +5,7 @@ import com.glisco.isometricrenders.util.ExportPathSpec;
 import io.wispforest.owo.ui.container.FlowLayout;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
+import org.joml.Matrix4f;
 
 public class EmptyRenderable implements Renderable<PropertyBundle> {
 

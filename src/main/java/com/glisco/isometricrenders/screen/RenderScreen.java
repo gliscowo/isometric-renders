@@ -191,16 +191,16 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
 
         final ButtonWidget exportButton;
         try (var builder = IsometricUI.row(rightColumn)) {
-            exportButton = Components.button(Translate.gui("export"), (ButtonComponent button) -> this.captureScheduled = true);
+            exportButton = Components.button(Translate.gui("export"), button -> this.captureScheduled = true);
             builder.row.child(exportButton.horizontalSizing(Sizing.fixed(75)));
 
-            builder.row.child(Components.button(Translate.gui("open_folder"), (ButtonComponent button) -> {
+            builder.row.child(Components.button(Translate.gui("open_folder"), button -> {
                 Util.getOperatingSystem().open(this.renderable.exportPath().resolveOffset().toFile());
             }).horizontalSizing(Sizing.fixed(75)).margins(Insets.left(5)));
         }
 
         if (!GraphicsEnvironment.isHeadless()) {
-            rightColumn.child(Components.button(Translate.gui("export_to_clipboard"), (ButtonComponent button) -> {
+            rightColumn.child(Components.button(Translate.gui("export_to_clipboard"), button -> {
 
                 this.notify(Translate.gui("copied_to_clipboard"));
 
@@ -254,7 +254,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                 });
 
                 try (var builder = IsometricUI.row(rightColumn)) {
-                    this.exportAnimationButton = Components.button(Translate.gui("export_animation"), (ButtonComponent button) -> {
+                    this.exportAnimationButton = Components.button(Translate.gui("export_animation"), button -> {
                         if (this.memoryGuard.canFit(this.estimateMemoryUsage(exportFrames)) || Screen.hasShiftDown()) {
                             this.remainingAnimationFrames = exportFrames;
 
@@ -267,7 +267,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                     });
                     builder.row.child(this.exportAnimationButton.horizontalSizing(Sizing.fixed(100)).margins(Insets.right(5)));
 
-                    builder.row.child(Components.button(Translate.gui("format." + animationFormat.extension), (ButtonComponent button) -> {
+                    builder.row.child(Components.button(Translate.gui("format." + animationFormat.extension), button -> {
                         animationFormat = animationFormat.next();
                         button.setMessage(Translate.gui("format." + animationFormat.extension));
                     }).horizontalSizing(Sizing.fixed(35)));
@@ -541,7 +541,6 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
     @Override
     public void removed() {
         this.renderable.dispose();
-        this.client.keyboard.setRepeatEvents(false);
         IsometricRenders.particleRestriction = ParticleRestriction.always();
         this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
     }

@@ -9,8 +9,8 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.math.RotationAxis;
 
 public class ItemRenderable extends DefaultRenderable<DefaultPropertyBundle> {
 
@@ -39,11 +39,11 @@ public class ItemRenderable extends DefaultRenderable<DefaultPropertyBundle> {
         // This funny matrix manipulation here is done in order to
         // avoid funny axis rotation on models with depth
         if (hasDepth) {
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-this.properties().rotation.get()));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(30));
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(this.properties().rotation.get() + 135));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-this.properties().rotation.get()));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(this.properties().rotation.get() + 135));
         } else {
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
         }
 
         itemRenderer.renderItem(this.stack, ModelTransformation.Mode.FIXED, LightmapTextureManager.MAX_LIGHT_COORDINATE,
@@ -59,7 +59,7 @@ public class ItemRenderable extends DefaultRenderable<DefaultPropertyBundle> {
     @Override
     public ExportPathSpec exportPath() {
         return ExportPathSpec.ofIdentified(
-                Registry.ITEM.getId(this.stack.getItem()),
+                Registries.ITEM.getId(this.stack.getItem()),
                 "item"
         );
     }

@@ -13,7 +13,7 @@ import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 import java.util.List;
 
@@ -87,8 +87,8 @@ public class ItemAtlasRenderable extends DefaultRenderable<ItemAtlasRenderable.I
         @Override
         public void applyToViewMatrix(MatrixStack modelViewStack) {
             super.applyToViewMatrix(modelViewStack);
-            modelViewStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-this.rotation.get()));
-            modelViewStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-this.slant.get()));
+            modelViewStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-this.rotation.get()));
+            modelViewStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-this.slant.get()));
         }
 
     }

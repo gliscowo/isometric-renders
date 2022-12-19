@@ -7,8 +7,8 @@ import io.wispforest.exo.api.Exo;
 import io.wispforest.exo.api.ExoCommandChannel;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class IsometricChannel extends ExoCommandChannel {
 
@@ -24,9 +24,9 @@ public class IsometricChannel extends ExoCommandChannel {
             final var id = new Identifier(arguments[0]);
             final var client = MinecraftClient.getInstance();
 
-            if (Registry.ITEM.containsId(id)) {
+            if (Registries.ITEM.containsId(id)) {
                 MinecraftClient.getInstance().execute(() -> {
-                    final var stack = new ItemStack(Registry.ITEM.get(id));
+                    final var stack = new ItemStack(Registries.ITEM.get(id));
                     final var renderable = new ItemRenderable(stack);
 
                     var screen = new RenderScreen(renderable);

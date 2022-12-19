@@ -5,9 +5,10 @@ import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.math.Vector4f;
+import org.joml.Matrix4f;
+
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public abstract class DefaultRenderable<P extends DefaultPropertyBundle> implements Renderable<P> {
 
@@ -15,11 +16,11 @@ public abstract class DefaultRenderable<P extends DefaultPropertyBundle> impleme
     public void draw(Matrix4f modelViewMatrix) {
         // Apply inverse transform to lighting to keep it consistent
         final var lightDirection = getLightDirection();
-        final var lightTransform = modelViewMatrix.copy();
+        final var lightTransform = new Matrix4f(modelViewMatrix);
         lightTransform.invert();
-        lightDirection.transform(lightTransform);
+        lightDirection.mul(lightTransform);
 
-        final var transformedLightDirection = new Vec3f(lightDirection.getX(), lightDirection.getY(), lightDirection.getZ());
+        final var transformedLightDirection = new Vector3f(lightDirection.x, lightDirection.y, lightDirection.z);
         RenderSystem.setShaderLights(transformedLightDirection, transformedLightDirection);
 
         // Draw all buffers

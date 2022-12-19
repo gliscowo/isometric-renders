@@ -11,8 +11,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +51,7 @@ public class NamespaceArgumentType implements ArgumentType<NamespaceArgumentType
 
     private Set<String> getNamespaces() {
         final var set = new HashSet<String>();
-        for (var id : Registry.ITEM.getIds()) {
+        for (var id : Registries.ITEM.getIds()) {
             set.add(id.getNamespace());
         }
         return set;
@@ -59,7 +59,7 @@ public class NamespaceArgumentType implements ArgumentType<NamespaceArgumentType
 
     public record Namespace(String name) {
         public List<ItemStack> getContent() {
-            return Registry.ITEM.streamEntries()
+            return Registries.ITEM.streamEntries()
                     .filter(entry -> Objects.equals(entry.registryKey().getValue().getNamespace(), this.name))
                     .map(RegistryEntry.Reference::value)
                     .map(Item::getDefaultStack)

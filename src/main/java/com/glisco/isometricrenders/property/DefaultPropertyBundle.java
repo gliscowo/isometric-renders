@@ -11,7 +11,7 @@ import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public class DefaultPropertyBundle implements PropertyBundle {
 
@@ -69,8 +69,8 @@ public class DefaultPropertyBundle implements PropertyBundle {
 
         modelViewStack.translate(this.xOffset.get() / 26000d, this.yOffset.get() / -26000d, 0);
 
-        modelViewStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(this.slant.get()));
-        modelViewStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(this.rotation.get()));
+        modelViewStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(this.slant.get()));
+        modelViewStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(this.rotation.get()));
 
         this.updateAndApplyRotationOffset(modelViewStack);
     }
@@ -85,7 +85,7 @@ public class DefaultPropertyBundle implements PropertyBundle {
                 rotationOffset += MinecraftClient.getInstance().getLastFrameDuration() * rotationSpeed.get() * .1f;
                 this.rotationOffsetUpdated = true;
             }
-            modelViewStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationOffset));
+            modelViewStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotationOffset));
         } else {
             rotationOffset = 0;
         }

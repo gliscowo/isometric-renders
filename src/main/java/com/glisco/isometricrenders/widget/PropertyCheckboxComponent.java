@@ -21,8 +21,8 @@ public class PropertyCheckboxComponent extends CheckboxWidget {
         MinecraftClient.getInstance().textRenderer.draw(
                 matrices,
                 this.getMessage(),
-                this.x + 24,
-                this.y + (this.height - 8) / 2f,
+                this.getX() + 24,
+                this.getY() + (this.height - 8) / 2f,
                 0xAAAAAA
         );
     }

@@ -3,7 +3,6 @@ package com.glisco.isometricrenders.command;
 import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.mixin.access.BlockStateArgumentAccessor;
 import com.glisco.isometricrenders.mixin.access.DefaultPosArgumentAccessor;
-import com.glisco.isometricrenders.mixin.access.EntitySummonArgumentTypeInvoker;
 import com.glisco.isometricrenders.property.GlobalProperties;
 import com.glisco.isometricrenders.render.*;
 import com.glisco.isometricrenders.screen.RenderScreen;
@@ -26,20 +25,20 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -48,7 +47,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class IsorenderCommand {
 
-    private static final SuggestionProvider<FabricClientCommandSource> CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registry.ENTITY_TYPE.stream().filter(EntityType::isSummonable),
+    private static final SuggestionProvider<FabricClientCommandSource> CLIENT_SUMMONABLE_ENTITIES = (context, builder) -> CommandSource.suggestFromIdentifier(Registries.ENTITY_TYPE.stream().filter(EntityType::isSummonable),
             builder, EntityType::getId, entityType -> Text.translatable(Util.createTranslationKey("entity", EntityType.getId(entityType)))
     );
 
@@ -66,7 +65,7 @@ public class IsorenderCommand {
                                 .executes(IsorenderCommand::renderBlockWithArgument)))
                 .then(literal("entity")
                         .executes(IsorenderCommand::renderTargetedEntity)
-                        .then(argument("entity", EntitySummonArgumentType.entitySummon())
+                        .then(argument("entity", RegistryEntryArgumentType.registryEntry(access, RegistryKeys.ENTITY_TYPE))
                                 .suggests(CLIENT_SUMMONABLE_ENTITIES)
                                 .executes(IsorenderCommand::renderEntityWithoutNbt)
                                 .then(argument("nbt", NbtCompoundArgumentType.nbtCompound())
@@ -241,26 +240,24 @@ public class IsorenderCommand {
         return 0;
     }
 
+    @SuppressWarnings("unchecked")
     private static int renderEntityWithNbt(CommandContext<FabricClientCommandSource> context) {
         final var entityNbt = NbtCompoundArgumentType.getNbtCompound(context, "nbt");
-        final var entityId = EntitySummonArgumentTypeInvoker.isometric$validate(
-                context.getArgument("entity", Identifier.class)
-        );
+        final var entityReference = (RegistryEntry.Reference<EntityType<?>>) context.getArgument("entity", RegistryEntry.Reference.class);
 
         ScreenScheduler.schedule(new RenderScreen(
-                EntityRenderable.of(Registry.ENTITY_TYPE.get(entityId), entityNbt)
+                EntityRenderable.of(entityReference.value(), entityNbt)
         ));
 
         return 0;
     }
 
+    @SuppressWarnings("unchecked")
     private static int renderEntityWithoutNbt(CommandContext<FabricClientCommandSource> context) {
-        final var entityId = EntitySummonArgumentTypeInvoker.isometric$validate(
-                context.getArgument("entity", Identifier.class)
-        );
+        final var entityReference = (RegistryEntry.Reference<EntityType<?>>) context.getArgument("entity", RegistryEntry.Reference.class);
 
         ScreenScheduler.schedule(new RenderScreen(
-                EntityRenderable.of(Registry.ENTITY_TYPE.get(entityId), null)
+                EntityRenderable.of(entityReference.value(), null)
         ));
 
         return 0;
@@ -333,9 +330,8 @@ public class IsorenderCommand {
 
     private static <S> void withItemGroupFromContext(CommandContext<S> context, BiConsumer<List<ItemStack>, String> action) {
         final var itemGroup = ItemGroupArgumentType.getItemGroup("itemgroup", context);
-        final var stacks = DefaultedList.<ItemStack>of();
-        itemGroup.appendStacks(stacks);
-        action.accept(stacks, "creative-tab_" + itemGroup.getName());
+        final var stacks = new ArrayList<>(itemGroup.getDisplayStacks());
+        action.accept(stacks, "creative-tab_" + itemGroup.getId().toShortTranslationKey());
     }
 
     public static BlockPos getPosFromArgument(DefaultPosArgument argument, FabricClientCommandSource source) {

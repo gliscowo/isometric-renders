@@ -9,9 +9,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.math.RotationAxis;
 
 public class TooltipRenderable extends DefaultRenderable<TooltipRenderable.TooltipPropertyBundle> {
 
@@ -34,7 +34,7 @@ public class TooltipRenderable extends DefaultRenderable<TooltipRenderable.Toolt
 
     @Override
     public ExportPathSpec exportPath() {
-        return ExportPathSpec.of("tooltip", Registry.ITEM.getId(stack.getItem()).getPath());
+        return ExportPathSpec.of("tooltip", Registries.ITEM.getId(stack.getItem()).getPath());
     }
 
     public static class TooltipPropertyBundle extends DefaultPropertyBundle {
@@ -52,8 +52,8 @@ public class TooltipRenderable extends DefaultRenderable<TooltipRenderable.Toolt
             modelViewStack.scale(scale, scale, -scale);
 
             modelViewStack.translate(this.xOffset.get() / 260d, this.yOffset.get() / -260d, 0);
-            modelViewStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180));
-            modelViewStack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(180));
+            modelViewStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
+            modelViewStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180));
         }
     }
 
