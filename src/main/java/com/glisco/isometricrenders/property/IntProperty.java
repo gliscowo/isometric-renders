@@ -49,7 +49,7 @@ public class IntProperty extends Property<Integer> {
     }
 
     public void setFromProgress(double progress) {
-        this.value = (int) (this.min + progress * this.span);
+        this.value = (int) Math.round(this.min + progress * this.span);
         this.invokeListeners();
     }
 

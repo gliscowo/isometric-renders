@@ -18,7 +18,7 @@ public class PropertySliderComponent extends SliderComponent {
 
         this.message(s -> text);
 
-        this.onChanged(this.setting::setFromProgress);
+        this.onChanged().subscribe(this.setting::setFromProgress);
         setting.listen((intSetting, integer) -> ((SliderWidgetInvoker) this).isometric$setValue(setting.progress()));
     }
 
