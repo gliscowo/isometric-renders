@@ -80,12 +80,14 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
 
         matrices.translate(xOffset, 1.65 + this.client.player.getY() % 1d, zOffset);
 
-        this.client.particleManager.renderParticles(matrices,
-                (VertexConsumerProvider.Immediate) vertexConsumers,
-                this.client.gameRenderer.getLightmapTextureManager(),
-                getParticleCamera(),
-                tickDelta
-        );
+        withParticleCamera(camera -> {
+            this.client.particleManager.renderParticles(matrices,
+                    (VertexConsumerProvider.Immediate) vertexConsumers,
+                    this.client.gameRenderer.getLightmapTextureManager(),
+                    camera,
+                    tickDelta
+            );
+        });
 
         matrices.pop();
     }

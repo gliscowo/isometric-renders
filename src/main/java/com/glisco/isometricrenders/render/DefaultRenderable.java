@@ -6,9 +6,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import org.joml.Matrix4f;
-
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+
+import java.util.function.Consumer;
 
 public abstract class DefaultRenderable<P extends DefaultPropertyBundle> implements Renderable<P> {
 
@@ -27,10 +28,14 @@ public abstract class DefaultRenderable<P extends DefaultPropertyBundle> impleme
         MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers().draw();
     }
 
-    protected Camera getParticleCamera() {
+    protected void withParticleCamera(Consumer<Camera> action) {
         Camera camera = MinecraftClient.getInstance().getEntityRenderDispatcher().camera;
+        float previousYaw = camera.getYaw(), previousPitch = camera.getPitch();
+
         ((CameraInvoker) camera).isometric$setRotation(this.properties().rotation.get() + 180 + this.properties().rotationOffset(), this.properties().slant.get());
-        return camera;
+        action.accept(camera);
+
+        ((CameraInvoker) camera).isometric$setRotation(previousYaw, previousPitch);
     }
 
     protected Vector4f getLightDirection() {

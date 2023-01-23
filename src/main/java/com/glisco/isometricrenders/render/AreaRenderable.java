@@ -84,12 +84,14 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
         var diff = Vec3d.of(mesh.startPos()).subtract(client.player.getPos());
         matrices.translate(-diff.x, -diff.y + 1.65, -diff.z);
 
-        client.particleManager.renderParticles(matrices,
-                (VertexConsumerProvider.Immediate) vertexConsumers,
-                client.gameRenderer.getLightmapTextureManager(),
-                getParticleCamera(),
-                tickDelta
-        );
+        withParticleCamera(camera -> {
+            client.particleManager.renderParticles(matrices,
+                    (VertexConsumerProvider.Immediate) vertexConsumers,
+                    client.gameRenderer.getLightmapTextureManager(),
+                    camera,
+                    tickDelta
+            );
+        });
     }
 
     @Override

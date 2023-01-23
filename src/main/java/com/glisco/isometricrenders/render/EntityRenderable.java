@@ -83,12 +83,14 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-180));
         matrices.translate(0, 1.65, 0);
 
-        client.particleManager.renderParticles(matrices,
-                (VertexConsumerProvider.Immediate) vertexConsumers,
-                client.gameRenderer.getLightmapTextureManager(),
-                getParticleCamera(),
-                tickDelta
-        );
+        withParticleCamera(camera -> {
+            client.particleManager.renderParticles(matrices,
+                    (VertexConsumerProvider.Immediate) vertexConsumers,
+                    client.gameRenderer.getLightmapTextureManager(),
+                    camera,
+                    tickDelta
+            );
+        });
 
         matrices.pop();
     }
