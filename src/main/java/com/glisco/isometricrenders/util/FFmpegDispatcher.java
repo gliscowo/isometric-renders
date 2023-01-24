@@ -2,6 +2,7 @@ package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.property.GlobalProperties;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Util;
 
 import java.io.File;
@@ -10,10 +11,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class FFmpegDispatcher {
+
+    private static String ffmpegCommand = "ffmpeg";
 
     private static Boolean ffmpegDetected = null;
 
@@ -31,20 +35,32 @@ public class FFmpegDispatcher {
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                final var process = new ProcessBuilder("ffmpeg", "-version")
-                        .redirectError(ProcessBuilder.Redirect.DISCARD)
-                        .start();
+            // On macOS, MultiMC-based launchers fail to give the minecraft process a PATH env variable
+            // which includes /usr/local/bin, which is the common install location for FFmpeg.
+            // So in that case we check `/usr/local/bin` and `/usr/bin` as well as the implicit `ffmpeg`.
+            for (Iterator<String> itr =
+                 MinecraftClient.IS_SYSTEM_MAC
+                         ? List.of("ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg").iterator()
+                         : List.of("ffmpeg").iterator();
+                 itr.hasNext();
+            ) {
+                ffmpegCommand = itr.next();
+                try {
+                    final var process = new ProcessBuilder(ffmpegCommand, "-version")
+                            .redirectError(ProcessBuilder.Redirect.DISCARD)
+                            .start();
 
-                process.onExit().join();
-                final var output = new String(process.getInputStream().readAllBytes());
+                    process.onExit().join();
+                    final var output = new String(process.getInputStream().readAllBytes());
 
-                IsometricRenders.LOGGER.info("FFmpeg detected, version: {}", output.split(" ")[2]);
-                return true;
-            } catch (IOException exception) {
-                IsometricRenders.LOGGER.info("Did not detect FFmpeg for reason: {}", exception.getMessage());
-                return false;
+                    IsometricRenders.LOGGER.info("FFmpeg detected as \"{}\", version: {}", ffmpegCommand, output.split(" ")[2]);
+                    return true;
+                } catch (IOException exception) {
+                    IsometricRenders.LOGGER.info("No FFmpeg found with command \"{}\" ({})", ffmpegCommand, exception.getMessage());
+                }
             }
+            IsometricRenders.LOGGER.info("Couldn't find any installed FFmpeg.");
+            return false;
         }, Util.getMainWorkerExecutor()).whenComplete((result, throwable) -> {
             if (throwable != null) {
                 ffmpegDetected = false;
@@ -60,7 +76,7 @@ public class FFmpegDispatcher {
         target.resolveOffset().toFile().mkdirs();
 
         final var defaultArgs = new ArrayList<>(List.of(new String[]{
-                "ffmpeg",
+                ffmpegCommand,
                 "-y",
                 "-f", "image2",
                 "-framerate", String.valueOf(GlobalProperties.exportFramerate),

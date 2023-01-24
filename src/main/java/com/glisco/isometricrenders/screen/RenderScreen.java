@@ -42,6 +42,7 @@ import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -199,16 +200,35 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
             }).horizontalSizing(Sizing.fixed(75)).margins(Insets.left(5)));
         }
 
-        if (!GraphicsEnvironment.isHeadless()) {
+        if (!Boolean.getBoolean("isometric-renders.disableClipboard")) {
             rightColumn.child(Components.button(Translate.gui("export_to_clipboard"), button -> {
+                if (MinecraftClient.IS_SYSTEM_MAC) {
+                    // Due to an incompatibility between AWT and GLFW on macOS we need to use an alternative
+                    // method to put the image in the clipboard. So we just render it to a temporary file and
+                    // then use macOS system API calls to put that file in to the clipboard.
+                    try {
+                        ImageIO.save(
+                                RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution),
+                                new ExportPathSpec(Files.createTempDirectory("IsometricRendersMod").toString(), this.renderable.exportPath().filename(), true)
+                        ).whenComplete((file, throwable) -> {
+                            this.client.execute(() -> {
+                                MacOSClipboard.copyFile(file.getAbsolutePath());
+                                this.notify(Translate.gui("copied_to_clipboard"));
+                                file.delete();
+                            });
+                        });
+                    } catch (IOException e) {
+                        IsometricRenders.LOGGER.error("Error during clipboard copy", e);
+                    }
+                } else {
+                    try (var image = RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)) {
+                        final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(image.getBytes())));
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, transferable);
 
-                this.notify(Translate.gui("copied_to_clipboard"));
-
-                try (var image = RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)) {
-                    final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(image.getBytes())));
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, transferable);
-                } catch (IOException e) {
-                    IsometricRenders.LOGGER.error("mfw", e);
+                        this.notify(Translate.gui("copied_to_clipboard"));
+                    } catch (IOException e) {
+                        IsometricRenders.LOGGER.error("mfw", e);
+                    }
                 }
             }).horizontalSizing(Sizing.fixed(75)));
         }
