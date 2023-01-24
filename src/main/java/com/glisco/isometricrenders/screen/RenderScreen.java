@@ -14,7 +14,6 @@ import com.glisco.isometricrenders.widget.IOStateComponent;
 import com.glisco.isometricrenders.widget.NotificationComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
-import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
@@ -38,11 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -202,34 +197,8 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
 
         if (!Boolean.getBoolean("isometric-renders.disableClipboard")) {
             rightColumn.child(Components.button(Translate.gui("export_to_clipboard"), button -> {
-                if (MinecraftClient.IS_SYSTEM_MAC) {
-                    // Due to an incompatibility between AWT and GLFW on macOS we need to use an alternative
-                    // method to put the image in the clipboard. So we just render it to a temporary file and
-                    // then use macOS system API calls to put that file in to the clipboard.
-                    try {
-                        ImageIO.save(
-                                RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution),
-                                new ExportPathSpec(Files.createTempDirectory("IsometricRendersMod").toString(), this.renderable.exportPath().filename(), true)
-                        ).whenComplete((file, throwable) -> {
-                            this.client.execute(() -> {
-                                MacOSClipboard.copyFile(file.getAbsolutePath());
-                                this.notify(Translate.gui("copied_to_clipboard"));
-                                file.delete();
-                            });
-                        });
-                    } catch (IOException e) {
-                        IsometricRenders.LOGGER.error("Error during clipboard copy", e);
-                    }
-                } else {
-                    try (var image = RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)) {
-                        final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(image.getBytes())));
-                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, transferable);
-
-                        this.notify(Translate.gui("copied_to_clipboard"));
-                    } catch (IOException e) {
-                        IsometricRenders.LOGGER.error("mfw", e);
-                    }
-                }
+                SystemClipboard.copyNativeImage(RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution));
+                this.notify(Translate.gui("copied_to_clipboard"));
             }).horizontalSizing(Sizing.fixed(75)));
         }
 
@@ -257,8 +226,8 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
 
         IsometricUI.sectionHeader(rightColumn, "animation_options", true);
 
-        if (FFmpegDispatcher.wasFFmpegDetected()) {
-            if (FFmpegDispatcher.ffmpegAvailable()) {
+        if (FFmpegResolver.alreadyChecked()) {
+            if (FFmpegResolver.isFFmpegAvailable()) {
                 var framesField = IsometricUI.labelledTextField(rightColumn, String.valueOf(exportFrames), "animation_frames", Sizing.fixed(30));
                 framesField.setTextPredicate(s -> s.matches("\\d*"));
                 framesField.setChangedListener(s -> {
@@ -313,10 +282,19 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                             }, "https://ffmpeg.org/download.html", true));
                             return true;
                         });
+                try (var builder = IsometricUI.row(rightColumn)) {
+                    builder.row.child(Components.button(Translate.gui("no_ffmpeg_retry"), button -> {
+                        IsometricUI.sectionHeader(rightColumn, "detecting_ffmpeg", false);
+                        FFmpegResolver.detectFFmpeg(true).whenComplete((aBoolean, throwable) -> {
+                            this.guiRebuildScheduled = true;
+                        });
+                    }).horizontalSizing(Sizing.fixed(75)));
+                }
+
             }
         } else {
             IsometricUI.sectionHeader(rightColumn, "detecting_ffmpeg", false);
-            FFmpegDispatcher.detectFFmpeg().whenComplete((aBoolean, throwable) -> {
+            FFmpegResolver.detectFFmpeg().whenComplete((aBoolean, throwable) -> {
                 this.guiRebuildScheduled = true;
             });
         }

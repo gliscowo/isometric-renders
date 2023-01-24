@@ -54,6 +54,7 @@
   "gui.isometric-renders.no_ffmpeg_1": "FFmpeg was not detected",
   "gui.isometric-renders.no_ffmpeg_2": "Please download it from",
   "gui.isometric-renders.no_ffmpeg_3": "https://ffmpeg.org/download.html",
+  "gui.isometric-renders.no_ffmpeg_retry": "Retry",
   "gui.isometric-renders.vram": "Estimated VRAM usage: %s/%smb (%s)",
   "gui.isometric-renders.ram": "Estimated RAM usage: %s/%smb (%s)",
   "gui.isometric-renders.vram_ignore": "Shift-click to ignore",
