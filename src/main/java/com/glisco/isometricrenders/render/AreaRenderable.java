@@ -52,6 +52,8 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
     @Override
     public void emitVertices(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta) {
         if (!mesh.canRender()) {
+            if (mesh.state() == WorldMesh.MeshState.CORRUPT) return;
+
             mesh.scheduleRebuild();
             return;
         }
@@ -59,7 +61,7 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
         matrices.loadIdentity();
         matrices.translate(-xSize / 2f, -ySize / 2f, -zSize / 2f);
 
-        final var blockEntities = mesh.getRenderInfo().getBlockEntities();
+        final var blockEntities = mesh.renderInfo().blockEntities();
         blockEntities.forEach((blockPos, entity) -> {
             matrices.push();
             matrices.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
@@ -71,7 +73,7 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
         super.draw(RenderSystem.getModelViewMatrix());
 
         final var effectiveDelta = mesh.entitiesFrozen() ? 0 : client.getTickDelta();
-        final var entities = mesh.getRenderInfo().getEntities();
+        final var entities = mesh.renderInfo().entities();
         entities.forEach((vec3d, entry) -> {
             if (!mesh.entitiesFrozen()) {
                 vec3d = entry.entity().getLerpedPos(effectiveDelta).subtract(mesh.startPos().getX(), mesh.startPos().getY(), mesh.startPos().getZ());
@@ -144,12 +146,16 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
 
             IsometricUI.dynamicLabel(container, () -> {
                 var meshStatus = Translate.gui("mesh_status");
-                if (!mesh.getState().isBuildStage) {
+                if (!mesh.state().isBuildStage) {
                     meshStatus.append(Translate.gui("mesh_ready").formatted(Formatting.GREEN));
                 } else {
                     meshStatus.append(Translate.gui(
-                            mesh.getState() == WorldMesh.MeshState.BUILDING ? "mesh_building" : "mesh_rebuilding",
-                            (int) (mesh.getBuildProgress() * 100)
+                            switch (mesh.state()) {
+                                case BUILDING -> "mesh_building";
+                                case CORRUPT -> "mesh_corrupt";
+                                default -> "mesh_rebuilding";
+                            },
+                            (int) (mesh.buildProgress() * 100)
                     ).formatted(Formatting.RED));
                 }
                 return meshStatus;

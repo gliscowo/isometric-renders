@@ -1,12 +1,12 @@
 {
   "key.isometric-renders.area_select": [
     "",
-    { "text": "[", "color": "dark_gray" },
-    { "text": "I", "color": "#00c9f1" },
-    { "text": "S", "color": "#00f1c7" },
-    { "text": "O", "color": "#00f195" },
-    { "text": "]", "color": "dark_gray" },
-     " Select Area"
+    {"text": "[", "color": "dark_gray"},
+    {"text": "I", "color": "#00c9f1"},
+    {"text": "S", "color": "#00f1c7"},
+    {"text": "O", "color": "#00f195"},
+    {"text": "]", "color": "dark_gray"},
+    " Select Area"
   ],
 
   "gui.isometric-renders.animations": "Run Animations (Tick)",
@@ -83,6 +83,7 @@
   "gui.isometric-renders.mesh_status": "Status: ",
   "gui.isometric-renders.mesh_building": "Building - %d%%",
   "gui.isometric-renders.mesh_rebuilding": "Rebuilding - %d%%",
+  "gui.isometric-renders.mesh_corrupt": {"text": "Corrupted - report this", "color": "red"},
   "gui.isometric-renders.mesh_ready": "Ready",
   "gui.isometric-renders.freeze_entities": "Freeze Entities",
   "gui.isometric-renders.rebuild_mesh": "Rebuild Mesh",
