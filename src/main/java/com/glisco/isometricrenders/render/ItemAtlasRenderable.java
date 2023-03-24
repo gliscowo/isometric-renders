@@ -9,7 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
@@ -46,13 +46,14 @@ public class ItemAtlasRenderable extends DefaultRenderable<ItemAtlasRenderable.I
                 final var index = row * columns + column;
                 if (index >= this.items.size()) continue;
 
-                client.getItemRenderer().renderItem(
+                this.client.getItemRenderer().renderItem(
                         this.items.get(index),
-                        ModelTransformation.Mode.GUI,
+                        ModelTransformationMode.GUI,
                         LightmapTextureManager.MAX_LIGHT_COORDINATE,
                         OverlayTexture.DEFAULT_UV,
                         matrices,
                         vertexConsumers,
+                        this.client.world,
                         0
                 );
             }

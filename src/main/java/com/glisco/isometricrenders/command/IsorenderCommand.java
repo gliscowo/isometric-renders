@@ -339,6 +339,6 @@ public class IsorenderCommand {
         DefaultPosArgumentAccessor accessor = (DefaultPosArgumentAccessor) argument;
         Vec3d pos = source.getPlayer().getPos();
 
-        return new BlockPos(accessor.isometric$getX().toAbsoluteCoordinate(pos.x), accessor.isometric$getY().toAbsoluteCoordinate(pos.y), accessor.isometric$getZ().toAbsoluteCoordinate(pos.z));
+        return BlockPos.ofFloored(accessor.isometric$getX().toAbsoluteCoordinate(pos.x), accessor.isometric$getY().toAbsoluteCoordinate(pos.y), accessor.isometric$getZ().toAbsoluteCoordinate(pos.z));
     }
 }

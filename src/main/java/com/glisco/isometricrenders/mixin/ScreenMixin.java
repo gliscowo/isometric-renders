@@ -27,16 +27,16 @@ public class ScreenMixin {
         this.isometric$tooltipHeight = height;
     }
 
-    @ModifyVariable(method = "renderTooltipFromComponents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;push()V"), ordinal = 4)
+    @ModifyVariable(method = "renderTooltipFromComponents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;push()V"), ordinal = 6)
     private int centerXIfNeeded(int orig) {
         if (!IsometricRenders.centerNextTooltip) return orig;
         return orig - 12 - isometric$tooltipWidth / 2;
     }
 
-    @ModifyVariable(method = "renderTooltipFromComponents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;push()V"), ordinal = 5)
+    @ModifyVariable(method = "renderTooltipFromComponents", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;push()V"), ordinal = 7)
     private int centerYIfNeeded(int orig) {
         if (!IsometricRenders.centerNextTooltip) return orig;
-        return orig + 8 - isometric$tooltipHeight / 2;
+        return orig + 12 - isometric$tooltipHeight / 2;
     }
 
     @Inject(method = "renderTooltipFromComponents", at = @At("TAIL"))

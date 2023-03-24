@@ -38,7 +38,7 @@ public class AreaSelectionHelper {
         BlockPos origin = AreaSelectionHelper.pos1;
 
         HitResult result = player.raycast(player.getAbilities().creativeMode ? 5.0F : 4.5F, 0, false);
-        BlockPos size = AreaSelectionHelper.pos2 != null ? AreaSelectionHelper.pos2 : (result.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) result).getBlockPos() : new BlockPos(result.getPos()));
+        BlockPos size = AreaSelectionHelper.pos2 != null ? AreaSelectionHelper.pos2 : (result.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) result).getBlockPos() : BlockPos.ofFloored(result.getPos()));
         size = size.subtract(origin);
 
         origin = origin.add(size.getX() < 0 ? 1 : 0, size.getY() < 0 ? 1 : 0, size.getZ() < 0 ? 1 : 0);
@@ -58,7 +58,7 @@ public class AreaSelectionHelper {
         final MinecraftClient client = MinecraftClient.getInstance();
         final HitResult target = client.crosshairTarget;
         if ((target == null)) return;
-        BlockPos targetPos = new BlockPos(target.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) target).getBlockPos() : new BlockPos(target.getPos()));
+        BlockPos targetPos = new BlockPos(target.getType() == HitResult.Type.BLOCK ? ((BlockHitResult) target).getBlockPos() : BlockPos.ofFloored(target.getPos()));
 
         if (pos1 == null) {
             pos1 = targetPos;
