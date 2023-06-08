@@ -2,7 +2,7 @@ package com.glisco.isometricrenders.widget;
 
 import com.glisco.isometricrenders.util.Translate;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.container.VerticalFlowLayout;
+import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
@@ -15,10 +15,10 @@ import java.util.function.Supplier;
 import static com.glisco.isometricrenders.util.AreaSelectionHelper.pos1;
 import static com.glisco.isometricrenders.util.AreaSelectionHelper.pos2;
 
-public class AreaSelectionComponent extends VerticalFlowLayout {
+public class AreaSelectionComponent extends FlowLayout {
 
     public AreaSelectionComponent() {
-        super(Sizing.content(), Sizing.content());
+        super(Sizing.content(), Sizing.content(), Algorithm.VERTICAL);
 
         this.surface(Surface.flat(0x77000000).and(Surface.outline(0x77000000)));
         this.padding(Insets.of(5));

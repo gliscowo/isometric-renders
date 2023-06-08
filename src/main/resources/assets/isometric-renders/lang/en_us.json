@@ -117,7 +117,7 @@
 
   "message.isometric-renders.no_block": "You're not looking at a block",
   "message.isometric-renders.no_entity": "You're not looking at an entity",
-  "message.isometric-renders.incomplete_selection": "Your do not have a completed area",
+  "message.isometric-renders.incomplete_selection": "You do not have a completed area",
   "message.isometric-renders.no_such_namespace": "Unknown namespace",
 
   "message.isometric-renders.player_rendering_in_multiplayer": "Rendering players by names is only supported in Singleplayer",

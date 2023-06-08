@@ -2,8 +2,8 @@ package com.glisco.isometricrenders.widget;
 
 import com.glisco.isometricrenders.property.Property;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.CheckboxWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class PropertyCheckboxComponent extends CheckboxWidget {
@@ -16,20 +16,20 @@ public class PropertyCheckboxComponent extends CheckboxWidget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.renderButton(matrices, mouseX, mouseY, delta);
-        MinecraftClient.getInstance().textRenderer.draw(
-                matrices,
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.renderButton(context, mouseX, mouseY, delta);
+        context.drawText(
+                MinecraftClient.getInstance().textRenderer,
                 this.getMessage(),
                 this.getX() + 24,
-                this.getY() + (this.height - 8) / 2f,
-                0xAAAAAA
+                (int) (this.getY() + (this.height - 8) / 2f),
+                0xAAAAAA, false
         );
     }
 
     @Override
     public void onPress() {
         super.onPress();
-        property.set(isChecked());
+        property.set(this.isChecked());
     }
 }

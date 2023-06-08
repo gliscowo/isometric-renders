@@ -14,9 +14,8 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.VerticalAlignment;
-import io.wispforest.owo.ui.util.Drawer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.util.function.Supplier;
@@ -62,7 +61,7 @@ public class IsometricUI {
         }
     }
 
-    public static void drawExportProgressBar(MatrixStack matrices, int x, int y, int drawWidth, int barWidth, double speed) {
+    public static void drawExportProgressBar(DrawContext context, int x, int y, int drawWidth, int barWidth, double speed) {
         int end = x + drawWidth + barWidth;
 
         int offset = (int) (System.currentTimeMillis() / speed % (drawWidth + barWidth));
@@ -70,7 +69,7 @@ public class IsometricUI {
         int endWithOffset = x + offset;
         if (endWithOffset > end) endWithOffset = end;
 
-        Drawer.fill(matrices, Math.max(x + offset - barWidth, x), y, Math.min(endWithOffset, x + drawWidth), y + 2, 0xFF00FF00);
+        context.fill(Math.max(x + offset - barWidth, x), y, Math.min(endWithOffset, x + drawWidth), y + 2, 0xFF00FF00);
     }
 
     public static RowBuilder row(FlowLayout container) {

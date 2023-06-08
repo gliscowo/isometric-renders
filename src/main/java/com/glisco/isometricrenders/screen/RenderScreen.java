@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -303,7 +304,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
         if (this.guiRebuildScheduled) {
             this.guiRebuildScheduled = false;
@@ -316,9 +317,9 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         }
 
         if (this.drawOnlyBackground) {
-            fill(matrices, 0, 0, this.width, this.height, GlobalProperties.backgroundColor | 255 << 24);
+            context.fill(0, 0, this.width, this.height, GlobalProperties.backgroundColor | 255 << 24);
         } else {
-            renderBackground(matrices);
+            renderBackground(context);
         }
 
         final var window = client.getWindow();
@@ -333,11 +334,11 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         );
 
         if (!this.drawOnlyBackground && this.uiAdapter != null) {
-            drawFramingHint(matrices);
-            drawGuiBackground(matrices);
+            drawFramingHint(context);
+            drawGuiBackground(context);
 
             RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
-            super.render(matrices, mouseX, mouseY, delta);
+            super.render(context, mouseX, mouseY, delta);
 
             if (this.exportAnimationButton != null) {
                 this.exportAnimationButton.tooltip(this.memoryGuard.getStatusTooltip(this.estimateMemoryUsage(exportFrames)).stream().map(text -> TooltipComponent.of(text.asOrderedText())).toList());
@@ -545,15 +546,15 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         this.client.getWindow().setFramerateLimit(this.client.options.getMaxFps().getValue());
     }
 
-    private void drawFramingHint(MatrixStack matrices) {
-        fill(matrices, viewportBeginX + 5, 0, viewportEndX - 5, 5, 0x90000000);
-        fill(matrices, viewportBeginX + 5, height - 5, viewportEndX - 5, height, 0x90000000);
-        fill(matrices, viewportBeginX, 0, viewportBeginX + 5, height, 0x90000000);
-        fill(matrices, viewportEndX - 5, 0, viewportEndX, height, 0x90000000);
+    private void drawFramingHint(DrawContext context) {
+        context.fill(viewportBeginX + 5, 0, viewportEndX - 5, 5, 0x90000000);
+        context.fill(viewportBeginX + 5, height - 5, viewportEndX - 5, height, 0x90000000);
+        context.fill(viewportBeginX, 0, viewportBeginX + 5, height, 0x90000000);
+        context.fill(viewportEndX - 5, 0, viewportEndX, height, 0x90000000);
     }
 
-    private void drawGuiBackground(MatrixStack matrices) {
-        fill(matrices, 0, 0, viewportBeginX, height, 0x90000000);
-        fill(matrices, viewportEndX, 0, width, height, 0x90000000);
+    private void drawGuiBackground(DrawContext context) {
+        context.fill(0, 0, viewportBeginX, height, 0x90000000);
+        context.fill(viewportEndX, 0, width, height, 0x90000000);
     }
 }

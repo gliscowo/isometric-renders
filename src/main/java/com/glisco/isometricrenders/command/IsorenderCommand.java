@@ -331,7 +331,7 @@ public class IsorenderCommand {
     private static <S> void withItemGroupFromContext(CommandContext<S> context, BiConsumer<List<ItemStack>, String> action) {
         final var itemGroup = ItemGroupArgumentType.getItemGroup("itemgroup", context);
         final var stacks = new ArrayList<>(itemGroup.getDisplayStacks());
-        action.accept(stacks, "creative-tab_" + itemGroup.getId().toShortTranslationKey());
+        action.accept(stacks, "creative-tab_" + Registries.ITEM_GROUP.getId(itemGroup).toShortTranslationKey());
     }
 
     public static BlockPos getPosFromArgument(DefaultPosArgument argument, FabricClientCommandSource source) {

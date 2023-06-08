@@ -1,10 +1,10 @@
 package com.glisco.isometricrenders.widget;
 
 import io.wispforest.owo.ui.base.BaseComponent;
+import io.wispforest.owo.ui.core.OwoUIDrawContext;
 import io.wispforest.owo.ui.core.Sizing;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.util.function.Supplier;
@@ -42,13 +42,7 @@ public class DynamicLabelComponent extends BaseComponent {
     }
 
     @Override
-    public void draw(MatrixStack matrices, int mouseX, int mouseY, float partialTicks, float delta) {
-        if (this.shadow) {
-            this.textRenderer.drawWithShadow(matrices, this.content.get(), this.x, this.y, this.color);
-        } else {
-            this.textRenderer.draw(matrices, this.content.get(), this.x, this.y, this.color);
-        }
+    public void draw(OwoUIDrawContext context, int mouseX, int mouseY, float partialTicks, float delta) {
+        context.drawText(this.textRenderer, this.content.get(), this.x, this.y, this.color, this.shadow);
     }
-
-
 }

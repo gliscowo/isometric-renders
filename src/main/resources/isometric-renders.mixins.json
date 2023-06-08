@@ -9,7 +9,7 @@
     "LivingEntityRendererMixin",
     "MinecraftClientMixin",
     "ParticleManagerMixin",
-    "ScreenMixin",
+    "DrawContextMixin",
     "SliderWidgetInvoker",
     "TextureManagerMixin",
     "WorldRendererMixin",

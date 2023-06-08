@@ -47,12 +47,7 @@ public class IsometricRenders implements ClientModInitializer {
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(IsorenderCommand::register);
 
-        ClientLifecycleEvents.CLIENT_STARTED.register(newClient -> {
-            TooltipRenderable.TooltipScreen.INSTANCE.init(newClient, 10000, 10000);
-        });
-
         KeyBindingHelper.registerKeyBinding(SELECT);
-
 
         final var ioStateId = "io-state";
         final var areaSelectionHintId = "area-selection-hint";

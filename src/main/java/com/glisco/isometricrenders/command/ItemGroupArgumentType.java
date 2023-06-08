@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,11 +32,11 @@ public class ItemGroupArgumentType implements ArgumentType<ItemGroup> {
     @Override
     public ItemGroup parse(StringReader reader) throws CommandSyntaxException {
         var id = Identifier.fromCommandInput(reader);
-        return ItemGroups.getGroups().stream().filter(itemGroup -> itemGroup.getId().equals(id)).findAny().orElseThrow(() -> NO_ITEMGROUP.create(id));
+        return ItemGroups.getGroups().stream().filter(itemGroup -> Registries.ITEM_GROUP.getId(itemGroup).equals(id)).findAny().orElseThrow(() -> NO_ITEMGROUP.create(id));
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestIdentifiers(ItemGroups.getGroups().stream().map(ItemGroup::getId), builder);
+        return CommandSource.suggestIdentifiers(ItemGroups.getGroups().stream().map(Registries.ITEM_GROUP::getId), builder);
     }
 }
