@@ -12,6 +12,7 @@ import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.util.function.Consumer;
 
@@ -27,9 +28,6 @@ public class RenderableDispatcher {
      * @param tickDelta   The tick delta to use
      */
     public static void drawIntoActiveFramebuffer(Renderable<?> renderable, float aspectRatio, float tickDelta, Consumer<MatrixStack> transformer) {
-        RenderSystem.backupProjectionMatrix();
-        Matrix4f projectionMatrix = new Matrix4f().setOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 3000);
-        RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.BY_Z);
 
         renderable.prepare();
 
@@ -42,6 +40,14 @@ public class RenderableDispatcher {
 
         renderable.properties().applyToViewMatrix(modelViewStack);
         RenderSystem.applyModelViewMatrix();
+
+        RenderSystem.backupProjectionMatrix();
+        Matrix4f projectionMatrix = new Matrix4f().setOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 3000);
+
+        // Unproject to get the camera position for vertex sorting
+        var camPos = new Vector4f(0, 0, 0, 1);
+        camPos.mul(new Matrix4f(projectionMatrix).invert()).mul(new Matrix4f(modelViewStack.peek().getPositionMatrix()).invert());
+        RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorter.byDistance(-camPos.x, -camPos.y, -camPos.z));
 
         IsometricRenders.beginRenderableDraw();
 
