@@ -177,7 +177,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         var colorField = IsometricUI.labelledTextField(rightColumn, "#000000", "background_color", Sizing.fixed(50));
         colorField.setTextPredicate(s -> s.matches("^#([A-Fa-f\\d]{0,6})$"));
         colorField.setText("#" + String.format("%02X", backgroundColor >> 16) + String.format("%02X", backgroundColor >> 8 & 0xFF) + String.format("%02X", backgroundColor & 0xFF));
-        colorField.setCursorToStart();
+        colorField.setCursorToStart(false);
         colorField.setChangedListener(s -> {
             if (s.substring(1).length() < 6) return;
             backgroundColor = Integer.parseInt(s.substring(1), 16);
@@ -319,7 +319,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         if (this.drawOnlyBackground) {
             context.fill(0, 0, this.width, this.height, GlobalProperties.backgroundColor | 255 << 24);
         } else {
-            renderBackground(context);
+            this.renderBackground(context, mouseX, mouseY, delta);
         }
 
         final var window = client.getWindow();
@@ -497,15 +497,15 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (!(this.renderable.properties() instanceof DefaultPropertyBundle properties)) return super.mouseScrolled(mouseX, mouseY, amount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (!(this.renderable.properties() instanceof DefaultPropertyBundle properties)) return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 
         if (this.isInViewport(mouseX)) {
-            properties.scale.modify((int) (amount * Math.max(1, properties.scale.get() * 0.075)));
+            properties.scale.modify((int) (verticalAmount * Math.max(1, properties.scale.get() * 0.075)));
             return true;
         }
 
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override

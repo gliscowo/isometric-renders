@@ -17,10 +17,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.RotationAxis;
-import org.apache.commons.lang3.mutable.MutableFloat;
+import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> implements TickingRenderable<DefaultPropertyBundle> {
 
@@ -34,8 +36,13 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
     public static EntityRenderable of(EntityType<?> type, @Nullable NbtCompound nbt) {
         final var client = MinecraftClient.getInstance();
 
-        final var entity = type.create(client.world);
-        if (nbt != null) entity.readNbt(nbt);
+        if (nbt == null) {
+            nbt = new NbtCompound();
+        }
+
+        nbt.putString("id", type.getRegistryEntry().registryKey().getValue().toString());
+
+        final var entity = EntityType.loadEntityWithPassengers(nbt, client.world, Function.identity());
         entity.updatePosition(client.player.getX(), client.player.getY(), client.player.getZ());
 
         return new EntityRenderable(entity);
@@ -44,9 +51,12 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
     public static EntityRenderable copyOf(Entity source) {
         final var client = MinecraftClient.getInstance();
 
-        final var entity = source.getType().create(client.world);
-        entity.copyFrom(source);
-        entity.tick();
+        var nbt = new NbtCompound();
+        source.writeNbt(nbt);
+        nbt.putString("id", source.getType().getRegistryEntry().registryKey().getValue().toString());
+
+        final var entity = EntityType.loadEntityWithPassengers(nbt, client.world, Function.identity());
+        applyToEntityAndPassengers(entity, Entity::tick);
 
         return new EntityRenderable(entity);
     }
@@ -71,13 +81,16 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
         this.entity.setPitch(properties.pitch.get());
         this.entity.prevPitch = properties.pitch.get();
 
-        final MutableFloat y = new MutableFloat();
+        final MutableObject<Vec3d> offset = new MutableObject<>(Vec3d.ZERO);
 
         applyToEntityAndPassengers(this.entity, entity -> {
             entity.setPos(client.player.getX(), client.player.getY(), client.player.getZ());
-            y.add(entity.hasVehicle() ? entity.getVehicle().getMountedHeightOffset() + entity.getHeightOffset() : 0);
+            if (entity.hasVehicle()) {
+                offset.setValue(offset.getValue().add(entity.getVehicle().getPassengerRidingPos(entity).subtract(entity.getPos())));
+            }
 
-            client.getEntityRenderDispatcher().render(entity, 0, y.floatValue(), 0, 0, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+            var offsetPos = offset.getValue();
+            client.getEntityRenderDispatcher().render(entity, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ(), 0, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE);
         });
 
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-180));

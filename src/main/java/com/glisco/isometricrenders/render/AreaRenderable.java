@@ -36,9 +36,9 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
         this.mesh = mesh;
 
         final var dimensions = mesh.dimensions();
-        this.xSize = (int) dimensions.getXLength() + 1;
-        this.ySize = (int) dimensions.getYLength() + 1;
-        this.zSize = (int) dimensions.getZLength() + 1;
+        this.xSize = (int) dimensions.getLengthX() + 1;
+        this.ySize = (int) dimensions.getLengthY() + 1;
+        this.zSize = (int) dimensions.getLengthZ() + 1;
     }
 
     public static AreaRenderable of(BlockPos origin, BlockPos end) {
