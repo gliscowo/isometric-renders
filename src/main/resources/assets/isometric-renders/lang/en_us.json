@@ -106,7 +106,9 @@
     {"index": 0, "color": "gray"}
   ],
   "gui.isometric-renders.hud.area_selection.clear_hint": [
-    {"text": "Clear by sneak-clicking", "color": "gray"}
+    {"text": "To clear, press ", "color": "gray"},
+    {"index": 0, "color": "yellow"},
+    " while sneaking"
   ],
 
   "gui.isometric-renders.click_to_open": [

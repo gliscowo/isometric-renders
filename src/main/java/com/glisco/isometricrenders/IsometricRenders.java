@@ -41,7 +41,7 @@ public class IsometricRenders implements ClientModInitializer {
     public static boolean skipWorldRender = false;
     public static boolean centerNextTooltip = false;
 
-    private static final KeyBinding SELECT = new KeyBinding("key.isometric-renders.area_select", GLFW.GLFW_KEY_C, KeyBinding.MISC_CATEGORY);
+    public static final KeyBinding SELECT = new KeyBinding("key.isometric-renders.area_select", GLFW.GLFW_KEY_C, KeyBinding.MISC_CATEGORY);
 
     @Override
     public void onInitializeClient() {

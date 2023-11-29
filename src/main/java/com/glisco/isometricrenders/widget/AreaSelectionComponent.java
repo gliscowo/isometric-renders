@@ -1,11 +1,13 @@
 package com.glisco.isometricrenders.widget;
 
+import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.util.Translate;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.Surface;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -35,7 +37,7 @@ public class AreaSelectionComponent extends FlowLayout {
                 .shadow(false).margins(Insets.bottom(10))
         );
 
-        this.child(Components.label(Translate.gui("hud.area_selection.clear_hint")));
+        this.child(Components.label(Translate.gui("hud.area_selection.clear_hint", KeyBindingHelper.getBoundKeyOf(IsometricRenders.SELECT).getLocalizedText())));
     }
 
     private static Supplier<Text> positionText(Supplier<BlockPos> pos, String name) {
