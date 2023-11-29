@@ -6,6 +6,7 @@ import com.glisco.isometricrenders.property.PropertyBundle;
 import com.glisco.isometricrenders.screen.IsometricUI;
 import com.glisco.isometricrenders.util.ExportPathSpec;
 import com.glisco.isometricrenders.util.ImageIO;
+import com.glisco.isometricrenders.util.ParticleRestriction;
 import com.glisco.isometricrenders.util.Translate;
 import io.wispforest.owo.ui.component.ButtonComponent;
 import io.wispforest.owo.ui.component.Components;
@@ -20,7 +21,6 @@ import java.util.List;
 
 public class BatchRenderable<R extends Renderable<?>> implements Renderable<BatchRenderable.BatchPropertyBundle> {
 
-    private final BatchPropertyBundle properties;
     private final List<R> delegates;
     private final String contentType;
 
@@ -38,8 +38,6 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
 
         this.contentType = ExportPathSpec.exportRoot().resolve("batches/")
                 .relativize(ImageIO.next(ExportPathSpec.exportRoot().resolve("batches/" + source + "/"))).toString();
-
-        this.properties = new BatchPropertyBundle(this.currentDelegate.properties());
         this.renderDelay = Math.max((int) Math.pow(GlobalProperties.exportResolution / 1024f, 2) * 100L, 75);
     }
 
@@ -49,6 +47,11 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
         } else {
             return new BatchRenderable<>(source, delegates);
         }
+    }
+
+    @Override
+    public void prepare() {
+        this.currentDelegate.prepare();
     }
 
     @Override
@@ -70,6 +73,21 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
         this.currentDelegate.draw(modelViewMatrix);
     }
 
+    @Override
+    public void cleanUp() {
+        this.currentDelegate.cleanUp();
+    }
+
+    @Override
+    public void dispose() {
+        this.delegates.forEach(Renderable::dispose);
+    }
+
+    @Override
+    public ParticleRestriction<?> particleRestriction() {
+        return this.currentDelegate.particleRestriction();
+    }
+
     private void start() {
         this.batchActive = true;
         this.currentIndex = 0;
@@ -86,7 +104,7 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
 
     @Override
     public BatchPropertyBundle properties() {
-        return this.properties;
+        return new BatchPropertyBundle(this.currentDelegate.properties());
     }
 
     @Override
