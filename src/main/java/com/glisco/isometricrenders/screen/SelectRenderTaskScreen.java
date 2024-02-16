@@ -51,6 +51,10 @@ public class SelectRenderTaskScreen extends BaseOwoScreen<FlowLayout> {
                     RenderTask.BATCH_BLOCK.action.accept("inventory", this.items);
                     this.close();
                 }).horizontalSizing(Sizing.fixed(80)).margins(Insets.bottom(5)))
+                .child(Components.button(Translate.gui("select_tooltip_batch"), (ButtonComponent button) -> {
+                    RenderTask.BATCH_TOOLTIP.action.accept("inventory", this.items);
+                    this.close();
+                }).horizontalSizing(Sizing.fixed(80)).margins(Insets.bottom(5)))
                 .child(Components.button(Translate.gui("select_atlas"), (ButtonComponent button) -> {
                     RenderTask.ATLAS.action.accept("inventory", this.items);
                     this.close();
