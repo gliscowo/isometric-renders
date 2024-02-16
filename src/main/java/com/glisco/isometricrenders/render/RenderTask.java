@@ -25,6 +25,16 @@ public enum RenderTask {
                 )
         ));
     }),
+    BATCH_TOOLTIP((source, renderables) -> {
+        ScreenScheduler.schedule(new RenderScreen(
+                BatchRenderable.of(
+                        source + "/tooltips",
+                        renderables.stream()
+                                .map(TooltipRenderable::new)
+                                .toList()
+                )
+        ));
+    }),
     BATCH_BLOCK((source, renderables) -> {
         ScreenScheduler.schedule(new RenderScreen(
                 BatchRenderable.of(

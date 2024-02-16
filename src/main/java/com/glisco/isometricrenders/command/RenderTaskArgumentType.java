@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class RenderTaskArgumentType implements ArgumentType<RenderTask> {
 
-    private final SimpleCommandExceptionType EXCEPTION = new SimpleCommandExceptionType(Text.of("mald about it, see if anybody notices"));
+    private static final SimpleCommandExceptionType EXCEPTION = new SimpleCommandExceptionType(Text.of("mald about it, see if anybody notices"));
 
     public static <S> RenderTask getTask(String name, CommandContext<S> context) {
         return context.getArgument(name, RenderTask.class);
@@ -32,6 +32,7 @@ public class RenderTaskArgumentType implements ArgumentType<RenderTask> {
 
             if (second.equals("items")) return RenderTask.BATCH_ITEM;
             if (second.equals("blocks")) return RenderTask.BATCH_BLOCK;
+            if (second.equals("tooltips")) return RenderTask.BATCH_TOOLTIP;
         }
 
         throw EXCEPTION.create();
@@ -42,7 +43,7 @@ public class RenderTaskArgumentType implements ArgumentType<RenderTask> {
         final var input = builder.getRemaining();
 
         if (input.codePoints().filter(value -> value == ' ').count() > 0 && input.contains("batch")) {
-            return CommandSource.suggestMatching(new String[]{"items", "blocks"}, builder.createOffset(builder.getStart() + 6));
+            return CommandSource.suggestMatching(new String[]{"items", "blocks", "tooltips"}, builder.createOffset(builder.getStart() + 6));
         } else {
             return CommandSource.suggestMatching(new String[]{"atlas", "batch"}, builder);
         }

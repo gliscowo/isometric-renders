@@ -35,6 +35,7 @@
 
   "gui.isometric-renders.select_item_batch": "Item Batch",
   "gui.isometric-renders.select_block_batch": "Block Batch",
+  "gui.isometric-renders.select_tooltip_batch": "Tooltip Batch",
   "gui.isometric-renders.select_atlas": "Atlas",
 
   "gui.isometric-renders.select_batch_operation": "Select batch operation",
