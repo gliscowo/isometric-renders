@@ -319,7 +319,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         if (this.drawOnlyBackground) {
             context.fill(0, 0, this.width, this.height, GlobalProperties.backgroundColor | 255 << 24);
         } else {
-            this.renderBackground(context, mouseX, mouseY, delta);
+            this.renderInGameBackground(context);
         }
 
         final var window = client.getWindow();
@@ -334,10 +334,11 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         );
 
         if (!this.drawOnlyBackground && this.uiAdapter != null) {
+            RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
+
             drawFramingHint(context);
             drawGuiBackground(context);
 
-            RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, MinecraftClient.IS_SYSTEM_MAC);
             super.render(context, mouseX, mouseY, delta);
 
             if (this.exportAnimationButton != null) {
