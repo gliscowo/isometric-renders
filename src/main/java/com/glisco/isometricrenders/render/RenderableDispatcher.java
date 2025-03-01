@@ -51,6 +51,8 @@ public class RenderableDispatcher {
 
         IsometricRenders.beginRenderableDraw();
 
+        renderable.setupLighting(modelViewStack);
+
         // TODO replacement?
 //        RenderSystem.runAsFancy(() -> {
             // Emit untransformed vertices

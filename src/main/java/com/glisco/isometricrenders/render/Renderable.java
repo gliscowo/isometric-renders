@@ -13,6 +13,8 @@ public interface Renderable<P extends PropertyBundle> {
 
     default void prepare() {}
 
+    default void setupLighting(Matrix4f modelViewMatrix) {}
+
     void emitVertices(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta);
 
     void draw(Matrix4f modelViewMatrix);

@@ -56,6 +56,11 @@ public class BatchRenderable<R extends Renderable<?>> implements Renderable<Batc
     }
 
     @Override
+    public void setupLighting(Matrix4f modelViewMatrix) {
+        this.currentDelegate.setupLighting(modelViewMatrix);
+    }
+
+    @Override
     public void emitVertices(MatrixStack matrices, VertexConsumerProvider vertexConsumers, float tickDelta) {
         this.currentDelegate.emitVertices(matrices, vertexConsumers, tickDelta);
 

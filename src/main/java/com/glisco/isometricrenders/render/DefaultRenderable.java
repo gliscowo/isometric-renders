@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public abstract class DefaultRenderable<P extends DefaultPropertyBundle> implements Renderable<P> {
 
     @Override
-    public void draw(Matrix4f modelViewMatrix) {
+    public void setupLighting(Matrix4f modelViewMatrix) {
         // Apply inverse transform to lighting to keep it consistent
         final var lightDirection = getLightDirection();
         final var lightTransform = new Matrix4f(modelViewMatrix);
@@ -23,7 +23,10 @@ public abstract class DefaultRenderable<P extends DefaultPropertyBundle> impleme
 
         final var transformedLightDirection = new Vector3f(lightDirection.x, lightDirection.y, lightDirection.z);
         RenderSystem.setShaderLights(transformedLightDirection, transformedLightDirection);
+    }
 
+    @Override
+    public void draw(Matrix4f modelViewMatrix) {
         // Draw all buffers
         MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers().draw();
     }

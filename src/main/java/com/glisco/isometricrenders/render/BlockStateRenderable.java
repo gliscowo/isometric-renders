@@ -72,6 +72,10 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
             this.client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
         }
 
+        if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) {
+            immediate.draw();
+        }
+
         double xOffset = this.client.player.getX() % 1d;
         double zOffset = this.client.player.getZ() % 1d;
 
