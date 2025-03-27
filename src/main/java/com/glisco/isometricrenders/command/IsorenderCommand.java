@@ -23,6 +23,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
@@ -100,7 +102,13 @@ public class IsorenderCommand {
                         .then(literal("enable")
                                 .executes(IsorenderCommand::enableUnsafe))
                         .then(literal("disable")
-                                .executes(IsorenderCommand::disableUnsafe))));
+                                .executes(IsorenderCommand::disableUnsafe)))
+
+                .then(literal("translated_names")
+                        .then(literal("enable")
+                                .executes(IsorenderCommand::enableTranslatedNames))
+                        .then(literal("disable")
+                                .executes(IsorenderCommand::disableTranslatedNames))));
     }
 
     private static int showRootNodeHelp(CommandContext<FabricClientCommandSource> context) {
@@ -125,6 +133,18 @@ public class IsorenderCommand {
     private static int enableUnsafe(CommandContext<FabricClientCommandSource> context) {
         GlobalProperties.unsafe.set(true);
         Translate.commandFeedback(context, "unsafe_enabled");
+        return 0;
+    }
+
+    private static int disableTranslatedNames(CommandContext<FabricClientCommandSource> context) {
+        GlobalProperties.translatedNames.set(false);
+        Translate.commandFeedback(context, "translated_names_disabled");
+        return 0;
+    }
+
+    private static int enableTranslatedNames(CommandContext<FabricClientCommandSource> context) {
+        GlobalProperties.translatedNames.set(true);
+        Translate.commandFeedback(context, "translated_names_enabled");
         return 0;
     }
 
@@ -331,7 +351,7 @@ public class IsorenderCommand {
     private static <S> void withItemGroupFromContext(CommandContext<S> context, BiConsumer<List<ItemStack>, String> action) {
         final var itemGroup = ItemGroupArgumentType.getItemGroup("itemgroup", context);
         final var stacks = new ArrayList<>(itemGroup.getDisplayStacks());
-        action.accept(stacks, "creative-tab_" + Registries.ITEM_GROUP.getId(itemGroup).toShortTranslationKey());
+        action.accept(stacks, "creative-tab_" + ItemGroupArgumentType.getGroupId(itemGroup).toShortTranslationKey());
     }
 
     public static BlockPos getPosFromArgument(DefaultPosArgument argument, FabricClientCommandSource source) {

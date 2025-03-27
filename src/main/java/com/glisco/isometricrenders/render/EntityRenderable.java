@@ -125,8 +125,9 @@ public class EntityRenderable extends DefaultRenderable<DefaultPropertyBundle> i
 
     @Override
     public ExportPathSpec exportPath() {
-        return ExportPathSpec.ofIdentified(
+        return ExportPathSpec.ofIdentifiedAndNamed(
                 Registries.ENTITY_TYPE.getId(this.entity.getType()),
+                this.entity.getName(),
                 "entity"
         );
     }

@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.compatibility.PolymerSupport;
 import com.glisco.isometricrenders.mixin.access.ItemRenderStateAccessor;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.util.ExportPathSpec;
@@ -78,8 +79,10 @@ public class ItemRenderable extends DefaultRenderable<DefaultPropertyBundle> {
 
     @Override
     public ExportPathSpec exportPath() {
-        return ExportPathSpec.ofIdentified(
-            Registries.ITEM.getId(this.stack.getItem()),
+        var id = PolymerSupport.getPolymerId(this.stack);
+        return ExportPathSpec.ofIdentifiedAndNamed(
+                id != null ? id : Registries.ITEM.getId(this.stack.getItem()),
+                this.stack.getName(),
             "item"
         );
     }
