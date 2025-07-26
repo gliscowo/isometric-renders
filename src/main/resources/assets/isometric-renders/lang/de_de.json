@@ -1,0 +1,140 @@
+{
+  "key.isometric-renders.area_select": [
+    "",
+    {"text": "[", "color": "dark_gray"},
+    {"text": "I", "color": "#00c9f1"},
+    {"text": "S", "color": "#00f1c7"},
+    {"text": "O", "color": "#00f195"},
+    {"text": "]", "color": "dark_gray"},
+    " Bereich wählen"
+  ],
+
+  "gui.isometric-renders.animations": "Animation abspielen (Ticken)",
+  "gui.isometric-renders.particles": "Partikel anzeigen (Benötigt ticken)",
+  "gui.isometric-renders.use_external_renderer": "Externen Renderer verwenden",
+  "gui.isometric-renders.dump_into_root": "In root ablegen",
+  "gui.isometric-renders.overwrite_latest": "Neuste Datei überschreiben",
+  "gui.isometric-renders.export": "Exportieren",
+  "gui.isometric-renders.export_to_clipboard": "Zwischenablage",
+  "gui.isometric-renders.open_folder": "Ordner öffnen",
+  "gui.isometric-renders.copied_to_clipboard": "In Zwischenablage exportiert",
+  "gui.isometric-renders.exported_as": "Exportieren als: ",
+  "gui.isometric-renders.animation_saved": "Animation gespeichert in: ",
+  "gui.isometric-renders.converting_image_sequence": "Bildsequenz in Zielformat konvertieren",
+
+  "gui.isometric-renders.scale": "Skalierung",
+  "gui.isometric-renders.rotation": "Rotation",
+  "gui.isometric-renders.slant": "Neigung",
+  "gui.isometric-renders.light_angle": "Winkel Licht",
+  "gui.isometric-renders.rotation_speed": "Rotationsgeschwindigkeit",
+  "gui.isometric-renders.dimetric": "Dimetrisch",
+  "gui.isometric-renders.isometric": "Isometrisch",
+
+  "gui.isometric-renders.atlas_options": "Atlas Optionen",
+  "gui.isometric-renders.columns": "Spalten",
+
+  "gui.isometric-renders.select_item_batch": "Item Batch",
+  "gui.isometric-renders.select_block_batch": "Block Batch",
+  "gui.isometric-renders.select_tooltip_batch": "Tooltip Batch",
+  "gui.isometric-renders.select_atlas": "Atlas",
+
+  "gui.isometric-renders.select_batch_operation": "Wähle Massenaufgabe",
+  "gui.isometric-renders.render_task_size": "Items zum rendern: %s",
+
+  "gui.isometric-renders.animation_options": "Animationsoptionen",
+  "gui.isometric-renders.animation_frames": "Animationsbilder",
+  "gui.isometric-renders.animation_framerate": "Animationsbildrate",
+  "gui.isometric-renders.export_animation": "Animation Exportieren",
+  "gui.isometric-renders.exporting": "Exportiere...",
+  "gui.isometric-renders.converting": "Konveriere...",
+  "gui.isometric-renders.export_remaining_frames": "Verbleibende Franes: %d",
+  "gui.isometric-renders.format.mp4": "MP4",
+  "gui.isometric-renders.format.apng": "APNG",
+  "gui.isometric-renders.format.gif": "GIF",
+  "gui.isometric-renders.detecting_ffmpeg": "Finde FFmpeg...",
+  "gui.isometric-renders.no_ffmpeg_1": "FFmpeg wurde nicht erkannt",
+  "gui.isometric-renders.no_ffmpeg_2": "Bitte lade es herunter:",
+  "gui.isometric-renders.no_ffmpeg_3": "https://ffmpeg.org/download.html",
+  "gui.isometric-renders.vram": "Geschätzte VRAM nutzung: %s/%smb (%s)",
+  "gui.isometric-renders.ram": "Geschätzte RAM nutzung: %s/%smb (%s)",
+  "gui.isometric-renders.vram_ignore": "Shiftklicke zum ignorieren",
+  "gui.isometric-renders.no_vram_info_warning": "Verfügbares VRAM konnte nicht ermittelt werden",
+
+  "gui.isometric-renders.transform_options": "Transformationsoptionen",
+  "gui.isometric-renders.presets": "Voreinstellungen",
+  "gui.isometric-renders.lighting_profile": "Belichtungsprofil",
+
+  "gui.isometric-renders.entity_pose": "Entitätspose",
+  "gui.isometric-renders.entity_pose.yaw": "Gierung",
+  "gui.isometric-renders.entity_pose.pitch": "Neigung",
+
+  "gui.isometric-renders.render_options": "Renderoptionen",
+  "gui.isometric-renders.background_color": "Hintergrundfarbe",
+  "gui.isometric-renders.export_options": "Exportoptionen",
+  "gui.isometric-renders.renderer_resolution": "Export Auflösung",
+  "gui.isometric-renders.hotkeys": "F10: UI umschalten  F12: Exportieren",
+
+  "gui.isometric-renders.memory_warning1": "Warning: Sofern du nicht mindestens 6GB ",
+  "gui.isometric-renders.memory_warning2": "Arbeitsspeicher für Minecraft hast,",
+  "gui.isometric-renders.memory_warning3": "sind Auflösungen über 8192x8192",
+  "gui.isometric-renders.memory_warning4": "nicht empfohlen, sofern",
+  "gui.isometric-renders.memory_warning5": "dein Computer überleben soll",
+
+  "gui.isometric-renders.mesh_controls": "Maschenkontrolle",
+  "gui.isometric-renders.mesh_status": "Status: ",
+  "gui.isometric-renders.mesh_building": "Erstelle - %d%%",
+  "gui.isometric-renders.mesh_rebuilding": "Erstelle neu - %d%%",
+  "gui.isometric-renders.mesh_corrupt": {"text": "Beschädigt - melde das", "color": "red"},
+  "gui.isometric-renders.mesh_ready": "Bereit",
+  "gui.isometric-renders.freeze_entities": "Entitäten einfrieren",
+  "gui.isometric-renders.rebuild_mesh": "Masche neu erstellen",
+
+  "gui.isometric-renders.exporter.idle": "Exporter untätig",
+  "gui.isometric-renders.exporter.jobs": "Export arbeiten: %s",
+
+  "gui.isometric-renders.batch.remaining": "Verbleibend: %d/%d",
+  "gui.isometric-renders.batch.start": "Start",
+  "gui.isometric-renders.batch.reset": "Zurücksetzen",
+  "gui.isometric-renders.batch.controls": "Einstellungen Massenaufgabe",
+
+  "gui.isometric-renders.hud.area_selection": "Bereichsauswahl",
+  "gui.isometric-renders.hud.area_selection.from": [
+    {"text": "Von: "},
+    {"index": 0, "color": "gray"}
+  ],
+  "gui.isometric-renders.hud.area_selection.to": [
+    {"text": "Bis: "},
+    {"index": 0, "color": "gray"}
+  ],
+  "gui.isometric-renders.hud.area_selection.clear_hint": [
+    {"text": "Zum auflösen, drücke ", "color": "gray"},
+    {"index": 0, "color": "yellow"},
+    " während du schleichst"
+  ],
+
+  "gui.isometric-renders.click_to_open": [
+    "",
+    {"text": "! ", "color": "gray", "bold": true},
+    "Klicke zum öffnen"
+  ],
+
+  "message.isometric-renders.no_block": "Du schaust nicht auf einen Block",
+  "message.isometric-renders.no_entity": "Du schaust nicht auf eine Entität",
+  "message.isometric-renders.incomplete_selection": "Du hast keinen ganzen Bereich",
+  "message.isometric-renders.no_such_namespace": "Unbekannter Namensraum",
+
+  "message.isometric-renders.player_rendering_in_multiplayer": "Das rendern von Spielern per name ist nur im Einzelspieler möglich",
+
+  "message.isometric-renders.custom_lighting": "§aBenutzerdefiniere Beleuchtung: §7[§c%1$s §a%1$s §b%1$s§7]",
+  "message.isometric-renders.current_profile": "Aktuelles Profil: %1$s",
+  "message.isometric-renders.lighting_profile_updated": "§aBeleuchtungsprofil aktualisiert",
+  "message.isometric-renders.unsafe_enabled": "Unsicherer Modus §caktiviert§7. Sei vorsichtig",
+  "message.isometric-renders.unsafe_disabled": "Unsicherer Modus §adeaktiviert§7",
+
+  "message.isometric-renders.version": "Benutze Isometic Renders v%s",
+  "message.isometric-renders.command_hint": "Hinweis: Schau dir das Wiki für Unterbefehle und was diese tun an",
+
+  "message.isometric-renders.selection_cleared": "§7[§cAuswahl aufgehoben§7]",
+  "message.isometric-renders.selection_started": "§7[§aAuswahl gestartet§7]",
+  "message.isometric-renders.selection_finished": "§7[§aAuswahl beendet§7]"
+}
