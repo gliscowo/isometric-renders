@@ -11,7 +11,7 @@ Isometric Renders allows you to take isometric screenshots, or rather, create re
 These are automatically keyed to have a transparent background and you can adjust scale, positioning and many more options right in-game in a fancy gui.
 This was designed with modded wikis or similar documentation in mind, should be easy to use and mostly pretty performant.
 
-**In-Depth documentation is available on the [wiki](https://docs.wispforest.io/isometric-renders/home/)**
+**In-Depth documentation is available on the [wiki](https://docs.wispforest.io/isometric-renders/home)**
 
 #
 
