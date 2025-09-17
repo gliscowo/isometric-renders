@@ -13,7 +13,7 @@ import com.glisco.isometricrenders.render.TickingRenderable;
 import com.glisco.isometricrenders.util.*;
 import com.glisco.isometricrenders.widget.IOStateComponent;
 import com.glisco.isometricrenders.widget.NotificationComponent;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
 import io.wispforest.owo.ui.base.BaseOwoScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -24,7 +24,6 @@ import io.wispforest.owo.ui.core.*;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -36,7 +35,6 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -97,7 +95,7 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
     private final FlowLayout leftColumn = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
     private final FlowLayout rightColumn = Containers.verticalFlow(Sizing.fill(100), Sizing.content());
 
-    private final List<Framebuffer> renderedFrames = new ArrayList<>();
+    private final List<GpuTexture> renderedFrames = new ArrayList<>();
     private int remainingAnimationFrames;
 
     public RenderScreen(Renderable<?> renderable) {
@@ -206,17 +204,20 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
 
                 this.notify(Translate.gui("copied_to_clipboard"));
 
-                try (var image = RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)) {
-                    var stream = new ByteArrayOutputStream();
-                    var channel = Channels.newChannel(stream);
+	            RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)
+			            .whenComplete((image, t) -> {
+							try (image) {
+								var stream = new ByteArrayOutputStream();
+								var channel = Channels.newChannel(stream);
 
-                    ((NativeImageInvoker) (Object) image).isometric$write(channel);
+								((NativeImageInvoker) (Object) image).isometric$write(channel);
 
-                    final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(stream.toByteArray())));
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, transferable);
-                } catch (IOException e) {
-                    IsometricRenders.LOGGER.error("mfw", e);
-                }
+								final var transferable = new ImageTransferable(javax.imageio.ImageIO.read(new ByteArrayInputStream(stream.toByteArray())));
+								Toolkit.getDefaultToolkit().getSystemClipboard().setContents(transferable, transferable);
+							} catch (IOException e) {
+								IsometricRenders.LOGGER.error("mfw", e);
+							}
+			            });
 
             }).horizontalSizing(Sizing.fixed(75)));
         }
@@ -329,10 +330,8 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
             this.renderInGameBackground(context);
         }
 
-        context.draw();
-
         final var window = client.getWindow();
-        final var effectiveTickDelta = playAnimations.get() ? client.getRenderTickCounter().getTickDelta(false) : 0;
+        final var effectiveTickDelta = playAnimations.get() ? client.getRenderTickCounter().getTickProgress(false) : 0;
         RenderableDispatcher.drawIntoActiveFramebuffer(
             this.renderable,
             window.getFramebufferWidth() / (float) window.getFramebufferHeight(),
@@ -343,8 +342,6 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         );
 
         if (!this.drawOnlyBackground && this.uiAdapter != null) {
-            RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT);
-
             drawFramingHint(context);
             drawGuiBackground(context);
 
@@ -374,10 +371,9 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
         }
 
         if (this.captureScheduled) {
-            ImageIO.save(
-                RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution),
-                this.renderable.exportPath()
-            ).whenComplete((file, throwable) -> {
+	        RenderableDispatcher.drawIntoImage(this.renderable, 0, exportResolution)
+					        .thenCompose(img -> ImageIO.save(img, this.renderable.exportPath()).whenComplete((f, t) -> img.close()))
+            .whenComplete((file, throwable) -> {
                 exportCallback.accept(file);
                 this.client.execute(() -> this.notify(
                     () -> Util.getOperatingSystem().open(file),
@@ -403,11 +399,10 @@ public class RenderScreen extends BaseOwoScreen<FlowLayout> {
                 CompletableFuture<File> exportFuture = null;
 
                 for (int i = 0; i < this.renderedFrames.size(); i++) {
-                    exportFuture = ImageIO.save(
-                        RenderableDispatcher.copyFramebufferIntoImage(this.renderedFrames.get(i)),
-                        ExportPathSpec.forced("sequence", "seq_" + i)
-                    );
-                    this.renderedFrames.get(i).delete();
+	                final int _i = i;
+	                exportFuture = RenderableDispatcher.copyTextureIntoImage(this.renderedFrames.get(i))
+			                .thenCompose(img -> ImageIO.save(img, ExportPathSpec.forced("sequence", "seq_" + _i)).whenComplete((f, t) -> img.close()));
+                    this.renderedFrames.get(i).close();
                 }
 
                 this.renderedFrames.clear();

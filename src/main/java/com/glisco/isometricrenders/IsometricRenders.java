@@ -17,28 +17,28 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Environment(EnvType.CLIENT)
 public class IsometricRenders implements ClientModInitializer {
 
-    public static final Logger LOGGER = LogManager.getLogger();
-    public static final String VERSION = FabricLoader.getInstance().getModContainer("isometric-renders").get().getMetadata().getVersion().getFriendlyString();
+	public static final String MOD_ID = "isometric-renders";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String VERSION = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().getFriendlyString();
 
     public static ParticleRestriction<?> particleRestriction = ParticleRestriction.always();
 
     public static boolean inRenderableDraw = false;
     public static boolean inRenderableTick = false;
     public static boolean skipWorldRender = false;
-    public static boolean centerNextTooltip = false;
 
     public static Framebuffer mainTargetOverride = null;
 
@@ -53,10 +53,10 @@ public class IsometricRenders implements ClientModInitializer {
         final var ioStateId = "io-state";
         final var areaSelectionHintId = "area-selection-hint";
 
-        var hudId = Identifier.of("isometric-renders", "hud");
+        var hudId = Identifier.of(MOD_ID, "hud");
         Hud.add(hudId, () -> Containers.verticalFlow(Sizing.content(), Sizing.content()).positioning(Positioning.absolute(20, 20)));
 
-        HudRenderCallback.EVENT.register((matrixStack, tickDelta) -> {
+        HudElementRegistry.addLast(hudId, (matrixStack, tickDelta) -> {
             var client = MinecraftClient.getInstance();
             var isometricHud = (FlowLayout) Hud.getComponent(hudId);
 

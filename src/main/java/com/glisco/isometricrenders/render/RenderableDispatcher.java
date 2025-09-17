@@ -1,23 +1,27 @@
 package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.IsometricRenders;
-import com.glisco.isometricrenders.mixin.access.FramebufferAccessor;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.TextureUtil;
+import com.glisco.isometricrenders.util.FramebufferUtils;
 import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
+import net.minecraft.client.render.RawProjectionMatrix;
 import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.util.math.MatrixStack;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
-import org.joml.Vector4f;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class RenderableDispatcher {
+
+	private static final RawProjectionMatrix projMatrix = new RawProjectionMatrix("RenderableDispatcher");
 
     /**
      * Renders the given renderable into the current framebuffer,
@@ -44,10 +48,7 @@ public class RenderableDispatcher {
         RenderSystem.backupProjectionMatrix();
         Matrix4f projectionMatrix = new Matrix4f().setOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 3000);
 
-        // Unproject to get the camera position for vertex sorting
-        var camPos = new Vector4f(0, 0, 0, 1);
-        camPos.mul(new Matrix4f(projectionMatrix).invert()).mul(new Matrix4f(modelViewStack).invert());
-        RenderSystem.setProjectionMatrix(projectionMatrix, ProjectionType.ORTHOGRAPHIC);
+        RenderSystem.setProjectionMatrix(projMatrix.set(projectionMatrix), ProjectionType.ORTHOGRAPHIC);
 
         IsometricRenders.beginRenderableDraw();
 
@@ -82,8 +83,9 @@ public class RenderableDispatcher {
      * @param size       The resolution to render at
      * @return The created image
      */
-    public static NativeImage drawIntoImage(Renderable<?> renderable, float tickDelta, int size) {
-        return copyFramebufferIntoImage(drawIntoTexture(renderable, tickDelta, size));
+    public static CompletableFuture<NativeImage> drawIntoImage(Renderable<?> renderable, float tickDelta, int size) {
+		final var texture = drawIntoTexture(renderable, tickDelta, size);
+        return copyTextureIntoImage(texture).whenComplete((i, t) -> texture.close());
     }
 
     /**
@@ -92,57 +94,49 @@ public class RenderableDispatcher {
      *
      * @param renderable The renderable to render
      * @param size       The resolution to render aat
-     * @return The framebuffer object holding the pointer to the color attachment
+     * @return The color attachment
      */
     @SuppressWarnings("ConstantConditions")
-    public static Framebuffer drawIntoTexture(Renderable<?> renderable, float tickDelta, int size) {
-        final var framebuffer = new SimpleFramebuffer(size, size, true);
+    public static GpuTexture drawIntoTexture(Renderable<?> renderable, float tickDelta, int size) {
+        final var framebuffer = new SimpleFramebuffer("Isometric Renders RenderableDispatcher.drawIntoTexture Framebuffer", size, size, true);
 
-        RenderSystem.enableBlend();
-        RenderSystem.clear(16640);
-
-        framebuffer.setClearColor(0, 0, 0, 0);
-        framebuffer.clear();
-
-        framebuffer.beginWrite(true);
-        IsometricRenders.mainTargetOverride = framebuffer;
+	    IsometricRenders.mainTargetOverride = framebuffer;
+		RenderSystem.outputColorTextureOverride = framebuffer.getColorAttachmentView();
+		RenderSystem.outputDepthTextureOverride = framebuffer.getDepthAttachmentView();
 
         drawIntoActiveFramebuffer(renderable, 1, tickDelta, matrixStack -> {});
 
-        framebuffer.endWrite();
-        IsometricRenders.mainTargetOverride = null;
+	    RenderSystem.outputColorTextureOverride = null;
+	    RenderSystem.outputDepthTextureOverride = null;
+	    IsometricRenders.mainTargetOverride = null;
+	    var texture = FramebufferUtils.cloneColorAttachment(framebuffer);
 
-        // Release depth attachment and FBO to save on VRAM - we only need
-        // the color attachment texture to later turn into an image
-        final var accessor = (FramebufferAccessor) framebuffer;
-        TextureUtil.releaseTextureId(framebuffer.getDepthAttachment());
-        accessor.isometric$setDepthAttachment(-1);
+	    // Release depth attachment and FBO to save on VRAM - we only need
+	    // the color attachment texture to later turn into an image
+		framebuffer.delete();
 
-        GlStateManager._glDeleteFramebuffers(accessor.isometric$getFbo());
-        accessor.isometric$setFbo(-1);
-
-        return framebuffer;
+        return texture;
     }
 
     /**
-     * Copies the given framebuffer's color attachment from video
+     * Copies the given color attachment from video
      * memory in to system memory, wrapped in a {@link NativeImage}
      *
-     * @param framebuffer The framebuffer to copy
+     * @param gpuTexture The texture to copy
      * @return The created image
      */
-    public static NativeImage copyFramebufferIntoImage(Framebuffer framebuffer) {
-        final NativeImage img = new NativeImage(framebuffer.textureWidth, framebuffer.textureHeight, false);
 
-        // This call internally binds the buffer's color attachment texture
-        framebuffer.beginRead();
+	public static CompletableFuture<NativeImage> copyTextureIntoImage(@NotNull GpuTexture gpuTexture) {
+		var future = new CompletableFuture<NativeImage>();
 
-        // This method gets the pixels from the currently bound texture
-        img.loadFromTextureImage(0, false);
-        img.mirrorVertically();
+		ScreenshotRecorder.takeScreenshot(new Framebuffer(null, false) {
+			{
+				this.textureWidth = gpuTexture.getWidth(0);
+				this.textureHeight = gpuTexture.getHeight(0);
+				this.colorAttachment = gpuTexture;
+			}
+		}, future::complete);
 
-        framebuffer.delete();
-
-        return img;
-    }
+		return future;
+	}
 }

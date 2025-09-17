@@ -1,5 +1,6 @@
 package com.glisco.isometricrenders.render;
 
+import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.mixin.access.BlockEntityAccessor;
 import com.glisco.isometricrenders.property.DefaultPropertyBundle;
 import com.glisco.isometricrenders.util.ExportPathSpec;
@@ -17,6 +18,8 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -69,7 +72,7 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
         }
 
         if (this.entity != null && this.client.getBlockEntityRenderDispatcher().get(this.entity) != null) {
-            this.client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+            this.client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, MinecraftClient.getInstance().gameRenderer.getCamera().getPos());
         }
 
         if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) {
@@ -134,7 +137,8 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
         nbtCopy.putInt("x", 0);
         nbtCopy.putInt("y", 0);
         nbtCopy.putInt("z", 0);
-
-        blockEntity.read(nbtCopy, MinecraftClient.getInstance().world.getRegistryManager());
+		try (ErrorReporter.Logging logging = new ErrorReporter.Logging(blockEntity.getReporterContext(), IsometricRenders.LOGGER)) {
+			blockEntity.read(NbtReadView.create(logging, blockEntity.getWorld().getRegistryManager(), nbtCopy));
+		}
     }
 }

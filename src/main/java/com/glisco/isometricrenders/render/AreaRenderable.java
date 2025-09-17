@@ -73,7 +73,7 @@ public class AreaRenderable extends DefaultRenderable<AreaRenderable.AreaPropert
 
         super.draw(RenderSystem.getModelViewMatrix());
 
-        final var effectiveDelta = mesh.entitiesFrozen() ? 0 : client.getRenderTickCounter().getTickDelta(false);
+        final var effectiveDelta = mesh.entitiesFrozen() ? 0 : client.getRenderTickCounter().getTickProgress(false);
         final var entities = mesh.renderInfo().entities();
         entities.forEach((vec3d, entry) -> {
             if (!mesh.entitiesFrozen()) {

@@ -17,19 +17,20 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import io.wispforest.owo.ui.component.EntityComponent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
@@ -38,6 +39,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -109,7 +111,7 @@ public class IsorenderCommand {
         source.sendFeedback(Translate.prefixed(Translate.make("version", Text.literal(IsometricRenders.VERSION).formatted(Formatting.DARK_GRAY)).formatted(Formatting.GRAY)));
         source.sendFeedback(Translate.prefixed(Translate.make("command_hint").styled(
                 style -> style
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://docs.wispforest.io/isometric-renders/slash_isorender/"))
+                        .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://docs.wispforest.io/isometric-renders/slash_isorender/")))
                         .withFormatting(Formatting.UNDERLINE)
                         .withFormatting(Formatting.GRAY)
         )));
@@ -143,9 +145,9 @@ public class IsorenderCommand {
 
         final var playerNbt = NbtCompoundArgumentType.getNbtCompound(context, "nbt");
         final var player = EntityComponent.createRenderablePlayer(gameProfile.get());
-        ((ClientPlayerEntity) player).readNbt(
-                playerNbt
-        );
+		try (var logging = new ErrorReporter.Logging(player.getErrorReporterContext(), IsometricRenders.LOGGER)) {
+			player.readData(NbtReadView.create(logging, server.getRegistryManager(), playerNbt));
+		}
 
         ScreenScheduler.schedule(new RenderScreen(
                 new EntityRenderable(player)
@@ -175,10 +177,18 @@ public class IsorenderCommand {
     }
 
     private static int renderSelf(CommandContext<FabricClientCommandSource> context) {
-        final var player = EntityComponent.createRenderablePlayer(MinecraftClient.getInstance().player.getGameProfile());
-        ((ClientPlayerEntity) player).readNbt(
-                MinecraftClient.getInstance().player.writeNbt(new NbtCompound())
-        );
+		final var clientPlayer = MinecraftClient.getInstance().player;
+        final var player = EntityComponent.createRenderablePlayer(clientPlayer.getGameProfile());
+
+	    ErrorReporter.Logging loggingWrite = new ErrorReporter.Logging(clientPlayer.getErrorReporterContext(), IsometricRenders.LOGGER);
+	    var view = NbtWriteView.create(loggingWrite, clientPlayer.getRegistryManager());
+		clientPlayer.writeData(view);
+	    var nbt = view.getNbt();
+		loggingWrite.close();
+
+	    try (ErrorReporter.Logging loggingRead = new ErrorReporter.Logging(player.getErrorReporterContext(), IsometricRenders.LOGGER)) {
+		    player.readData(NbtReadView.create(loggingRead, player.getRegistryManager(), nbt));
+	    }
 
         ScreenScheduler.schedule(new RenderScreen(
                 new EntityRenderable(player)
