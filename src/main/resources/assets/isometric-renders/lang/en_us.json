@@ -130,6 +130,8 @@
   "message.isometric-renders.lighting_profile_updated": "§aLighting profile updated",
   "message.isometric-renders.unsafe_enabled": "Unsafe mode §cenabled§7. Tread lightly",
   "message.isometric-renders.unsafe_disabled": "Unsafe mode §adisabled§7",
+  "message.isometric-renders.translated_names_enabled": "Translated filenames §aenabled§7",
+  "message.isometric-renders.translated_names_disabled": "Translated filenames §cdisabled§7",
 
   "message.isometric-renders.version": "Running Isometric Renders v%s",
   "message.isometric-renders.command_hint": "Hint: Check the wiki to see the subcommands and what they do",

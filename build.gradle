@@ -13,6 +13,7 @@ base {
 
 repositories {
     maven { url "https://maven.wispforest.io/releases/" }
+    maven { url 'https://maven.nucleoid.xyz' }
 }
 
 loom {
@@ -35,6 +36,10 @@ dependencies {
 
     modImplementation "io.wispforest:owo-lib:${project.owo_version}"
     include "io.wispforest:owo-sentinel:${project.owo_version}"
+
+
+    modCompileOnly("eu.pb4:polymer-core:0.11.8+1.21.4")
+
 }
 
 processResources {

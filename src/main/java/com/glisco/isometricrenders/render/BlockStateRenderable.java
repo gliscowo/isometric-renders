@@ -115,8 +115,9 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
 
     @Override
     public ExportPathSpec exportPath() {
-        return ExportPathSpec.ofIdentified(
+        return ExportPathSpec.ofIdentifiedAndNamed(
                 Registries.BLOCK.getId(this.state.getBlock()),
+                this.state.getBlock().getName(),
                 "block"
         );
     }

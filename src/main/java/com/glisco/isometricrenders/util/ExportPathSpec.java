@@ -2,6 +2,7 @@ package com.glisco.isometricrenders.util;
 
 import com.glisco.isometricrenders.property.GlobalProperties;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.io.File;
@@ -19,6 +20,10 @@ public record ExportPathSpec(String rootOffset, String filename, boolean ignoreS
 
     public static ExportPathSpec ofIdentified(Identifier id, String type) {
         return new ExportPathSpec(id.getNamespace() + "/" + type, id.getPath(), false);
+    }
+
+    public static ExportPathSpec ofIdentifiedAndNamed(Identifier id, Text name, String type) {
+        return new ExportPathSpec(id.getNamespace() + "/" + type, GlobalProperties.translatedNames.get() ? name.getString() : id.getPath(), false);
     }
 
     // -----

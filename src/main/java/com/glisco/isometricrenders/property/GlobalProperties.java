@@ -11,6 +11,7 @@ public class GlobalProperties {
     public static Property<Boolean> unsafe = Property.of(false);
     public static Property<Boolean> saveIntoRoot = Property.of(true);
     public static Property<Boolean> overwriteLatest = Property.of(false);
+    public static Property<Boolean> translatedNames = Property.of(false);
 
     public static int exportResolution = 1000;
 
