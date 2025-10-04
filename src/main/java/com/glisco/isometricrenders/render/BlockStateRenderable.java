@@ -67,12 +67,10 @@ public class BlockStateRenderable extends DefaultRenderable<DefaultPropertyBundl
         matrices.push();
         matrices.translate(-0.5, -0.5, -0.5);
 
-        if (this.state.getRenderType() != BlockRenderType.INVISIBLE) {
+	    if (this.entity != null && this.client.getBlockEntityRenderDispatcher().get(this.entity) != null) {
+		    this.client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, MinecraftClient.getInstance().gameRenderer.getCamera().getPos());
+	    } else if (this.state.getRenderType() != BlockRenderType.INVISIBLE) {
             this.client.getBlockRenderManager().renderBlockAsEntity(this.state, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
-        }
-
-        if (this.entity != null && this.client.getBlockEntityRenderDispatcher().get(this.entity) != null) {
-            this.client.getBlockEntityRenderDispatcher().get(this.entity).render(entity, tickDelta, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, MinecraftClient.getInstance().gameRenderer.getCamera().getPos());
         }
 
         if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) {
