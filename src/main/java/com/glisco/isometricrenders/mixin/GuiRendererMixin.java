@@ -37,7 +37,9 @@ public class GuiRendererMixin {
 
 	@WrapOperation(method = "renderPreparedDraws", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setProjectionMatrix(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;Lcom/mojang/blaze3d/systems/ProjectionType;)V"))
 	private void cancelProjectionSet(GpuBufferSlice projectionMatrixBuffer, ProjectionType projectionType, Operation<Void> original) {
-		if (IsometricRenders.inRenderableDraw) return;
-		original.call(projectionMatrixBuffer, projectionType);
+		// Something else may have overridden the projection matrix by this point, restore the original one used for the renderable.
+		if (IsometricRenders.inRenderableDraw)
+			original.call(IsometricRenders.renderableDrawProjectionBuffer, ProjectionType.ORTHOGRAPHIC);
+		else original.call(projectionMatrixBuffer, projectionType);
 	}
 }

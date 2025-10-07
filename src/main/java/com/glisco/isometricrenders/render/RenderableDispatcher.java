@@ -2,7 +2,6 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.util.FramebufferUtils;
-import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.MinecraftClient;
@@ -45,12 +44,8 @@ public class RenderableDispatcher {
 
         renderable.properties().applyToViewMatrix(modelViewStack);
 
-        RenderSystem.backupProjectionMatrix();
         Matrix4f projectionMatrix = new Matrix4f().setOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 3000);
-
-        RenderSystem.setProjectionMatrix(projMatrix.set(projectionMatrix), ProjectionType.ORTHOGRAPHIC);
-
-        IsometricRenders.beginRenderableDraw();
+	    IsometricRenders.beginRenderableDraw(projMatrix, projectionMatrix);
 
         renderable.setupLighting(modelViewStack);
 
@@ -72,7 +67,6 @@ public class RenderableDispatcher {
         modelViewStack.popMatrix();
 
         renderable.cleanUp();
-        RenderSystem.restoreProjectionMatrix();
     }
 
     /**

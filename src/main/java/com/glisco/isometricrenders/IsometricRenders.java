@@ -6,6 +6,9 @@ import com.glisco.isometricrenders.util.ImageIO;
 import com.glisco.isometricrenders.util.ParticleRestriction;
 import com.glisco.isometricrenders.widget.AreaSelectionComponent;
 import com.glisco.isometricrenders.widget.IOStateComponent;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.systems.ProjectionType;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Positioning;
@@ -22,7 +25,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.render.RawProjectionMatrix;
 import net.minecraft.util.Identifier;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +46,12 @@ public class IsometricRenders implements ClientModInitializer {
     public static boolean skipWorldRender = false;
 
     public static Framebuffer mainTargetOverride = null;
+
+	public static ProjectionType prevProjectionType = null;
+	public static GpuBufferSlice prevProjectionMatrix = null;
+
+	public static Matrix4f renderableDrawProjectionMatrix = null;
+	public static GpuBufferSlice renderableDrawProjectionBuffer = null;
 
     public static final KeyBinding SELECT = new KeyBinding("key.isometric-renders.area_select", GLFW.GLFW_KEY_C, KeyBinding.MISC_CATEGORY);
 
@@ -94,13 +105,23 @@ public class IsometricRenders implements ClientModInitializer {
         skipWorldRender = true;
     }
 
-    public static void beginRenderableDraw(){
-        inRenderableDraw = true;
-    }
+	public static void beginRenderableDraw(RawProjectionMatrix matrixStore, Matrix4f projectionMatrix) {
+		prevProjectionType = RenderSystem.getProjectionType();
+		prevProjectionMatrix = RenderSystem.getProjectionMatrixBuffer();
+		renderableDrawProjectionMatrix = projectionMatrix;
+		renderableDrawProjectionBuffer = matrixStore.set(projectionMatrix);
+		RenderSystem.setProjectionMatrix(renderableDrawProjectionBuffer, ProjectionType.ORTHOGRAPHIC);
+		inRenderableDraw = true;
+	}
 
-    public static void endRenderableDraw(){
-        inRenderableDraw = false;
-    }
+	public static void endRenderableDraw() {
+		RenderSystem.setProjectionMatrix(prevProjectionMatrix, prevProjectionType);
+		prevProjectionType = null;
+		prevProjectionMatrix = null;
+		renderableDrawProjectionMatrix = null;
+		renderableDrawProjectionBuffer = null;
+		inRenderableDraw = false;
+	}
 
     public static void beginRenderableTick() {
         inRenderableTick = true;
