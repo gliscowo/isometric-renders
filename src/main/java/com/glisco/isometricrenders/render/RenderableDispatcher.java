@@ -93,6 +93,8 @@ public class RenderableDispatcher {
     @SuppressWarnings("ConstantConditions")
     public static GpuTexture drawIntoTexture(Renderable<?> renderable, float tickDelta, int size) {
         final var framebuffer = new SimpleFramebuffer("Isometric Renders RenderableDispatcher.drawIntoTexture Framebuffer", size, size, true);
+	    RenderSystem.getDevice().createCommandEncoder()
+			    .clearColorAndDepthTextures(framebuffer.getColorAttachment(), 0, framebuffer.getDepthAttachment(), 1.0);
 
 	    IsometricRenders.mainTargetOverride = framebuffer;
 		RenderSystem.outputColorTextureOverride = framebuffer.getColorAttachmentView();
