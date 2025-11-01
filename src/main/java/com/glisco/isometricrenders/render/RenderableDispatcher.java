@@ -2,18 +2,20 @@ package com.glisco.isometricrenders.render;
 
 import com.glisco.isometricrenders.IsometricRenders;
 import com.glisco.isometricrenders.util.FramebufferUtils;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.TextureFormat;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.RawProjectionMatrix;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.util.math.MatrixStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
+import org.lwjgl.system.MemoryUtil;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -123,15 +125,43 @@ public class RenderableDispatcher {
      */
 
 	public static CompletableFuture<NativeImage> copyTextureIntoImage(@NotNull GpuTexture gpuTexture) {
-		var future = new CompletableFuture<NativeImage>();
+		final var future = new CompletableFuture<NativeImage>();
 
-		ScreenshotRecorder.takeScreenshot(new Framebuffer(null, false) {
-			{
-				this.textureWidth = gpuTexture.getWidth(0);
-				this.textureHeight = gpuTexture.getHeight(0);
-				this.colorAttachment = gpuTexture;
+		final int width  = gpuTexture.getWidth (0);
+		final int height = gpuTexture.getHeight(0);
+
+		// Optimized version of vanilla's ScreenshotRecorder.takeScreenshot
+		// that simply copies an RGBA8 GpuTexture's contents to an RGBA NativeImage, with vertical flipping.
+
+		// Color attachments [in vanilla] are always RGBA8, therefore != RGBA8 implies non-color attachment
+		if (gpuTexture.getFormat() != TextureFormat.RGBA8)
+			throw new IllegalStateException("Tried to copy non-compatible texture into image");
+
+		GpuBuffer gpuBuffer = RenderSystem.getDevice().createBuffer(() -> "Isometric Renders RenderableDispatcher.copyTextureIntoImage buffer", GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST, 4 * width * height);
+		CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
+		RenderSystem.getDevice().createCommandEncoder().copyTextureToBuffer(gpuTexture, gpuBuffer, 0, () -> {
+			try (GpuBuffer.MappedView mappedView = commandEncoder.mapBuffer(gpuBuffer, true, false)) {
+				NativeImage nativeImage = new NativeImage(NativeImage.Format.RGBA, width, height, false);
+
+				// Skip redundant safety checks, do the memory copies directly.
+				final long stride = 4L * width;
+				final long srcBuf = MemoryUtil.memAddress(mappedView.data());
+				final long dstBuf = nativeImage.imageId();
+
+				long src = srcBuf;
+				long dst = dstBuf + stride * (height - 1);
+
+				for (int y = 0; y < height; y++) {
+					MemoryUtil.memCopy(src, dst, stride);
+					src += stride;
+					dst -= stride;
+				}
+
+				future.complete(nativeImage);
 			}
-		}, future::complete);
+
+			gpuBuffer.close();
+		}, 0);
 
 		return future;
 	}
