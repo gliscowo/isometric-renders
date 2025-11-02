@@ -50,6 +50,7 @@
   "gui.isometric-renders.export_remaining_frames": "Remaining Frames: %d",
   "gui.isometric-renders.format.mp4": "MP4",
   "gui.isometric-renders.format.apng": "APNG",
+  "gui.isometric-renders.format.webp": "WEBP",
   "gui.isometric-renders.format.gif": "GIF",
   "gui.isometric-renders.detecting_ffmpeg": "Detecting FFmpeg...",
   "gui.isometric-renders.no_ffmpeg_1": "FFmpeg was not detected",

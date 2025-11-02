@@ -104,6 +104,7 @@ public class FFmpegDispatcher {
 
     public enum Format {
         APNG("apng", new String[]{"-plays", "0"}),
+	    WEBP("webp", new String[]{"-plays", "0"}),
         GIF("gif", new String[]{"-plays", "0", "-pix_fmt", "yuv420p"}),
         MP4("mp4", new String[]{"-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p"});
 
@@ -118,7 +119,8 @@ public class FFmpegDispatcher {
         public Format next() {
             return switch (this) {
                 case MP4 -> APNG;
-                case APNG -> GIF;
+                case APNG -> WEBP;
+	            case WEBP -> GIF;
                 case GIF -> MP4;
             };
         }
